@@ -1,11 +1,14 @@
 # Generated API client configuration.
 #
-# openapi.json is the release asset from spatiumddi 2026.08.22-1, committed
+# openapi.json is the release asset from spatiumddi 2026.09.04-1, committed
 # byte-for-byte so it can be verified against the published artefact:
 #
-#   gh release download 2026.08.22-1 --repo spatiumnorth/spatiumddi --pattern openapi.json
+#   gh release download 2026.09.04-1 --repo spatiumnorth/spatiumddi --pattern openapi.json
 #   shasum -a 256 openapi.json
-#   # 3d18647cb4c86bc76e01c60e5342dd4d5c88ff10513b7b4d2d9d90f5ec5e78d6
+#   # dc07aca3b4bb765297993a73b0b141d2ef7727d074724e789d4528ce3f0ae4d8
+#
+# Re-pinning moves SupportedServer.minimum with it (ServerVersion.swift): the
+# minimum is the release the client was compiled against, never a guess.
 #
 # Re-pin deliberately, against a release — never against a live control plane's
 # /api/openapi.json, which tracks main and is not a contract anyone shipped.
@@ -103,6 +106,11 @@ filter:
     # front of you (spatiumddi-mobile#18). POST is on the collection above;
     # the item path carries the delete.
     - /api/v1/dhcp/statics/{static_id}
+    # Fleet-wide, not per server (spatiumddi-mobile#20): "does this MAC hold a
+    # lease anywhere right now, and has it ever" in one call each, instead of
+    # one call per server and a merge on the phone.
+    - /api/v1/dhcp/leases
+    - /api/v1/dhcp/lease-history
     # Deleting a lease, from the row that shows it.
     - /api/v1/dhcp/servers/{server_id}/leases/{lease_id}
     # Blocking a MAC at DHCP. An availability decision about a device you may
@@ -143,20 +151,26 @@ filter:
 
     # Ownership entities, which cross-cut everything above.
     - /api/v1/customers
+    # Owned-resource counts: the "safe to decommission?" answer (#20).
+    - /api/v1/customers/{customer_id}/summary
     - /api/v1/sites
     - /api/v1/providers
 
     # ── The read-only remainder, ranked by mobile fit (#17) ───────────────
     # Four of that issue's five strong-fit surfaces. Platform Insights is the
-    # fifth and is **not here**: the 2026.08.22-1 document has no endpoint for
+    # fifth and is **not here**: the 2026.09.04-1 document still has no endpoint for
     # it, so it stays unbuilt rather than guessed at.
 
-    # What rotted, and one bulk action to mark it. The report is `object` in
-    # the document — untyped — so the app decodes the rows it needs by hand
-    # from the container rather than pretending to a schema the server did
-    # not publish.
+    # What rotted, and one bulk action to mark it. Typed as `StaleIPReport`
+    # since 2026.09.04-1; before that it was a bare `object`, and this was the
+    # one place the app decoded by hand.
     - /api/v1/ipam/reports/stale-ips
     - /api/v1/ipam/reports/stale-ips/deprecate
+    # Address hygiene, three triage lists (#20): free-but-answering, dead
+    # reservations, and unknown MACs squatting a static range.
+    - /api/v1/ipam/reports/hygiene
+    # Which vendors are on the network, fleet-wide (#20).
+    - /api/v1/ipam/reports/vendors
 
     # "What does this translate to", answered from an address rather than
     # browsed as a table — so the by-ip lookup only. The collection is

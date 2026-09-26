@@ -80,5 +80,5 @@ nonisolated enum SupportedServer {
     /// coincidence: it is the only version whose contract this app has actually
     /// been compiled against. Claiming compatibility with anything older would
     /// be a guess about backwards compatibility nothing here verifies.
-    static let minimum = ServerVersion("2026.08.22-1")
+    static let minimum = ServerVersion("2026.09.04-1")
 }

@@ -24,8 +24,22 @@ struct IPAMBrowseView: View {
                 } label: {
                     Label("Stale Addresses", systemImage: "clock.badge.exclamationmark")
                 }
+                NavigationLink {
+                    HygieneReportView(session: session)
+                } label: {
+                    Label("Address Hygiene", systemImage: "stethoscope")
+                }
+                NavigationLink {
+                    VendorRollupView(session: session)
+                } label: {
+                    Label("Vendors", systemImage: "shippingbox")
+                }
+            } header: {
+                Text("Reports")
             } footer: {
-                Text("Addresses nothing has answered for, and one action to mark them.")
+                Text(
+                    "Addresses nothing has answered for; where IPAM and the network disagree; and whose hardware is out there."
+                )
             }
 
             LoadStateView(state: state, emptyMessage: "No IP spaces are defined on this server.", retry: load)

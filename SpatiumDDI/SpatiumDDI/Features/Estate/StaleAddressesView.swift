@@ -6,75 +6,6 @@
 import SpatiumAPI
 import SwiftUI
 
-/// One row of the stale-address report.
-///
-/// **Hand-written, and the only such model in the app** — which is worth
-/// explaining, because non-negotiable #1 forbids exactly this. That rule exists
-/// so a model cannot drift silently from a schema the server published. Here
-/// the server published none: `/api/v1/ipam/reports/stale-ips` is typed as a
-/// bare `object` in the document, so the generator produces an untyped
-/// container and there is nothing to generate against.
-///
-/// So the payload is re-encoded and decoded through this, and every field is
-/// optional apart from the two the row cannot exist without. A field the server
-/// renames goes missing rather than failing the whole screen — which for a
-/// report is the right failure, since a report that will not render at all
-/// tells the operator nothing about their estate.
-nonisolated struct StaleAddress: Decodable, Identifiable, Sendable {
-    let id: String
-    let address: String
-    let status: String?
-    let hostname: String?
-    let macAddress: String?
-    /// Days since anything last saw it. **Null means never seen at all**, which
-    /// is a different and worse answer than "seen a long time ago".
-    let daysStale: Int?
-    let lastSeenMethod: String?
-    let subnetNetwork: String?
-    let subnetName: String?
-
-    enum CodingKeys: String, CodingKey {
-        case id, address, status, hostname
-        case macAddress = "mac_address"
-        case daysStale = "days_stale"
-        case lastSeenMethod = "last_seen_method"
-        case subnetNetwork = "subnet_network"
-        case subnetName = "subnet_name"
-    }
-}
-
-/// The report as a whole.
-nonisolated struct StaleAddressReport: Decodable, Sendable {
-    /// Optional for the same reason the row's fields are: the envelope is
-    /// untyped too, so a renamed key here would otherwise throw and take every
-    /// row down with it — a screen full of usable findings replaced by an
-    /// error banner, which is the failure this type is meant to avoid.
-    let total: Int?
-    let staleDays: Int?
-    let entries: [StaleAddress]
-
-    enum CodingKeys: String, CodingKey {
-        case total
-        case staleDays = "stale_days"
-        case entries
-    }
-
-    /// Reads the report out of the untyped payload the generated client hands
-    /// back.
-    ///
-    /// Round-tripped through JSON rather than picked apart by hand: the
-    /// container behind that payload holds `Any` values, and unwrapping them
-    /// field by field is where a typo becomes a silently-empty screen instead
-    /// of a decode error somebody notices.
-    ///
-    /// Takes `some Encodable` rather than naming the generated payload type,
-    /// which keeps a 90-character type name out of the signature.
-    init(encoded payload: some Encodable) throws {
-        let data = try JSONEncoder().encode(payload)
-        self = try JSONDecoder().decode(StaleAddressReport.self, from: data)
-    }
-}
-
 /// What has rotted, and one action to mark it.
 ///
 /// The hygiene screen. An estate accumulates addresses that nothing has
@@ -92,7 +23,7 @@ struct StaleAddressesView: View {
 
     @State private var staleDays = 90
     @State private var includeNeverSeen = false
-    @State private var state: LoadState<StaleAddressReport> = .idle
+    @State private var state: LoadState<Components.Schemas.StaleIPReport> = .idle
     @State private var selection: Set<String> = []
     @State private var isConfirming = false
     @State private var isDeprecating = false
@@ -106,7 +37,7 @@ struct StaleAddressesView: View {
 
     /// The report's rows as their own `LoadState`, so `LoadStateView` can tell
     /// "loaded and empty" from "loaded".
-    private var entriesState: LoadState<[StaleAddress]> {
+    private var entriesState: LoadState<[Components.Schemas.StaleIPEntry]> {
         switch state {
         case .idle: .idle
         case .loading: .loading
@@ -145,7 +76,7 @@ struct StaleAddressesView: View {
                     emptyMessage: "Nothing has gone stale in this window.",
                     retry: { Task { await fetch() } }
                 ) { entries in
-                    ForEach(entries) { entry in
+                    ForEach(entries, id: \.id) { entry in
                         StaleAddressRow(
                             entry: entry,
                             isSelected: selection.contains(entry.id),
@@ -160,10 +91,8 @@ struct StaleAddressesView: View {
                     }
                 }
             } header: {
-                if case .loaded(let report) = state, let total = report.total,
-                    total > report.entries.count
-                {
-                    Text("Stale — showing \(report.entries.count) of \(total)")
+                if case .loaded(let report) = state, report.total > report.entries.count {
+                    Text("Stale — showing \(report.entries.count) of \(report.total)")
                 } else {
                     Text("Stale")
                 }
@@ -239,7 +168,7 @@ struct StaleAddressesView: View {
         return lines.joined(separator: "\n")
     }
 
-    private var selectedEntries: [StaleAddress] {
+    private var selectedEntries: [Components.Schemas.StaleIPEntry] {
         guard case .loaded(let report) = state else { return [] }
         return report.entries.filter { selection.contains($0.id) }
     }
@@ -314,7 +243,7 @@ struct StaleAddressesView: View {
             )
             switch response {
             case .ok(let ok):
-                return try StaleAddressReport(encoded: try ok.body.json)
+                return try ok.body.json
             case .unprocessableContent: throw APIStatusError(status: 422)
             case .undocumented(let statusCode, let payload):
                 throw await APIStatusError(status: statusCode, payload: payload)
@@ -340,7 +269,7 @@ struct StaleAddressesView: View {
 }
 
 private struct StaleAddressRow: View {
-    let entry: StaleAddress
+    let entry: Components.Schemas.StaleIPEntry
     let isSelected: Bool
     let isSelectable: Bool
     let toggle: () -> Void
@@ -367,9 +296,7 @@ private struct StaleAddressRow: View {
                 HStack {
                     Text(verbatim: entry.address).font(.body.monospaced())
                     Spacer()
-                    if let status = entry.status {
-                        Badge(text: status, tint: .secondary)
-                    }
+                    Badge(text: entry.status, tint: .secondary)
                 }
                 if let hostname = entry.hostname, !hostname.isEmpty {
                     Text(verbatim: hostname).font(.caption).foregroundStyle(.secondary)
