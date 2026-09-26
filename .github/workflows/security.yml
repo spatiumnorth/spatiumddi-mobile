@@ -29,8 +29,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # Secrets and misconfiguration are what matter here today. Dependency
-      # scanning becomes meaningful once Package.resolved exists.
+      # Secrets, misconfiguration, and the pinned Swift packages in both
+      # committed Package.resolved files.
       - name: Scan repository
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # v0.36.0
         with:
@@ -62,7 +62,13 @@ jobs:
 
   codeql:
     name: CodeQL
-    runs-on: macos-latest
+    # Deliberately not on Xcode 27 with the rest of CI. CodeQL's Swift
+    # extractor supports Swift 5.4–6.3; Xcode 27 ships 6.4, which it cannot
+    # trace. Pinned by image and by path so a default-Xcode bump on the image
+    # can't move it onto an unsupported compiler. Move it when CodeQL lists 6.4.
+    runs-on: macos-26
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
     # 60 minutes used to be enough and stopped being; 90 is headroom, not a
     # target. What the job actually spends its time on is below.
     timeout-minutes: 90

@@ -170,7 +170,9 @@ run_tests() {
   start
   local status=0
   # CI picks a destination that exists on the runner; locally this default is fine.
-  local destination="${SPATIUM_TEST_DESTINATION:-platform=iOS Simulator,name=iPhone 17 Pro}"
+  # A named model stops resolving when the simulator line-up changes with the
+  # next Xcode, so the default is whatever the picker finds here.
+  local destination="${SPATIUM_TEST_DESTINATION:-$("$ROOT/scripts/pick-simulator.py")}"
   TEST_RUNNER_SPATIUM_STUB_RUNNING=1 \
   TEST_RUNNER_SPATIUM_EXPECTED_FINGERPRINT="$(fingerprint)" \
   xcodebuild -project "$ROOT/SpatiumDDI/SpatiumDDI.xcodeproj" -scheme SpatiumDDI \

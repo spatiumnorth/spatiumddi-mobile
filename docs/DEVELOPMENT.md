@@ -7,7 +7,8 @@ Building, testing and changing the app. For how it's structured and why, see
 
 ## Prerequisites
 
-- **macOS** with **Xcode 16** or later (Swift 6 language mode)
+- **macOS** with **Xcode 26** or later (Swift 6 language mode, default main-actor
+  isolation — both need Swift 6.2). CI builds with Xcode 27.
 - An iOS 18+ simulator, or a device in developer mode
 - `gh` for release assets and issues (optional)
 - Python 3 for the helper scripts (ships with macOS)
@@ -340,15 +341,22 @@ expires after seven days — that's Apple's limit, not a project one.
 
 ## CI
 
-Two workflows, both on push to `main` and on pull requests.
+Three workflows. `ci.yml` and `security.yml` run on push to `main` and on pull
+requests (CI skips docs-only PRs); `release.yml` runs on a `v*` tag or by hand.
 
-| Workflow | Job | Runs on |
-|---|---|---|
-| `ci.yml` | `swift-format` lint | always |
-| | Build & test (unit + trust, against the stub) | always |
-| | UI tests | **`main` only**, with retry |
-| `security.yml` | Trivy (SHA-pinned) | always |
-| | CodeQL | always |
+| Workflow | Job | Runs on | Toolchain |
+|---|---|---|---|
+| `ci.yml` | `swift-format` lint | always | Xcode 27 |
+| | Build & test (unit + trust, against the stub) | always | Xcode 27 |
+| | UI tests | **`main` only**, after unit tests pass, with retry | Xcode 27 |
+| `security.yml` | Trivy (SHA-pinned) | always | — |
+| | CodeQL | always | **Xcode 26.6** |
+| `release.yml` | Archive & TestFlight upload | `v*` tags, or by hand from `main` | Xcode 27 |
+
+Each job selects its Xcode by path through `DEVELOPER_DIR`, not the image
+default, so lint and build only change when this repo changes them. CodeQL
+stays a version behind because its Swift extractor supports Swift up to 6.3 and
+Xcode 27 ships 6.4 — move it when CodeQL catches up.
 
 UI tests are kept off the pull-request path on purpose: the runner app's
 bootstrap isn't dependable on a hosted machine, and a run in which all unit tests

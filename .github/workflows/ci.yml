@@ -4,15 +4,33 @@ on:
   push:
     branches: [main]
   pull_request:
+    # A docs-only change cannot break the build, and every job here is a macOS
+    # runner. Safe while none of these checks is required: a required check on
+    # a skipped workflow would sit pending forever.
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+
+permissions:
+  contents: read
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Superseded PR pushes are worth cancelling. Main is the only place UI tests
+  # run, so cancelling there would leave a merge with no UI result at all.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# Xcode 27 by path, not whatever the image defaults to. The image also carries
+# the next betas, and swift-format ships with Xcode — a floating default would
+# let lint and build change under an unchanged commit. Bump both together, on
+# purpose.
+env:
+  DEVELOPER_DIR: /Applications/Xcode_27.app/Contents/Developer
 
 jobs:
   format:
     name: swift-format
-    runs-on: macos-latest
+    runs-on: xcode-27
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
@@ -23,7 +41,7 @@ jobs:
 
   test:
     name: Build & test
-    runs-on: macos-latest
+    runs-on: xcode-27
     # Generous: a cold runner resolves the package graph and generates the
     # client before a single test runs. Short enough that a wedged job says so.
     timeout-minutes: 45
@@ -75,7 +93,10 @@ jobs:
     # hosted machine. Kept out of the pull-request path so a flake never blocks
     # a review.
     if: github.event_name == 'push'
-    runs-on: macos-latest
+    # Forty minutes of simulator is not worth spending on a commit whose unit
+    # tests already failed.
+    needs: test
+    runs-on: xcode-27
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
@@ -86,14 +107,31 @@ jobs:
           destination=$(./scripts/pick-simulator.py)
           echo "destination=$destination" >> "$GITHUB_OUTPUT"
 
+      # Booted and settled before xcodebuild asks for it. The failures this job
+      # has had were the simulator, not the app: "Failed to send signal 19" and
+      # "failed to launch ...xctrunner", on a clone xcodebuild booted on demand
+      # alongside the original.
+      - name: Boot the simulator
+        env:
+          DESTINATION: ${{ steps.sim.outputs.destination }}
+        run: |
+          udid="${DESTINATION##*id=}"
+          xcrun simctl shutdown all || true
+          xcrun simctl boot "$udid"
+          xcrun simctl bootstatus "$udid" -b
+
       - name: Run UI tests against the stub control plane
         env:
           SPATIUM_TEST_DESTINATION: ${{ steps.sim.outputs.destination }}
-          # A killed runner app is worth one retry before it is called a failure.
+          # One simulator, the booted one: parallel testing clones it, and a
+          # second simulator is the headroom a hosted runner doesn't have. A
+          # killed runner app is still worth one retry, relaunched clean.
           SPATIUM_TEST_EXTRA_ARGS: >-
             -only-testing:SpatiumDDIUITests
+            -parallel-testing-enabled NO
             -retry-tests-on-failure
             -test-iterations 2
+            -test-repetition-relaunch-enabled YES
             -resultBundlePath ${{ runner.temp }}/UITestResults.xcresult
         run: ./scripts/dev-control-plane.sh test
 

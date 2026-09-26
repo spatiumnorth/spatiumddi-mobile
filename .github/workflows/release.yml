@@ -20,14 +20,25 @@ on:
         required: false
         default: "Internal test build."
 
+permissions:
+  contents: read
+
 concurrency:
   group: testflight-${{ github.ref }}
   cancel-in-progress: false
 
+# Same toolchain as CI, by path. A TestFlight build from a different Xcode than
+# the one the tests ran on is a build nobody tested.
+env:
+  DEVELOPER_DIR: /Applications/Xcode_27.app/Contents/Developer
+
 jobs:
   upload:
     name: Archive & upload
-    runs-on: macos-latest
+    # A manual run can target any branch, and this job holds the signing
+    # secrets. Only main and release tags get them.
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    runs-on: xcode-27
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
@@ -65,10 +76,11 @@ jobs:
 
       # App Store Connect rejects a build whose version it has seen before, and
       # a re-run of a failed upload is exactly when that bites. The run number
-      # is monotonic per repository, which is all the build number has to be.
+      # alone does not change on "Re-run jobs" — only the attempt does — so
+      # both go in: monotonic per repository, and distinct per re-run.
       - name: Set the build number
         run: |
-          agvtool new-version -all "${{ github.run_number }}"
+          agvtool new-version -all "${{ github.run_number }}.${{ github.run_attempt }}"
         working-directory: SpatiumDDI
 
       - name: Archive
