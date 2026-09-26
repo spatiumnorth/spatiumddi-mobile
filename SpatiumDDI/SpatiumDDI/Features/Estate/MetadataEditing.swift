@@ -420,12 +420,15 @@ nonisolated enum FieldChange {
 
     /// Whether an edit empties a field that had a value.
     ///
-    /// The update schemas mark these fields non-nullable, so the generated
-    /// client can only *omit* one — and the server reads an omitted field as
-    /// "leave it alone". Offered anyway, the confirmation would promise
+    /// The server clears a column on an explicit `null`, but a generated client
+    /// cannot send one: the published schema collapses nullable unions (the
+    /// platform's #907, so the generator keeps the property at all), and an
+    /// optional left `nil` is encoded by omitting the key — which the server
+    /// reads as "leave it alone". Offered anyway, the confirmation would promise
     /// "→ empty" and the save would quietly change nothing. Each sheet refuses
     /// it instead, with the reason beside the field, until the platform
-    /// publishes the fields as nullable.
+    /// publishes a clearing convention a generated client can express
+    /// (spatiumnorth/spatiumddi#1211).
     static func clears(from old: String, to new: String) -> Bool {
         !old.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && new.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
