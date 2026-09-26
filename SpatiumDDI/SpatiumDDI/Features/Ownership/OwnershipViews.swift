@@ -43,17 +43,21 @@ struct OwnershipView: View {
                     state: customers, emptyMessage: "No customers are defined.", retry: { load(.customers) }
                 ) { rows in
                     ForEach(rows, id: \.id) { customer in
-                        VStack(alignment: .leading, spacing: 3) {
-                            HStack {
-                                Text(customer.name)
-                                Spacer()
-                                StatusLabel(status: customer.status)
-                            }
-                            if let account = customer.accountNumber, !account.isEmpty {
-                                Text(account).font(.caption.monospaced()).foregroundStyle(.secondary)
-                            }
-                            if let email = customer.contactEmail, !email.isEmpty {
-                                Text(email).font(.caption2).foregroundStyle(.tertiary)
+                        NavigationLink {
+                            CustomerSummaryView(session: session, customer: customer)
+                        } label: {
+                            VStack(alignment: .leading, spacing: 3) {
+                                HStack {
+                                    Text(customer.name)
+                                    Spacer()
+                                    StatusLabel(status: customer.status)
+                                }
+                                if let account = customer.accountNumber, !account.isEmpty {
+                                    Text(account).font(.caption.monospaced()).foregroundStyle(.secondary)
+                                }
+                                if let email = customer.contactEmail, !email.isEmpty {
+                                    Text(email).font(.caption2).foregroundStyle(.tertiary)
+                                }
                             }
                         }
                     }
