@@ -40,7 +40,7 @@ struct OverviewView: View {
         // while looking, from here, like it had simply loaded nothing.
         .task(id: ObjectIdentifier(session)) {
             if model?.session !== session { model = OverviewModel(session: session) }
-            if case .idle = model?.health { await model?.refresh() }
+            if model?.hasIdleSection == true { await model?.refresh() }
         }
     }
 }

@@ -82,10 +82,11 @@ struct ChangeRequestsView: View {
     }
 
     private func fetch() async {
+        let filter = stateFilter
         state = .loading
-        state = await LoadState.fetching {
+        let result = await LoadState.fetching {
             let response = try await session.client.listRequestsApiV1ChangeRequestsGet(
-                query: .init(state: stateFilter, limit: 100)
+                query: .init(state: filter, limit: 100)
             )
             switch response {
             case .ok(let ok):
@@ -98,6 +99,11 @@ struct ChangeRequestsView: View {
                 throw await APIStatusError(status: statusCode, payload: payload)
             }
         }
+        // A pull-to-refresh is not cancelled when the filter changes, so it can
+        // finish after the fetch for the newer filter — and would put
+        // "pending" rows under "All". Only the current filter's answer lands.
+        guard filter == stateFilter else { return }
+        state = result
     }
 }
 

@@ -163,6 +163,16 @@ final class OverviewModel {
         return running.satisfiesMinimum(SupportedServer.minimum) ? nil : running
     }
 
+    /// Whether any section still has nothing to show.
+    ///
+    /// Not just `health`: leaving the screen mid-load cancels the fetches still
+    /// in flight, which returns them to `.idle` — and the section that finished
+    /// first is usually health. Checking it alone left the others spinning.
+    var hasIdleSection: Bool {
+        health.isIdle || version.isIdle || alerts.isIdle || ipam.isIdle || dns.isIdle
+            || dhcp.isIdle
+    }
+
     func refresh() async {
         // Every call is independent, and a phone on a VPN pays the round trip
         // once rather than eight times if they overlap.

@@ -24,6 +24,13 @@ nonisolated enum Expiry: Sendable {
             self = .unknown
             return
         }
+        // Before the day count: `dateComponents` truncates toward zero, so a
+        // certificate that lapsed five hours ago is "0 days" away — and would
+        // read "Expires today" while already expired.
+        if date <= now {
+            self = .expired
+            return
+        }
         self.init(daysRemaining: Calendar.current.dateComponents([.day], from: now, to: date).day ?? 0)
     }
 
