@@ -87,6 +87,11 @@ class DualStackServer(http.server.ThreadingHTTPServer):
     """
 
     address_family = socket.AF_INET6
+    # The default listen backlog is 5. The trust tests open several connections
+    # at once (each address attempted over both ::1 and 127.0.0.1), and a full
+    # backlog drops the SYNs past it — the client then waits out a retransmit
+    # backoff before it even reaches the handshake.
+    request_queue_size = 64
 
     def server_bind(self):
         self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)

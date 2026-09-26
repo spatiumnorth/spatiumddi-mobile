@@ -89,6 +89,8 @@ class DualStackServer(http.server.ThreadingHTTPServer):
     """
 
     address_family = socket.AF_INET6
+    # The default listen backlog is 5; see the stub in dev-control-plane.sh.
+    request_queue_size = 64
 
     def server_bind(self):
         self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)

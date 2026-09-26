@@ -70,11 +70,21 @@ jobs:
       # headroom: the runner app was killed before it could connect, failing a
       # run in which all 58 unit tests passed. They run on main instead, where a
       # retry costs nobody's review cycle.
+      # The same booted, quieted device the UI job uses, and no parallel
+      # testing, which would boot a fresh clone of it instead. Without this the
+      # iOS 27 simulator's push daemon spins, starves the runner, and the trust
+      # tests time out against a stub that can't get CPU. See boot-simulator.sh.
+      - name: Boot the simulator
+        run: ./scripts/boot-simulator.sh "$DESTINATION"
+        env:
+          DESTINATION: ${{ steps.sim.outputs.destination }}
+
       - name: Run tests against the stub control plane
         env:
           SPATIUM_TEST_DESTINATION: ${{ steps.sim.outputs.destination }}
           SPATIUM_TEST_EXTRA_ARGS: >-
             -only-testing:SpatiumDDITests
+            -parallel-testing-enabled NO
             -resultBundlePath ${{ runner.temp }}/TestResults.xcresult
         run: ./scripts/dev-control-plane.sh test
 
@@ -107,18 +117,14 @@ jobs:
           destination=$(./scripts/pick-simulator.py)
           echo "destination=$destination" >> "$GITHUB_OUTPUT"
 
-      # Booted and settled before xcodebuild asks for it. The failures this job
-      # has had were the simulator, not the app: "Failed to send signal 19" and
-      # "failed to launch ...xctrunner", on a clone xcodebuild booted on demand
-      # alongside the original.
+      # Booted, settled and quieted before xcodebuild asks for it. The failures
+      # this job has had were the simulator, not the app: "Failed to send
+      # signal 19" and "failed to launch ...xctrunner", on a clone xcodebuild
+      # booted on demand alongside the original. See boot-simulator.sh.
       - name: Boot the simulator
+        run: ./scripts/boot-simulator.sh "$DESTINATION"
         env:
           DESTINATION: ${{ steps.sim.outputs.destination }}
-        run: |
-          udid="${DESTINATION##*id=}"
-          xcrun simctl shutdown all || true
-          xcrun simctl boot "$udid"
-          xcrun simctl bootstatus "$udid" -b
 
       - name: Run UI tests against the stub control plane
         env:
