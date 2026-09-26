@@ -18,17 +18,24 @@ import SwiftUI
 struct ClientLookupView: View {
     let session: ControlPlaneSession
 
-    /// A lease-history row with the server it came from, since the lookup fans
-    /// out across every DHCP server and the row itself only carries an id.
+    /// A lease-history row with the name of the server it came from — the row
+    /// itself only carries an id.
     struct Result: Identifiable {
         let row: Components.Schemas.LeaseHistoryRow
-        let serverName: String
+        let serverName: String?
         var id: String { row.id }
     }
 
+    /// One lookup's answer: history, what is held right now, and how much of
+    /// the history there was, so a capped page says it is one.
+    struct Answer {
+        let history: [Result]
+        let historyTotal: Int
+        let active: [Components.Schemas.LeaseResponse]
+    }
+
     @State private var query = ""
-    @State private var state: LoadState<[Result]> = .idle
-    @State private var activeLeases: [Components.Schemas.LeaseResponse] = []
+    @State private var state: LoadState<Answer> = .idle
     @State private var searched = ""
     /// Where the SNMP poller has seen this MAC. Built lazily so the screen
     /// works unchanged on a control plane without the device module.
@@ -58,13 +65,13 @@ struct ClientLookupView: View {
                 // Says what the match actually is, so nobody reads a blank
                 // result as "this machine has never been on the network".
                 Text(
-                    "Searches every DHCP server's lease history. A MAC can be entered with or without colons."
+                    "Searches lease history across every DHCP server you can read. A MAC can be entered with or without colons."
                 )
             }
 
-            if !activeLeases.isEmpty {
+            if case .loaded(let answer) = state, !answer.active.isEmpty {
                 Section("Holding an address now") {
-                    ForEach(activeLeases, id: \.id) { lease in
+                    ForEach(answer.active, id: \.id) { lease in
                         VStack(alignment: .leading, spacing: 3) {
                             HStack {
                                 Text(lease.ipAddress).font(.body.monospaced())
@@ -109,7 +116,7 @@ struct ClientLookupView: View {
             if !searched.isEmpty {
                 Section {
                     LoadStateView(
-                        state: state,
+                        state: historyState,
                         emptyMessage:
                             "No lease has ever been recorded for \"\(searched)\" on any DHCP server. Either it has never asked, or it is asking a server this platform doesn't manage.",
                         retry: { Task { await search() } }
@@ -121,8 +128,14 @@ struct ClientLookupView: View {
                 } header: {
                     Text("Lease history")
                 } footer: {
-                    if case .loaded(let results) = state, !results.isEmpty {
-                        Text("Most recent first. ^[\(results.count) record](inflect: true).")
+                    if case .loaded(let answer) = state, !answer.history.isEmpty {
+                        if answer.historyTotal > answer.history.count {
+                            Text(
+                                "Most recent first. Showing \(answer.history.count) of \(answer.historyTotal) records — narrow the search to see older ones."
+                            )
+                        } else {
+                            Text("Most recent first. ^[\(answer.history.count) record](inflect: true).")
+                        }
                     }
                 }
             }
@@ -134,17 +147,27 @@ struct ClientLookupView: View {
         }
     }
 
+    /// The history rows as their own `LoadState`, so `LoadStateView` can tell
+    /// "loaded and empty" from "loaded".
+    private var historyState: LoadState<[Result]> {
+        switch state {
+        case .idle: .idle
+        case .loading: .loading
+        case .loaded(let answer): .loaded(answer.history)
+        case .failed(let message): .failed(message)
+        }
+    }
+
     private func search() async {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         searched = trimmed
         state = .loading
-        activeLeases = []
 
-        // Runs alongside the DHCP fan-out rather than after it: the two
-        // answer different halves of the same question — what the estate
-        // *thinks* this client is, and where it physically is — and waiting
-        // for one to show the other would make the slower one the whole wait.
+        // Runs alongside the DHCP lookup rather than after it: the two answer
+        // different halves of the same question — what the estate *thinks*
+        // this client is, and where it physically is — and waiting for one to
+        // show the other would make the slower one the whole wait.
         if let canonical = ClientIdentifier.canonicalMAC(trimmed) {
             let model = sightings ?? NetworkSightingModel(session: session)
             sightings = model
@@ -153,89 +176,86 @@ struct ClientLookupView: View {
             sightings?.clear()
         }
 
-        state = await LoadState.fetching {
-            // Which server holds the answer is not knowable in advance, so the
-            // lookup asks all of them at once. A field technician is not going
-            // to know which scope a machine belongs to — that is the question.
-            let servers: [Components.Schemas.AppApiV1DhcpServersServerResponse]
-            switch try await session.client.listServersApiV1DhcpServersGet() {
-            case .ok(let ok): servers = try ok.body.json
-            case .undocumented(let statusCode, let payload):
-                throw await APIStatusError(status: statusCode, payload: payload)
-            }
+        let mac = ClientIdentifier.canonicalMAC(trimmed)
+        let ip = ClientIdentifier.isIPv4Like(trimmed) ? trimmed : nil
 
-            let looksLikeMAC = ClientIdentifier.isMACLike(trimmed)
-            let looksLikeIP = ClientIdentifier.isIPv4Like(trimmed)
-
-            async let history = historyAcross(servers, term: trimmed, isMAC: looksLikeMAC, isIP: looksLikeIP)
-            async let active = activeAcross(servers, term: trimmed)
-            let (rows, leases) = await (history, active)
-            activeLeases = leases
-            // Most recent first. A row with no start date sorts last rather
-            // than to the top — an unknown time is not a recent one.
-            return rows.sorted {
-                ($0.row.startedAt ?? .distantPast) > ($1.row.startedAt ?? .distantPast)
-            }
+        state = await LoadState.fetching { [session] in
+            // Fleet-wide, one call each (spatiumddi#917). This used to be one
+            // call per DHCP server and a merge here, which swallowed each
+            // server's failure: a server this account cannot read looked
+            // exactly like one with no history. Now a refusal is the answer
+            // the operator sees, not an absence.
+            async let history = Self.history(session, mac: mac, ip: ip, term: trimmed)
+            async let active = Self.active(session, mac: mac, ip: ip, term: trimmed)
+            async let names = Self.serverNames(session)
+            let (page, leases, serverNames) = try await (history, active, names)
+            return Answer(
+                // Most recent first. A row with no start date sorts last
+                // rather than to the top — an unknown time is not a recent one.
+                history: page.items
+                    .map { Result(row: $0, serverName: serverNames[$0.serverId]) }
+                    .sorted { ($0.row.startedAt ?? .distantPast) > ($1.row.startedAt ?? .distantPast) },
+                historyTotal: page.total,
+                active: leases
+            )
         }
     }
 
-    /// Fans the history query across every server, tolerating individual
-    /// failures — one unreachable server must not hide another's answer.
-    private func historyAcross(
-        _ servers: [Components.Schemas.AppApiV1DhcpServersServerResponse],
-        term: String,
-        isMAC: Bool,
-        isIP: Bool
-    ) async -> [Result] {
-        await withTaskGroup(of: [Result].self) { tasks in
-            for server in servers {
-                tasks.addTask { [session] in
-                    // The server filters on exactly one of these, so the guess
-                    // matters: sending a hostname as `mac` matches nothing.
-                    let query = Operations.ListLeaseHistoryApiV1DhcpServersServerIdLeaseHistoryGet.Input
-                        .Query(
-                            mac: isMAC ? term : nil,
-                            ip: isIP ? term : nil,
-                            hostname: (isMAC || isIP) ? nil : term,
-                            perPage: 100
-                        )
-                    let response = try? await session.client
-                        .listLeaseHistoryApiV1DhcpServersServerIdLeaseHistoryGet(
-                            path: .init(serverId: server.id), query: query
-                        )
-                    guard case .ok(let ok) = response, let page = try? ok.body.json else { return [] }
-                    return page.items.map { Result(row: $0, serverName: server.name) }
-                }
-            }
-            var collected: [Result] = []
-            for await rows in tasks { collected += rows }
-            return collected
+    /// The history endpoint filters on exactly one of these, so the guess
+    /// matters: sending a hostname as `mac` matches nothing.
+    private static func history(
+        _ session: ControlPlaneSession, mac: String?, ip: String?, term: String
+    ) async throws -> Components.Schemas.LeaseHistoryPage {
+        let response = try await session.client.listAllLeaseHistoryApiV1DhcpLeaseHistoryGet(
+            query: .init(
+                mac: mac,
+                ip: ip,
+                hostname: (mac == nil && ip == nil) ? term : nil,
+                perPage: 100
+            )
+        )
+        switch response {
+        case .ok(let ok): return try ok.body.json
+        case .unprocessableContent: throw APIStatusError(status: 422)
+        case .undocumented(let statusCode, let payload):
+            throw await APIStatusError(status: statusCode, payload: payload)
         }
     }
 
     /// A history row says what happened; an active lease says what is true now.
-    private func activeAcross(
-        _ servers: [Components.Schemas.AppApiV1DhcpServersServerResponse],
-        term: String
-    ) async -> [Components.Schemas.LeaseResponse] {
-        await withTaskGroup(of: [Components.Schemas.LeaseResponse].self) { tasks in
-            for server in servers {
-                tasks.addTask { [session] in
-                    let response = try? await session.client
-                        .listLeasesApiV1DhcpServersServerIdLeasesGet(
-                            path: .init(serverId: server.id),
-                            query: .init(search: term, page: 1, pageSize: 50)
-                        )
-                    guard case .ok(let ok) = response, let page = try? ok.body.json else { return [] }
-                    return page.items
-                }
-            }
-            var collected: [Components.Schemas.LeaseResponse] = []
-            for await leases in tasks { collected += leases }
-            return collected
+    /// Exact MAC and IP matches where the input is one — `search` is a
+    /// substring, and "10.0.0.1" would also match 10.0.0.10 through .19.
+    private static func active(
+        _ session: ControlPlaneSession, mac: String?, ip: String?, term: String
+    ) async throws -> [Components.Schemas.LeaseResponse] {
+        let response = try await session.client.listAllLeasesApiV1DhcpLeasesGet(
+            query: .init(
+                search: (mac == nil && ip == nil) ? term : nil,
+                mac: mac,
+                ip: ip,
+                page: 1,
+                pageSize: 50
+            )
+        )
+        switch response {
+        case .ok(let ok): return try ok.body.json.items
+        case .unprocessableContent: throw APIStatusError(status: 422)
+        case .undocumented(let statusCode, let payload):
+            throw await APIStatusError(status: statusCode, payload: payload)
         }
     }
 
+    /// Server names for the rows, which carry only an id.
+    ///
+    /// Decoration, so it is the one failure tolerated here: a row without its
+    /// server's name is still the answer, and an empty map costs the caption,
+    /// not the lookup.
+    private static func serverNames(_ session: ControlPlaneSession) async throws -> [String: String] {
+        guard case .ok(let ok) = try? await session.client.listServersApiV1DhcpServersGet(),
+            let servers = try? ok.body.json
+        else { return [:] }
+        return Dictionary(servers.map { ($0.id, $0.name) }, uniquingKeysWith: { first, _ in first })
+    }
 }
 
 /// How to read what the operator typed into the lookup field.
@@ -299,7 +319,9 @@ private struct LeaseHistoryRow: View {
                 Text(hostname).font(.caption).foregroundStyle(.secondary)
             }
             HStack(spacing: 8) {
-                Text(result.serverName)
+                if let serverName = result.serverName {
+                    Text(verbatim: serverName)
+                }
                 if let started = row.startedAt {
                     Text("from \(started.formatted(date: .abbreviated, time: .shortened))")
                 }
