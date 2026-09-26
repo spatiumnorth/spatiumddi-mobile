@@ -94,6 +94,29 @@ class DualStackServer(http.server.ThreadingHTTPServer):
         self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
         super().server_bind()
 
+    # TLS per connection, in that connection's own thread. Wrapping the
+    # listening socket instead runs every handshake inside accept(), on the
+    # one serving thread — so concurrent clients queue behind each other's
+    # handshakes, including the ones that abort on purpose because the
+    # certificate is untrusted. On a slow CI runner four parallel trust tests
+    # queued long enough to fail with a TLS error before seeing a certificate.
+    def get_request(self):
+        sock, address = self.socket.accept()
+        return self.tls.wrap_socket(sock, server_side=True, do_handshake_on_connect=False), address
+
+    def finish_request(self, request, client_address):
+        request.settimeout(15)
+        try:
+            request.do_handshake()
+        except (ssl.SSLError, OSError):
+            # A client refusing the certificate is the point of half the
+            # tests; it is not a server error worth a traceback.
+            return
+        super().finish_request(request, client_address)
+
+    #: Set by main() before serving.
+    tls: ssl.SSLContext
+
 
 def main(argv: list[str]) -> int:
     if len(argv) != 5:
@@ -106,7 +129,7 @@ def main(argv: list[str]) -> int:
     context.load_cert_chain(cert, key)
 
     server = DualStackServer(("::", port), make_handler(upstream))
-    server.socket = context.wrap_socket(server.socket, server_side=True)
+    server.tls = context
 
     sys.stderr.write(f"proxying https://localhost:{port} -> {upstream}\n")
     sys.stderr.flush()
