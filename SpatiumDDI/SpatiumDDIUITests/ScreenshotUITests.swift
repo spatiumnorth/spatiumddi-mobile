@@ -68,6 +68,7 @@ final class ScreenshotUITests: XCTestCase {
     }
 
     /// Attaches to the result bundle, and writes a PNG when a directory is set.
+    @MainActor
     private func capture(_ app: XCUIApplication, _ name: String) {
         let screenshot = app.screenshot()
         let attachment = XCTAttachment(screenshot: screenshot)
@@ -87,6 +88,7 @@ final class ScreenshotUITests: XCTestCase {
     /// back button until the bar reads Menu". Bounded, because a loop that taps
     /// whatever is at the top-left forever will eventually find a button that
     /// does something worse than navigate.
+    @MainActor
     private func popToMenu(_ app: XCUIApplication) {
         for _ in 0..<8 {
             if app.navigationBars["Menu"].waitForExistence(timeout: 2) { return }
@@ -106,6 +108,7 @@ final class ScreenshotUITests: XCTestCase {
     /// not in the accessibility tree at all, so "missing" and "not scrolled
     /// to" are the same observation. Look where we are, then down, then up.
     @discardableResult
+    @MainActor
     private func openSection(_ app: XCUIApplication, _ title: String) -> Bool {
         popToMenu(app)
         let row = app.cells.staticTexts[title]
@@ -124,6 +127,7 @@ final class ScreenshotUITests: XCTestCase {
     }
 
     /// Opens a section, lets it settle, and captures it.
+    @MainActor
     private func captureSection(
         _ app: XCUIApplication, _ title: String, as name: String, settle: TimeInterval = 2.5
     ) {
@@ -137,6 +141,7 @@ final class ScreenshotUITests: XCTestCase {
 
     /// Opens the named row when a hint was provided, else the first row whose
     /// pushed screen is not an empty state.
+    @MainActor
     private func descend(_ app: XCUIApplication, hint: String?) -> Bool {
         if let hint { return openRow(app, containing: hint) }
         return drillFirstPopulatedRow(app)
@@ -144,6 +149,7 @@ final class ScreenshotUITests: XCTestCase {
 
     /// Taps the row whose text contains `text`, scrolling to materialise it —
     /// a lazy List keeps unscrolled rows out of the accessibility tree.
+    @MainActor
     private func openRow(_ app: XCUIApplication, containing text: String) -> Bool {
         for _ in 0..<3 {
             let match = app.cells.staticTexts.matching(
@@ -163,6 +169,7 @@ final class ScreenshotUITests: XCTestCase {
     /// empty spaces and groups near the top of the sort order — and an empty
     /// state is itself a cell, so "has any cell" is not the test; "has a cell
     /// and is not the Nothing here card" is.
+    @MainActor
     private func drillFirstPopulatedRow(_ app: XCUIApplication) -> Bool {
         for index in 0..<3 {
             let row = app.cells.element(boundBy: index)
@@ -183,6 +190,7 @@ final class ScreenshotUITests: XCTestCase {
     /// network as a CIDR, sometimes a gateway — so a tap is verified by the
     /// Actions menu appearing rather than trusted. A fact row swallows the tap
     /// and the loop moves on.
+    @MainActor
     private func openFirstAddressRow(_ app: XCUIApplication) -> Bool {
         for _ in 0..<2 {
             // Built fresh each pass: an NSPredicate is not Sendable, and one
@@ -204,6 +212,7 @@ final class ScreenshotUITests: XCTestCase {
 
     // MARK: - The walk
 
+    @MainActor
     func testCaptureEverySurface() throws {
         let app = XCUIApplication()
         // The dark set is forced through the app's own capture hook — see

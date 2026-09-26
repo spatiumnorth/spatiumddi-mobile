@@ -92,10 +92,29 @@ class DualStackServer(http.server.ThreadingHTTPServer):
         self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
         super().server_bind()
 
-ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-ctx.load_cert_chain("cert.pem", "key.pem")
+    # TLS per connection, in that connection's own thread. Wrapping the
+    # listening socket instead runs every handshake inside accept(), on the
+    # one serving thread — so concurrent clients queue behind each other's
+    # handshakes, including the ones that abort on purpose because the
+    # certificate is untrusted. On a slow CI runner four parallel trust tests
+    # queued long enough to fail with a TLS error before seeing a certificate.
+    def get_request(self):
+        sock, address = self.socket.accept()
+        return CONTEXT.wrap_socket(sock, server_side=True, do_handshake_on_connect=False), address
+
+    def finish_request(self, request, client_address):
+        request.settimeout(15)
+        try:
+            request.do_handshake()
+        except (ssl.SSLError, OSError):
+            # A client refusing the certificate is the point of half the
+            # tests; it is not a server error worth a traceback.
+            return
+        super().finish_request(request, client_address)
+
+CONTEXT = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+CONTEXT.load_cert_chain("cert.pem", "key.pem")
 srv = DualStackServer(("::", PORT), Handler)
-srv.socket = ctx.wrap_socket(srv.socket, server_side=True)
 sys.stderr.write("listening on %d mode=%s\n" % (PORT, MODE)); sys.stderr.flush()
 srv.serve_forever()
 PY
@@ -184,7 +203,9 @@ run_tests() {
   start
   local status=0
   # CI picks a destination that exists on the runner; locally this default is fine.
-  local destination="${SPATIUM_TEST_DESTINATION:-platform=iOS Simulator,name=iPhone 17 Pro}"
+  # A named model stops resolving when the simulator line-up changes with the
+  # next Xcode, so the default is whatever the picker finds here.
+  local destination="${SPATIUM_TEST_DESTINATION:-$("$ROOT/scripts/pick-simulator.py")}"
   TEST_RUNNER_SPATIUM_STUB_RUNNING=1 \
   TEST_RUNNER_SPATIUM_EXPECTED_FINGERPRINT="$(fingerprint)" \
   xcodebuild -project "$ROOT/SpatiumDDI/SpatiumDDI.xcodeproj" -scheme SpatiumDDI \

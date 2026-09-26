@@ -23,6 +23,7 @@ final class ConnectionFlowUITests: XCTestCase {
         try XCTSkipUnless(stubIsRunning, "Stub control plane not running.")
     }
 
+    @MainActor
     private func attach(_ app: XCUIApplication, _ name: String) {
         let shot = XCTAttachment(screenshot: app.screenshot())
         shot.name = name
@@ -30,6 +31,7 @@ final class ConnectionFlowUITests: XCTestCase {
         add(shot)
     }
 
+    @MainActor
     func testOperatorApprovesCertificateThenConnects() throws {
         let app = XCUIApplication()
         app.launch()
@@ -69,6 +71,7 @@ final class ConnectionFlowUITests: XCTestCase {
         forgetTrustedCertificate(app)
     }
 
+    @MainActor
     func testDecliningTheCertificateRefusesTheConnection() throws {
         let app = XCUIApplication()
         app.launch()

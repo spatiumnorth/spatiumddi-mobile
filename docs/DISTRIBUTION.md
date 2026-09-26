@@ -90,9 +90,10 @@ Once enrolled:
 readable message rather than a signing error if any secret is missing, so it is
 harmless to have in the repo before the account exists.
 
-The build number comes from the Actions run number, because App Store Connect
-rejects a version it has already seen — and a re-run after a failed upload is
-exactly when that bites.
+The build number is the Actions run number plus the attempt (`412.2`), because
+App Store Connect rejects a version it has already seen — and a re-run after a
+failed upload is exactly when that bites. The run number alone doesn't change on
+a re-run; the attempt does.
 
 ## 4. Ad-hoc / enterprise
 

@@ -12,6 +12,7 @@ import XCTest
 ///
 /// These helpers make each test start from a known state instead of inheriting
 /// whatever the last one left behind.
+@MainActor
 extension XCTestCase {
 
     /// Gets the app back to the connect screen, whatever it launched into.
