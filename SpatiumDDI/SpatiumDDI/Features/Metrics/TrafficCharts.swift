@@ -37,6 +37,16 @@ nonisolated enum MetricsWindow: String, CaseIterable, Identifiable, Sendable {
         case .week: "7d"
         }
     }
+
+    /// For a sentence VoiceOver reads aloud, where "7d" comes out as "seven d".
+    var spokenName: LocalizedStringResource {
+        switch self {
+        case .hour: "1 hour"
+        case .sixHours: "6 hours"
+        case .day: "24 hours"
+        case .week: "7 days"
+        }
+    }
 }
 
 // MARK: - Condensing
@@ -119,6 +129,23 @@ struct TrafficChart: View {
     /// Read aloud in place of the marks, which VoiceOver cannot describe.
     let accessibilitySummary: String
 
+    /// Scales with Dynamic Type: at the largest sizes the legend and axis
+    /// labels grow into a fixed frame and squeeze the plot to a sliver.
+    @ScaledMetric(relativeTo: .caption) private var height: CGFloat = 130
+
+    private var descriptor: TimeSeriesChartDescriptor {
+        TimeSeriesChartDescriptor(
+            title: String(localized: "\(volumeLabel) and \(problemLabel)"),
+            summary: accessibilitySummary,
+            valueTitle: String(
+                localized: "Count per \(Duration.seconds(volume.bucketSeconds).formattedCompact)"),
+            series: [
+                .init(name: volumeLabel, points: volume.samples.map { ($0.t, Double($0.value)) }),
+                .init(name: problemLabel, points: problem.samples.map { ($0.t, Double($0.value)) }),
+            ]
+        )
+    }
+
     private var isSilent: Bool {
         volume.samples.allSatisfy { $0.value == 0 } && problem.samples.allSatisfy { $0.value == 0 }
     }
@@ -157,8 +184,8 @@ struct TrafficChart: View {
                     problemLabel: problemTint,
                 ])
                 .chartLegend(.visible)
-                .frame(height: 130)
-                .accessibilityLabel(accessibilitySummary)
+                .frame(height: height)
+                .chartAccessibility(descriptor)
 
                 // The axis is a count per bucket, and the bucket is not always
                 // the one the server sent — saying which keeps the numbers
@@ -177,6 +204,22 @@ struct TrafficChart: View {
 /// question, and a single percentage cannot answer it.
 struct UtilisationTrendChart: View {
     let points: [Components.Schemas.UtilizationHistoryPoint]
+
+    @ScaledMetric(relativeTo: .caption) private var height: CGFloat = 110
+
+    private var descriptor: TimeSeriesChartDescriptor {
+        TimeSeriesChartDescriptor(
+            title: String(localized: "Utilisation trend"),
+            summary: trendSummary,
+            valueTitle: String(localized: "Percent used"),
+            series: [
+                .init(
+                    name: String(localized: "Used"),
+                    points: points.map { ($0.sampledAt, $0.utilizationPercent) })
+            ],
+            valueRange: 0...100
+        )
+    }
 
     /// Whether the figure has moved at all across the samples.
     private var isFlat: Bool {
@@ -208,8 +251,8 @@ struct UtilisationTrendChart: View {
                 // look like a trend, which is exactly the misread this chart
                 // exists to prevent.
                 .chartYScale(domain: 0...100)
-                .frame(height: 110)
-                .accessibilityLabel(trendSummary)
+                .frame(height: height)
+                .chartAccessibility(descriptor)
 
                 if isFlat {
                     Text("Flat across the whole period.")

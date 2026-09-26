@@ -152,7 +152,7 @@ struct DNSServerDetailView: View {
                         problemTint: .red,
                         accessibilitySummary: String(
                             localized:
-                                "\(series.totalQueries) queries to \(server.name) over \(window.rawValue), of which \(series.totalServfail) failed."
+                                "\(series.totalQueries) queries to \(server.name) over \(String(localized: window.spokenName)), of which \(series.totalServfail) failed."
                         )
                     )
                     if series.totalNXDomain > 0 || series.totalServfail > 0 {
