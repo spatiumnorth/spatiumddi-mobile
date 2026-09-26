@@ -20,7 +20,13 @@ import os
 /// background queue immediately and a human cannot be consulted in that window,
 /// so the connection is dropped and retried once approval exists. There is no
 /// point at which an unapproved certificate is accepted.
-final class ServerTrustDelegate: NSObject, URLSessionDelegate, Sendable {
+///
+/// It also refuses every redirect. The API has no legitimate one, and a 3xx
+/// followed to another origin would carry the request there — a write's body
+/// with it on a 307 — to a host the operator never approved, and which step 2
+/// would wave through if it presented the pinned certificate, since the pin is
+/// checked against this delegate's origin rather than the one being visited.
+final class ServerTrustDelegate: NSObject, URLSessionTaskDelegate, Sendable {
     private let address: ServerAddress
     private let trustStore: TrustStore
     /// The certificate that caused the most recent refusal, for the UI to display.
@@ -33,6 +39,18 @@ final class ServerTrustDelegate: NSObject, URLSessionDelegate, Sendable {
 
     /// Set when a handshake was refused for want of operator approval.
     var refusedCertificate: CertificateInfo? { refused.withLock { $0 } }
+
+    /// Hands the 3xx itself back to the caller, where it surfaces as the
+    /// status it is rather than as whatever the other host said.
+    nonisolated func urlSession(
+        _ session: URLSession,
+        task: URLSessionTask,
+        willPerformHTTPRedirection response: HTTPURLResponse,
+        newRequest request: URLRequest,
+        completionHandler: @escaping @Sendable (URLRequest?) -> Void
+    ) {
+        completionHandler(nil)
+    }
 
     nonisolated func urlSession(
         _ session: URLSession,
