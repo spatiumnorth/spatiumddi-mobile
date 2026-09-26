@@ -87,6 +87,11 @@ class DualStackServer(http.server.ThreadingHTTPServer):
     """
 
     address_family = socket.AF_INET6
+    # The default listen backlog is 5. The trust tests open several connections
+    # at once (each address attempted over both ::1 and 127.0.0.1), and a full
+    # backlog drops the SYNs past it — the client then waits out a retransmit
+    # backoff before it even reaches the handshake.
+    request_queue_size = 64
 
     def server_bind(self):
         self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
@@ -200,18 +205,32 @@ stop() {
 }
 
 run_tests() {
-  start
   local status=0
   # CI picks a destination that exists on the runner; locally this default is fine.
   # A named model stops resolving when the simulator line-up changes with the
   # next Xcode, so the default is whatever the picker finds here.
   local destination="${SPATIUM_TEST_DESTINATION:-$("$ROOT/scripts/pick-simulator.py")}"
+  local project=(-project "$ROOT/SpatiumDDI/SpatiumDDI.xcodeproj" -scheme SpatiumDDI
+    -destination "$destination" -skipPackagePluginValidation)
+
+  # Build first, and only then bring the stub up, so it is running for the
+  # tests and nothing else — a cold build is twenty minutes on a hosted
+  # runner, and a stub up for all of it is one more thing that can have
+  # drifted by the time a test reaches it.
+  xcodebuild "${project[@]}" build-for-testing || return $?
+
+  start
   TEST_RUNNER_SPATIUM_STUB_RUNNING=1 \
   TEST_RUNNER_SPATIUM_EXPECTED_FINGERPRINT="$(fingerprint)" \
-  xcodebuild -project "$ROOT/SpatiumDDI/SpatiumDDI.xcodeproj" -scheme SpatiumDDI \
-    -destination "$destination" \
-    -skipPackagePluginValidation \
-    ${SPATIUM_TEST_EXTRA_ARGS:-} test || status=$?
+  xcodebuild "${project[@]}" ${SPATIUM_TEST_EXTRA_ARGS:-} test-without-building || status=$?
+
+  # A failure against the stub is only diagnosable with what the stub saw.
+  if [[ $status -ne 0 ]]; then
+    for name in healthy maintenance; do
+      echo "--- $name stub log (last 40 lines) ---"
+      tail -n 40 "$WORK/$name.log" 2>/dev/null || echo "(no log)"
+    done
+  fi
   stop
   return $status
 }
