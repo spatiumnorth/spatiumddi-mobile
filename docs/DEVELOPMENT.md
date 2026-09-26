@@ -13,7 +13,7 @@ Building, testing and changing the app. For how it's structured and why, see
 - Python 3 for the helper scripts (ships with macOS)
 
 ```bash
-git clone https://github.com/spatiumddi/spatiumddi-mobile.git
+git clone https://github.com/spatiumnorth/spatiumddi-mobile.git
 cd spatiumddi-mobile
 open SpatiumDDI/SpatiumDDI.xcodeproj
 ```
@@ -288,7 +288,7 @@ xcrun swift-format lint --recursive --strict \
 When a new platform release lands:
 
 ```bash
-gh release download <TAG> --repo spatiumddi/spatiumddi --pattern openapi.json \
+gh release download <TAG> --repo spatiumnorth/spatiumddi --pattern openapi.json \
   --output Packages/SpatiumAPI/Sources/SpatiumAPI/openapi.json
 
 shasum -a 256 Packages/SpatiumAPI/Sources/SpatiumAPI/openapi.json

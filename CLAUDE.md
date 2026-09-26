@@ -2,9 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> **GitHub Org:** https://github.com/spatiumddi
-> **Platform repo:** https://github.com/spatiumddi/spatiumddi
-> **Tracking issue:** [spatiumddi#884](https://github.com/spatiumddi/spatiumddi/issues/884)
+> **GitHub Org:** https://github.com/spatiumnorth — renamed from `spatiumddi` in
+> September 2026. Link to `spatiumnorth/…` only: the old handle is unclaimed, and a
+> redirect through it would follow whoever registers it next.
+> **Platform repo:** https://github.com/spatiumnorth/spatiumddi
+> **Tracking issue:** [spatiumddi#884](https://github.com/spatiumnorth/spatiumddi/issues/884)
 > **License:** Apache 2.0
 
 ---
@@ -19,7 +21,7 @@ iOS (SwiftUI) first. Android is deliberately un-decided — Kotlin native vs. KM
 React Native is a Phase 4 call, not a commitment made now.
 
 **This repo is a client of a contract it does not own.** Every behaviour question that
-starts "what does the server do when…" is answered in `spatiumddi/spatiumddi`, not here.
+starts "what does the server do when…" is answered in `spatiumnorth/spatiumddi`, not here.
 
 ---
 
@@ -27,8 +29,8 @@ starts "what does the server do when…" is answered in `spatiumddi/spatiumddi`,
 
 | What | Where |
 |---|---|
-| Anything the **app** does — features, UX, bugs, roadmap | **this tracker**, `spatiumddi/spatiumddi-mobile` |
-| Work the **platform** has to do — a new or changed REST endpoint, a server-side capability | `spatiumddi/spatiumddi` |
+| Anything the **app** does — features, UX, bugs, roadmap | **this tracker**, `spatiumnorth/spatiumddi-mobile` |
+| Work the **platform** has to do — a new or changed REST endpoint, a server-side capability | `spatiumnorth/spatiumddi` |
 | API reference | `docs/API.md` in the platform repo |
 | Permission grammar | `docs/PERMISSIONS.md` in the platform repo |
 | The API contract itself | `openapi.json`, a release asset on each platform release |
@@ -48,7 +50,7 @@ document, and commit the generated code. A hand-written `Codable` struct drifts 
 server within one release and the drift is silent.
 
 ```bash
-gh release download <TAG> --repo spatiumddi/spatiumddi --pattern openapi.json
+gh release download <TAG> --repo spatiumnorth/spatiumddi --pattern openapi.json
 ```
 
 A live control plane also serves the same document at `/api/openapi.json`, useful for
@@ -129,7 +131,7 @@ and IP-literal hosts with no name at all.
 
 ## Phasing
 
-Per [#884](https://github.com/spatiumddi/spatiumddi/issues/884). Do not pull scope forward.
+Per [#884](https://github.com/spatiumnorth/spatiumddi/issues/884). Do not pull scope forward.
 
 - **Phase 1 — read-mostly.** Sign-in, dashboard KPIs + health, global search, IPAM browse
   (space → block → subnet → IP), DNS zone/record view, DHCP scope/lease view, alert list.
@@ -141,7 +143,7 @@ Per [#884](https://github.com/spatiumddi/spatiumddi/issues/884). Do not pull sco
   alert channel do not exist server-side yet.
 - **Phase 4 — Android.** Decide the stack then, on evidence.
 
-Phase 0 (PWA groundwork) is upstream frontend work — [spatiumddi#902](https://github.com/spatiumddi/spatiumddi/issues/902).
+Phase 0 (PWA groundwork) is upstream frontend work — [spatiumddi#902](https://github.com/spatiumnorth/spatiumddi/issues/902).
 
 ---
 

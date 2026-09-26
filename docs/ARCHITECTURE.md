@@ -40,7 +40,7 @@ That document is **the release asset from a pinned platform release**, committed
 byte-for-byte so anyone can verify it against what upstream published:
 
 ```bash
-gh release download 2026.08.22-1 --repo spatiumddi/spatiumddi --pattern openapi.json
+gh release download 2026.08.22-1 --repo spatiumnorth/spatiumddi --pattern openapi.json
 shasum -a 256 openapi.json
 # 3d18647cb4c86bc76e01c60e5342dd4d5c88ff10513b7b4d2d9d90f5ec5e78d6
 ```

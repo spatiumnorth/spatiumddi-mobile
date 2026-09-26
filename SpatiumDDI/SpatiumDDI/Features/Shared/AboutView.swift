@@ -21,12 +21,12 @@ struct AboutView: View {
         return "\(marketing) (\(build))"
     }
 
-    private static let repository = URL(string: "https://github.com/spatiumddi/spatiumddi-mobile")!
-    private static let platform = URL(string: "https://github.com/spatiumddi/spatiumddi")!
+    private static let repository = URL(string: "https://github.com/spatiumnorth/spatiumddi-mobile")!
+    private static let platform = URL(string: "https://github.com/spatiumnorth/spatiumddi")!
     private static let licence = URL(
-        string: "https://github.com/spatiumddi/spatiumddi-mobile/blob/main/LICENSE")!
+        string: "https://github.com/spatiumnorth/spatiumddi-mobile/blob/main/LICENSE")!
     private static let issues = URL(
-        string: "https://github.com/spatiumddi/spatiumddi-mobile/issues")!
+        string: "https://github.com/spatiumnorth/spatiumddi-mobile/issues")!
 
     var body: some View {
         List {
