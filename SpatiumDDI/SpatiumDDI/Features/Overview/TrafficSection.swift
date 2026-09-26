@@ -111,14 +111,14 @@ struct TrafficSection: View {
     private func dnsSummary(_ series: Components.Schemas.DNSTimeseries) -> String {
         String(
             localized:
-                "\(series.totalQueries) DNS queries over \(window.rawValue), of which \(series.totalServfail) failed and \(series.totalNXDomain) were for names that do not exist."
+                "\(series.totalQueries) DNS queries over \(String(localized: window.spokenName)), of which \(series.totalServfail) failed and \(series.totalNXDomain) were for names that do not exist."
         )
     }
 
     private func dhcpSummary(_ series: Components.Schemas.DHCPTimeseries) -> String {
         String(
             localized:
-                "\(series.totalAck) DHCP acknowledgements and \(series.totalNak) refusals over \(window.rawValue)."
+                "\(series.totalAck) DHCP acknowledgements and \(series.totalNak) refusals over \(String(localized: window.spokenName))."
         )
     }
 

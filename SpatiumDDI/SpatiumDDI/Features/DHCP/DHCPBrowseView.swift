@@ -323,6 +323,25 @@ struct DHCPServerDetailView: View {
 private struct LeaseRateChart: View {
     let stats: Components.Schemas.DHCPServerStatsResponse
 
+    @ScaledMetric(relativeTo: .caption) private var height: CGFloat = 120
+
+    /// The numbers, not just what the chart is of: "a chart of NAKs" tells a
+    /// VoiceOver user nothing about whether there were any.
+    private var descriptor: TimeSeriesChartDescriptor {
+        let acks = stats.rateBuckets.reduce(0) { $0 + $1.ack }
+        let naks = stats.rateBuckets.reduce(0) { $0 + $1.nak }
+        return TimeSeriesChartDescriptor(
+            title: String(localized: "DHCP acknowledgements and refusals"),
+            summary: String(
+                localized: "\(acks) acknowledgements and \(naks) refusals over the last \(stats.range)."),
+            valueTitle: String(localized: "Count"),
+            series: [
+                .init(name: "ACK", points: stats.rateBuckets.map { ($0.ts, Double($0.ack)) }),
+                .init(name: "NAK", points: stats.rateBuckets.map { ($0.ts, Double($0.nak)) }),
+            ]
+        )
+    }
+
     private var isSilent: Bool {
         stats.rateBuckets.allSatisfy { $0.ack == 0 && $0.nak == 0 }
     }
@@ -346,9 +365,8 @@ private struct LeaseRateChart: View {
                 }
                 .chartForegroundStyleScale(["ACK": Color.green, "NAK": Color.red])
                 .chartLegend(.visible)
-                .frame(height: 120)
-                .accessibilityLabel(
-                    "DHCP acknowledgement and negative-acknowledgement rate over the last \(stats.range)")
+                .frame(height: height)
+                .chartAccessibility(descriptor)
             }
         }
     }
