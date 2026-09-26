@@ -37,6 +37,8 @@ nonisolated enum ConnectionError: Error, Sendable, Equatable, LocalizedError {
     case cannotConnect(String)
     case timedOut
     case notAControlPlane(status: Int)
+    /// A 503 that is not a change window — see `ControlPlaneProbe.isMaintenance`.
+    case unavailable
     case transport(String)
 
     var errorDescription: String? {
@@ -49,6 +51,8 @@ nonisolated enum ConnectionError: Error, Sendable, Equatable, LocalizedError {
             "The server didn't respond in time."
         case .notAControlPlane(let status):
             "That address answered with HTTP \(status), which isn't a SpatiumDDI health response. Check you have the right host and port."
+        case .unavailable:
+            "The server answered but isn't serving right now (HTTP 503). It may be restarting, or a proxy in front of it can't reach it."
         case .transport(let detail):
             detail
         }
@@ -96,7 +100,7 @@ nonisolated struct ControlPlaneProbe: Sendable {
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
         do {
-            let (_, response) = try await session.data(for: request)
+            let (body, response) = try await session.data(for: request)
             guard let http = response as? HTTPURLResponse else {
                 return .failed(.transport("The server sent a response the app couldn't read."))
             }
@@ -104,7 +108,9 @@ nonisolated struct ControlPlaneProbe: Sendable {
             case 200...299: return .authenticated
             case 401: return .rejected
             case 403: return .forbidden
-            case 503: return .maintenance(retryAfter: Self.retryAfter(from: http))
+            case 503 where Self.isMaintenance(body):
+                return .maintenance(retryAfter: Self.retryAfter(from: http))
+            case 503: return .failed(.unavailable)
             default: return .failed(.notAControlPlane(status: http.statusCode))
             }
         } catch {
@@ -122,7 +128,7 @@ nonisolated struct ControlPlaneProbe: Sendable {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
         do {
-            let (_, response) = try await session.data(for: request)
+            let (body, response) = try await session.data(for: request)
             guard let http = response as? HTTPURLResponse else {
                 return .failed(.transport("The server sent a response the app couldn't read."))
             }
@@ -130,8 +136,10 @@ nonisolated struct ControlPlaneProbe: Sendable {
             switch http.statusCode {
             case 200...299:
                 return .reachable(status: http.statusCode)
-            case 503:
+            case 503 where Self.isMaintenance(body):
                 return .maintenance(retryAfter: Self.retryAfter(from: http))
+            case 503:
+                return .failed(.unavailable)
             default:
                 return .failed(.notAControlPlane(status: http.statusCode))
             }
@@ -143,6 +151,21 @@ nonisolated struct ControlPlaneProbe: Sendable {
             }
             return .failed(Self.classify(error, address: address))
         }
+    }
+
+    /// Whether a 503 is the platform's change-window refusal.
+    ///
+    /// Not every 503 is. The platform's maintenance middleware marks its own —
+    /// `{"detail": "...", "maintenance": true}` — while a proxy whose backend
+    /// is down, or the platform mid-restore, sends a 503 without the marker.
+    /// Calling those a change window tells the operator to wait out something
+    /// that isn't happening, while the server they need is down.
+    ///
+    /// One flag read from an error body, like `APIStatusError`'s envelope — not
+    /// a model of any documented response.
+    static func isMaintenance(_ body: Data) -> Bool {
+        struct Marker: Decodable { let maintenance: Bool? }
+        return (try? JSONDecoder().decode(Marker.self, from: body))?.maintenance == true
     }
 
     /// `Retry-After` is either a delay in seconds or an HTTP-date.

@@ -151,8 +151,39 @@ struct WriteErrorTests {
     /// has to leave the operator certain nothing half-landed.
     @Test("A maintenance window says nothing was changed")
     func maintenanceSaysNothingChanged() {
-        let text = APIErrorMessage.describeWrite(APIStatusError(status: 503)).englishText
+        let text = APIErrorMessage.describeWrite(APIStatusError(status: 503, isMaintenance: true))
+            .englishText
         #expect(text.contains("nothing was changed"))
+    }
+
+    /// The window's own message is what the operator who opened it wanted
+    /// everyone else to read — "Core switch upgrade until 02:00".
+    @Test("A maintenance window carries the message it was opened with")
+    func maintenanceCarriesItsMessage() {
+        let error = APIStatusError(
+            status: 503, detail: "Core switch upgrade until 02:00.", isMaintenance: true)
+        let text = APIErrorMessage.describeWrite(error).englishText
+        #expect(text.contains("Nothing was changed"))
+        #expect(text.contains("Core switch upgrade until 02:00."))
+    }
+
+    /// A proxy's 503 for a backend that is down carries no marker, and the
+    /// request may have reached the platform. "Nothing was changed" would be a
+    /// claim the app cannot back.
+    @Test("An unmarked 503 does not claim nothing was changed")
+    func unmarked503IsNotMaintenance() {
+        let text = APIErrorMessage.describeWrite(APIStatusError(status: 503)).englishText
+        #expect(!text.localizedCaseInsensitiveContains("nothing was changed"))
+        #expect(!text.contains("change window"))
+        #expect(text.contains("isn't known"))
+    }
+
+    @Test("Only the platform's own marker makes a 503 a change window")
+    func maintenanceMarker() {
+        #expect(ControlPlaneProbe.isMaintenance(Data(#"{"detail":"x","maintenance":true}"#.utf8)))
+        #expect(!ControlPlaneProbe.isMaintenance(Data(#"{"detail":"Database connection was closed"}"#.utf8)))
+        #expect(!ControlPlaneProbe.isMaintenance(Data("<html>502 Bad Gateway</html>".utf8)))
+        #expect(!ControlPlaneProbe.isMaintenance(Data()))
     }
 
     /// The single most useful sentence on a write is the server's own 422

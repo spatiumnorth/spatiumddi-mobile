@@ -57,7 +57,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if self.path != "/health/platform":
             self.send_error(404); return
         if MODE == "maintenance":
-            body = json.dumps({"maintenance_mode": True}).encode()
+            # The platform's own change-window refusal, marker and all. An
+            # unmarked 503 is a different thing — see ControlPlaneProbe.
+            body = json.dumps({
+                "detail": "Core switch upgrade until 02:00.",
+                "maintenance": True,
+                "message": "Core switch upgrade until 02:00.",
+            }).encode()
             self.send_response(503)
             self.send_header("Retry-After", "1800")
         else:
