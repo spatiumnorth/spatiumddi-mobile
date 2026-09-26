@@ -100,6 +100,7 @@ struct EditRecordView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel", role: .cancel, action: onDismiss)
+                        .disabled(model.isSending)
                 }
                 if !isSynthesised {
                     ToolbarItem(placement: .confirmationAction) {
@@ -271,9 +272,18 @@ final class EditRecordModel {
             return "An AAAA record's value is a single IPv6 address."
         case "SRV" where [priority, weight, port].contains(where: { trimmed($0).isEmpty }):
             return "An SRV needs a priority, a weight and a port."
+        case "MX" where FieldChange.clears(from: original["priority"] ?? "", to: priority):
+            return "An MX record needs a priority."
         default:
-            return nil
+            break
         }
+        // An emptied TTL would be omitted from the update, and the server
+        // reads that as "unchanged" — see FieldChange.clears.
+        if FieldChange.clears(from: original["ttl"] ?? "", to: ttl) {
+            return
+                "The app can't reset a record to the zone's TTL yet — only change it. Put a value back, or reset it in the web console."
+        }
+        return nil
     }
 
     var canSave: Bool { hasChanges && localProblem == nil && !isSending }
@@ -332,7 +342,7 @@ final class EditRecordModel {
                 throw await APIStatusError(status: statusCode, payload: payload)
             }
         } catch {
-            if case .failed(let message) = await WriteFailure.classify(error) {
+            if case .failed(let message) = await WriteFailure.classify(error, forced: true) {
                 submission = .failed(message)
             }
             return nil
@@ -411,7 +421,9 @@ final class DeleteRecordModel: Identifiable {
                 throw await APIStatusError(status: statusCode, payload: payload)
             }
         } catch {
-            if case .failed(let message) = await WriteFailure.classify(error) { failure = message }
+            if case .failed(let message) = await WriteFailure.classify(error, forced: true) {
+                failure = message
+            }
             isDeleting = false
             return false
         }

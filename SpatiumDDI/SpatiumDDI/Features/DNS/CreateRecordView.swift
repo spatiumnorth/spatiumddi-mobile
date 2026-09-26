@@ -91,6 +91,7 @@ struct CreateRecordView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel", role: .cancel, action: onDismiss)
+                        .disabled(model.isSending)
                 }
                 // In the bar for the same reason as the allocate sheet: at the
                 // foot of the form it is the one control the keyboard covers.
@@ -383,7 +384,7 @@ final class CreateRecordModel {
             // Records have no soft-conflict path — DNS has no duplicate check,
             // so a 409 here would be a real one — but the status recovery and
             // the write wording are the same problem either way.
-            if case .failed(let message) = await WriteFailure.classify(error) {
+            if case .failed(let message) = await WriteFailure.classify(error, forced: true) {
                 submission = .failed(message)
             }
             return nil

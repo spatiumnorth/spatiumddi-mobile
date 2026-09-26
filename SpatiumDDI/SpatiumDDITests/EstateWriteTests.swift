@@ -101,6 +101,18 @@ struct FieldChangeTests {
         #expect(FieldChange.line("Gateway", from: "", to: "10.1.0.1") == "Gateway: empty → 10.1.0.1")
         #expect(FieldChange.line("Gateway", from: "10.1.0.1", to: "") == "Gateway: 10.1.0.1 → empty")
     }
+
+    /// The update schemas can't carry an explicit null, so emptying a field
+    /// that had a value would be omitted and change nothing. Each sheet refuses
+    /// it on this answer.
+    @Test("Emptying a set field is a clear; anything else is not")
+    func clears() {
+        #expect(FieldChange.clears(from: "aa:bb:cc:dd:ee:ff", to: ""))
+        #expect(FieldChange.clears(from: "3600", to: "  "))
+        #expect(!FieldChange.clears(from: "", to: ""))
+        #expect(!FieldChange.clears(from: "", to: "10.1.0.1"))
+        #expect(!FieldChange.clears(from: "10.1.0.1", to: "10.1.0.254"))
+    }
 }
 
 /// Telling this device's own credential apart from every other row.

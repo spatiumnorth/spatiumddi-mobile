@@ -114,6 +114,7 @@ struct CreateReservationView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel", role: .cancel, action: onDismiss)
+                        .disabled(isSending)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if isSending {
@@ -618,6 +619,7 @@ private struct BlockMACView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel", role: .cancel, action: onDismiss)
+                        .disabled(isSending)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if isSending {

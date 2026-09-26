@@ -80,7 +80,14 @@ struct EditSubnetView: View {
                         .keyboardType(.numbersAndPunctuation)
                         .font(.body.monospaced())
                 } footer: {
-                    if !trimmedGateway.isEmpty, trimmedGateway != original.gateway {
+                    if clearsGateway {
+                        Label(
+                            "The app can't remove a gateway yet — only change it. Put it back, or remove it in the web console.",
+                            systemImage: "exclamationmark.circle"
+                        )
+                        .font(.footnote)
+                        .foregroundStyle(.orange)
+                    } else if !trimmedGateway.isEmpty, trimmedGateway != original.gateway {
                         // The gateway is handed to clients by DHCP, so this is
                         // not a label change at all — and nothing else on the
                         // screen would tell the operator that.
@@ -107,13 +114,14 @@ struct EditSubnetView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel", role: .cancel, action: onDismiss)
+                        .disabled(isSending)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if isSending {
                         ProgressView()
                     } else {
                         Button("Save") { isConfirming = true }
-                            .disabled(!hasChanges)
+                            .disabled(!hasChanges || clearsGateway)
                     }
                 }
             }
@@ -131,6 +139,8 @@ struct EditSubnetView: View {
         }
         .interactiveDismissDisabled(isSending)
     }
+
+    private var clearsGateway: Bool { FieldChange.clears(from: original.gateway, to: trimmedGateway) }
 
     private var summary: String {
         var lines: [String] = []
@@ -217,6 +227,23 @@ struct EditZoneView: View {
         if !typed.isEmpty && parsedTTL == nil {
             return "A TTL is a whole number of seconds, from 0 to 2147483647."
         }
+        // A zone cannot exist without these. Emptied, they would be omitted
+        // from the update and the zone left as it was — see FieldChange.clears.
+        if FieldChange.clears(from: original.ttl, to: typed) {
+            return "A zone needs a default TTL."
+        }
+        return nil
+    }
+
+    /// Beside the Authority fields rather than with the TTL's, so the reason
+    /// sits next to the field at fault.
+    private var authorityProblem: LocalizedStringResource? {
+        if FieldChange.clears(from: original.email, to: trimmedEmail) {
+            return "A zone needs an admin email — it's the RNAME in the SOA."
+        }
+        if FieldChange.clears(from: original.ns, to: trimmedNS) {
+            return "A zone needs a primary name server — it's the MNAME in the SOA."
+        }
         return nil
     }
 
@@ -268,9 +295,15 @@ struct EditZoneView: View {
                 } header: {
                     Text("Authority")
                 } footer: {
-                    Text(
-                        "Both land in the zone's SOA record and are republished to every server in the group."
-                    )
+                    if let authorityProblem {
+                        Label(authorityProblem, systemImage: "exclamationmark.circle")
+                            .font(.footnote)
+                            .foregroundStyle(.orange)
+                    } else {
+                        Text(
+                            "Both land in the zone's SOA record and are republished to every server in the group."
+                        )
+                    }
                 }
 
                 if let failure {
@@ -285,13 +318,14 @@ struct EditZoneView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel", role: .cancel, action: onDismiss)
+                        .disabled(isSending)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if isSending {
                         ProgressView()
                     } else {
                         Button("Save") { isConfirming = true }
-                            .disabled(!hasChanges || blocker != nil)
+                            .disabled(!hasChanges || blocker != nil || authorityProblem != nil)
                     }
                 }
             }
@@ -382,5 +416,18 @@ nonisolated enum FieldChange {
         let before = old.isEmpty ? String(localized: "empty") : old
         let after = new.isEmpty ? String(localized: "empty") : new
         return "\(label): \(before) → \(after)"
+    }
+
+    /// Whether an edit empties a field that had a value.
+    ///
+    /// The update schemas mark these fields non-nullable, so the generated
+    /// client can only *omit* one — and the server reads an omitted field as
+    /// "leave it alone". Offered anyway, the confirmation would promise
+    /// "→ empty" and the save would quietly change nothing. Each sheet refuses
+    /// it instead, with the reason beside the field, until the platform
+    /// publishes the fields as nullable.
+    static func clears(from old: String, to new: String) -> Bool {
+        !old.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && new.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 }
