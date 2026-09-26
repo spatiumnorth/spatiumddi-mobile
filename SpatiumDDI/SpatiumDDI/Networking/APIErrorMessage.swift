@@ -56,6 +56,23 @@ nonisolated enum APIErrorMessage {
         if let module = error.disabledFeatureModule {
             return .app("The \(module) feature module is switched off on this server.")
         }
+        if error.status == 503 {
+            guard error.isMaintenance else {
+                // Not the platform's refusal, so the request may have reached
+                // it. Saying "nothing was changed" here could be false.
+                return .app(
+                    "The server was unavailable (HTTP 503), so it isn't known whether this change landed. Check before trying again."
+                )
+            }
+            // The platform refuses before any handler runs, so nothing was
+            // changed. The detail is the window's own message when the
+            // operator who opened it wrote one.
+            if let detail = error.detail {
+                return .app("Nothing was changed — the server is in a change window: \(detail)")
+            }
+            return .app(
+                "The server is in a change window and nothing was changed. Try again once it's finished.")
+        }
         if let detail = error.detail, detailBearingStatuses.contains(error.status) {
             return .server(detail)
         }
@@ -68,9 +85,6 @@ nonisolated enum APIErrorMessage {
             return .app("The server doesn't have this any more — it may have been deleted.")
         case 409:
             return .app("That conflicts with something already on the server. Nothing was changed.")
-        case 503:
-            return .app(
-                "The server is in a change window and nothing was changed. Try again once it's finished.")
         default:
             return describe(status: error.status)
         }
@@ -113,8 +127,11 @@ nonisolated enum APIErrorMessage {
             .app("The server rejected that request as invalid.")
         case 429:
             .app("The server is rate-limiting requests. Wait a moment and try again.")
+        // Not "a change window": maintenance mode never blocks a read, so a
+        // read that gets a 503 has met something else — a proxy with its
+        // backend down, or a restore in progress.
         case 503:
-            .app("The server is in a change window. Try again once it's finished.")
+            .app("The server isn't serving right now (HTTP 503). Try again in a moment.")
         case 500...599:
             .app("The server reported an error (HTTP \(status)).")
         default:

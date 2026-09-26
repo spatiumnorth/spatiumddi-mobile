@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import SpatiumAPI
 import Testing
 
 @testable import SpatiumDDI
@@ -91,6 +92,43 @@ struct TrustFlowTests {
         #expect(outcome == .reachable(status: 200))
 
         try store.removePin(for: healthyAddress)
+    }
+
+    @Test("A redirect to another origin is handed back, never followed")
+    func redirectIsNotFollowed() async throws {
+        let store = isolatedStore()
+        guard
+            case .trustRequired(let presented) = await ControlPlaneProbe(trustStore: store).probe(
+                healthyAddress)
+        else {
+            Issue.record("Expected an initial trust prompt")
+            return
+        }
+        try store.pin(presented.fingerprint, for: healthyAddress)
+        defer { try? store.removePin(for: healthyAddress) }
+
+        // The session the app builds, through the generated client and its
+        // transport — the path a real call takes. The stub answers everything
+        // under /redirect/ with a 307 to the next port, which presents the same
+        // certificate: followed, the call would come back 404 from over there.
+        let session = URLSession(
+            configuration: .ephemeral,
+            delegate: ServerTrustDelegate(address: healthyAddress, trustStore: store),
+            delegateQueue: nil
+        )
+        defer { session.invalidateAndCancel() }
+        let client = SpatiumClientFactory.makeClient(
+            serverURL: healthyAddress.origin.appending(path: "redirect"),
+            session: session,
+            token: "sddi_redirect_test"
+        )
+
+        let response = try await client.getVersionApiV1VersionGet()
+        guard case .undocumented(let status, _) = response else {
+            Issue.record("Expected the 307 itself, got \(response)")
+            return
+        }
+        #expect(status == 307)
     }
 
     @Test("A pin for a different certificate does not open the door")

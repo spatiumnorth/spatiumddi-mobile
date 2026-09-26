@@ -46,10 +46,24 @@ MODE = sys.argv[2] if len(sys.argv) > 2 else "healthy"
 class Handler(http.server.BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
     def do_GET(self):
+        if self.path.startswith("/redirect/"):
+            # An off-origin redirect — the next port up — for the test proving
+            # the app never follows one with a bearer token attached.
+            self.send_response(307)
+            self.send_header("Location", "https://localhost:%d%s" % (PORT + 1, self.path[len("/redirect"):]))
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
         if self.path != "/health/platform":
             self.send_error(404); return
         if MODE == "maintenance":
-            body = json.dumps({"maintenance_mode": True}).encode()
+            # The platform's own change-window refusal, marker and all. An
+            # unmarked 503 is a different thing — see ControlPlaneProbe.
+            body = json.dumps({
+                "detail": "Core switch upgrade until 02:00.",
+                "maintenance": True,
+                "message": "Core switch upgrade until 02:00.",
+            }).encode()
             self.send_response(503)
             self.send_header("Retry-After", "1800")
         else:

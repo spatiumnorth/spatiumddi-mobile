@@ -77,6 +77,7 @@ struct AllocateAddressView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel", role: .cancel, action: onDismiss)
+                        .disabled(model.isSending)
                 }
                 // The primary action lives in the bar, not at the foot of the
                 // form: at the foot it is the one control the keyboard covers,
@@ -328,18 +329,27 @@ final class AllocateAddressModel {
         }
     }
 
-    var source: Source = .next
-    var typedAddress = ""
-    var hostname = ""
-    var mac = ""
-    var notes = ""
-    var status = "allocated"
+    var source: Source = .next { didSet { withdrawWaiver() } }
+    var typedAddress = "" { didSet { withdrawWaiver() } }
+    var hostname = "" { didSet { withdrawWaiver() } }
+    var mac = "" { didSet { withdrawWaiver() } }
+    var notes = "" { didSet { withdrawWaiver() } }
+    var status = "allocated" { didSet { withdrawWaiver() } }
     /// `nil` means "whatever this subnet is configured for" — the server resolves it.
-    var zoneID: String?
+    var zoneID: String? { didSet { withdrawWaiver() } }
 
-    private(set) var preview: LoadState<String?> = .idle
+    /// A fresh candidate is a different address, so it withdraws a waiver too.
+    private(set) var preview: LoadState<String?> = .idle { didSet { withdrawWaiver() } }
     private(set) var zones: [Components.Schemas.ZoneResponse] = []
     private(set) var submission: Submission = .idle
+
+    /// "Allocate Anyway" waives the warnings the server raised about the values
+    /// it was shown. Any edit after that — or a newer candidate address — is a
+    /// different request, so the waiver goes and the next tap asks the server
+    /// again. Otherwise a forced write would carry values nobody confirmed.
+    private func withdrawWaiver() {
+        if case .confirmable = submission { submission = .idle }
+    }
 
     private let session: ControlPlaneSession
     private let subnet: Components.Schemas.SubnetResponse
@@ -481,6 +491,7 @@ final class AllocateAddressModel {
 
     /// Sends the create. Returns the created row, or `nil` if nothing was written.
     func submit(force: Bool) async -> Components.Schemas.IPAddressResponse? {
+        guard !isSending else { return nil }
         guard let address = effectiveAddress else { return nil }
         submission = .sending
 

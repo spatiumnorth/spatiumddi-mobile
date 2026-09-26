@@ -44,15 +44,24 @@ nonisolated struct APIStatusError: Error {
     /// hostname into a dead end when the operator meant a round-robin A record.
     let collision: Collision?
 
+    /// Whether this is the platform's change-window refusal, which marks
+    /// itself `"maintenance": true`. Any other 503 — a proxy with its backend
+    /// down, a restore resetting connections — says nothing about whether a
+    /// write landed. See `ControlPlaneProbe.isMaintenance`.
+    let isMaintenance: Bool
+
     nonisolated struct Collision: Equatable, Sendable {
         let requiresConfirmation: Bool
         let warnings: [CollisionWarning]
     }
 
-    init(status: Int, detail: String? = nil, collision: Collision? = nil) {
+    init(
+        status: Int, detail: String? = nil, collision: Collision? = nil, isMaintenance: Bool = false
+    ) {
         self.status = status
         self.detail = detail
         self.collision = collision
+        self.isMaintenance = isMaintenance
     }
 
     /// Reads the `detail` out of an undocumented response body.
@@ -77,7 +86,9 @@ nonisolated struct APIStatusError: Error {
         if let envelope = try? JSONDecoder().decode(DetailEnvelope.self, from: data),
             !envelope.detail.isEmpty
         {
-            self.init(status: status, detail: envelope.detail)
+            self.init(
+                status: status, detail: envelope.detail,
+                isMaintenance: envelope.maintenance == true)
             return
         }
         if let envelope = try? JSONDecoder().decode(CollisionEnvelope.self, from: data) {
@@ -95,6 +106,7 @@ nonisolated struct APIStatusError: Error {
 
     private struct DetailEnvelope: Decodable {
         let detail: String
+        let maintenance: Bool?
     }
 
     private struct CollisionEnvelope: Decodable {

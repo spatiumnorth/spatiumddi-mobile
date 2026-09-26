@@ -40,14 +40,18 @@ struct LoadStateTests {
         #expect(message.englishText.contains("permission"))
     }
 
-    @Test("A maintenance window is not reported as a network failure")
-    func maintenanceIsItsOwnMessage() async {
+    /// Maintenance mode never blocks a read, so a read's 503 is something else
+    /// — a proxy with its backend down. Calling it a change window sends the
+    /// operator to wait out a window that isn't open.
+    @Test("A 503 on a read is not reported as a change window")
+    func read503IsNotMaintenance() async {
         let state = await LoadState<Int>.fetching { throw APIStatusError(status: 503) }
         guard case .failed(let message) = state else {
             Issue.record("expected .failed, got \(describe(state))")
             return
         }
-        #expect(message.englishText.contains("change window"))
+        #expect(!message.englishText.contains("change window"))
+        #expect(message.englishText.contains("503"))
     }
 
     /// The bug this guards against: cancellation arriving as `URLError.cancelled`

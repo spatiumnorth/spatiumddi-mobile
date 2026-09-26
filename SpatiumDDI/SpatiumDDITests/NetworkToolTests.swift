@@ -198,4 +198,20 @@ struct ExpiryDaysTests {
             }
         #expect(bucket == expected)
     }
+
+    /// `dateComponents` truncates toward zero, so hours past a deadline are
+    /// "0 days" — which read "Expires today" on something already expired.
+    @Test("A deadline hours in the past is expired, not today")
+    func hoursPastIsExpired() {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let expiry = Expiry(now.addingTimeInterval(-5 * 3600), now: now)
+        guard case .expired = expiry else {
+            Issue.record("Expected .expired, got \(expiry)")
+            return
+        }
+        guard case .critical(days: 0) = Expiry(now.addingTimeInterval(5 * 3600), now: now) else {
+            Issue.record("Expected hours ahead to be .critical(0)")
+            return
+        }
+    }
 }

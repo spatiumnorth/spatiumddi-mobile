@@ -136,7 +136,9 @@ private nonisolated enum JSONScalar: Decodable {
         switch self {
         case .string(let value): value
         case .number(let value):
-            value == value.rounded() ? String(Int(value)) : String(value)
+            // `Int(exactly:)`, not `Int(_:)`: a whole number past Int's range
+            // would trap, and this value comes straight off the wire.
+            Int(exactly: value).map(String.init) ?? String(value)
         case .bool(let value): value ? "true" : "false"
         case .null, .other: nil
         }

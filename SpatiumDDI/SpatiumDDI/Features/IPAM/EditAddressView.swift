@@ -74,9 +74,13 @@ struct EditAddressView: View {
                 } header: {
                     Text("Identity")
                 } footer: {
-                    // Clearing a name is a DNS change, not a cosmetic one, and
-                    // nothing else on this screen would say so.
-                    if model.clearsHostname {
+                    if let problem = model.problem {
+                        Label(problem, systemImage: "exclamationmark.circle")
+                            .font(.footnote)
+                            .foregroundStyle(.orange)
+                    } else if model.clearsHostname {
+                        // Clearing a name is a DNS change, not a cosmetic one,
+                        // and nothing else on this screen would say so.
                         Label(
                             "Clearing the host name deletes the DNS record this address publishes.",
                             systemImage: "exclamationmark.triangle.fill"
@@ -117,14 +121,17 @@ struct EditAddressView: View {
             .dismissableKeyboard()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
+                    // A write in flight lands whether or not the sheet is
+                    // still here to report it.
                     Button("Cancel", role: .cancel, action: onDismiss)
+                        .disabled(model.isSending)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if model.isSending {
                         ProgressView()
                     } else {
                         Button("Save") { isConfirming = true }
-                            .disabled(!model.hasChanges || model.isSending)
+                            .disabled(!model.canSave)
                     }
                 }
             }
@@ -164,12 +171,20 @@ final class EditAddressModel {
     /// reservation. `orphan` is what deleting produces, not something to pick.
     static let offeredStatuses = ["allocated", "reserved", "deprecated", "available"]
 
-    var hostname: String
-    var mac: String
-    var notes: String
-    var status: String
+    var hostname: String { didSet { withdrawWaiver() } }
+    var mac: String { didSet { withdrawWaiver() } }
+    var notes: String { didSet { withdrawWaiver() } }
+    var status: String { didSet { withdrawWaiver() } }
 
     private(set) var submission: Submission = .idle
+
+    /// "Save Anyway" waives the warnings the server raised about the values it
+    /// was shown. An edit after that is a different request, so the waiver goes
+    /// and the next Save asks the server again — otherwise a forced write would
+    /// carry values nobody confirmed, past warnings nobody saw.
+    private func withdrawWaiver() {
+        if case .confirmable = submission { submission = .idle }
+    }
 
     private let session: ControlPlaneSession
     private let address: Components.Schemas.IPAddressResponse
@@ -200,6 +215,17 @@ final class EditAddressModel {
             || trimmed(notes) != original.notes.trimmingCharacters(in: .whitespacesAndNewlines)
             || status != original.status
     }
+
+    /// Why Save is unavailable, shown beside the fields.
+    var problem: LocalizedStringResource? {
+        if FieldChange.clears(from: original.mac, to: trimmed(mac)) {
+            return
+                "The app can't clear a MAC address yet — only change it. Put it back, or clear it in the web console."
+        }
+        return nil
+    }
+
+    var canSave: Bool { hasChanges && problem == nil && !isSending }
 
     /// Whether saving would remove a name the address currently publishes.
     var clearsHostname: Bool { !original.hostname.isEmpty && trimmed(hostname).isEmpty }
@@ -233,14 +259,16 @@ final class EditAddressModel {
     }
 
     func save(force: Bool) async -> Components.Schemas.IPAddressResponse? {
+        guard !isSending else { return nil }
         submission = .sending
 
         let body = Components.Schemas.IPAddressUpdate(
             description: trimmed(notes),
             force: force,
             hostname: trimmed(hostname),
-            // Sent as null rather than "" so the column is cleared rather than
-            // set to an empty MACADDR, which Postgres rejects.
+            // Never "": Postgres rejects an empty MACADDR. An empty field is
+            // omitted, which the server reads as "unchanged" — `problem` stops
+            // that being offered as a way to clear one.
             macAddress: trimmed(mac).isEmpty ? nil : trimmed(mac),
             status: status
         )
@@ -344,7 +372,9 @@ final class DeleteAddressModel: Identifiable {
                 throw await APIStatusError(status: statusCode, payload: payload)
             }
         } catch {
-            if case .failed(let message) = await WriteFailure.classify(error) { failure = message }
+            if case .failed(let message) = await WriteFailure.classify(error, forced: true) {
+                failure = message
+            }
             isDeleting = false
             return false
         }

@@ -48,6 +48,11 @@ final class ConnectionModel {
     /// The token a scanned code carried, until it has been used.
     private(set) var scannedToken: String?
     private var expectedFingerprint: Data?
+    /// The server the scanned code named. The token and fingerprint are
+    /// evidence about that server only, so they are dropped the moment the
+    /// operator connects anywhere else — otherwise editing the address after a
+    /// scan would send one server's token to another.
+    private var scannedAddress: ServerAddress?
 
     /// Takes what a QR code claimed, and acts on none of it silently.
     ///
@@ -73,6 +78,7 @@ final class ConnectionModel {
         }
 
         addressInput = address.displayName
+        scannedAddress = address
         scannedToken = payload.token
         expectedFingerprint = payload.certificateFingerprint
 
@@ -146,8 +152,26 @@ final class ConnectionModel {
             return
         }
 
+        if let scannedAddress, scannedAddress != address {
+            setScanAside()
+        }
+
         state = .connecting
         await attempt(address)
+    }
+
+    /// The address was edited away from the one the code named: nothing the
+    /// code carried applies to this server, and the notice says so rather than
+    /// letting "Sign In" quietly become "Continue".
+    private func setScanAside() {
+        let hadToken = scannedToken != nil
+        scannedAddress = nil
+        scannedToken = nil
+        expectedFingerprint = nil
+        scanNotice =
+            hadToken
+            ? "The address no longer matches the scanned code, so its token was set aside."
+            : nil
     }
 
     /// The operator vouched for the certificate. Pin it and retry — the same

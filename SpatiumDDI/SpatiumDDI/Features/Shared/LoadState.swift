@@ -21,6 +21,11 @@ enum LoadState<Value> {
     /// the string catalogue, and the control plane's must never be parsed or
     /// looked up.
     case failed(FailureMessage)
+
+    /// Not started, or started and cancelled before it finished.
+    var isIdle: Bool {
+        if case .idle = self { true } else { false }
+    }
 }
 
 /// Renders the four states of a fetch consistently.

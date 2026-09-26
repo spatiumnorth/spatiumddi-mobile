@@ -114,6 +114,7 @@ struct CreateReservationView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel", role: .cancel, action: onDismiss)
+                        .disabled(isSending)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if isSending {
@@ -509,7 +510,11 @@ private struct MACBlockRow: View {
                 Spacer()
                 if !block.enabled { Badge(localised: "not enforced", tint: .secondary) }
                 if block.matchCount > 0 {
-                    Badge(text: "^[\(block.matchCount) hit](inflect: true)", tint: .orange)
+                    // Not inflection Markdown: a badge renders verbatim, so
+                    // "^[3 hit](inflect: true)" would reach the screen as-is.
+                    Badge(
+                        localised: block.matchCount == 1 ? "1 hit" : "\(block.matchCount) hits",
+                        tint: .orange)
                 }
             }
             if let vendor = block.vendor, !vendor.isEmpty {
@@ -614,6 +619,7 @@ private struct BlockMACView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel", role: .cancel, action: onDismiss)
+                        .disabled(isSending)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if isSending {
