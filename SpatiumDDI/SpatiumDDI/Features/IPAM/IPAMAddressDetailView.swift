@@ -203,10 +203,16 @@ struct IPAMAddressDetailView: View {
                     // Shown, not swallowed — but the list's copy is still on
                     // screen above, so the operator can see both that there is
                     // data and that it could not be confirmed.
-                    Label(
-                        "Couldn't refresh this address: \(message) What's shown came from the list.",
-                        systemImage: "exclamationmark.triangle.fill"
-                    )
+                    // The message goes in as a `Text`, not as the value: a
+                    // `FailureMessage` interpolated into a localised string is
+                    // rendered as its debug description.
+                    Label {
+                        Text(
+                            "Couldn't refresh this address: \(Text(message)) What's shown came from the list."
+                        )
+                    } icon: {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                    }
                     .font(.caption)
                     .foregroundStyle(.orange)
                 }

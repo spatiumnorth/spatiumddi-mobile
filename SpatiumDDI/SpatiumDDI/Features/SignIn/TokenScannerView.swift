@@ -141,7 +141,11 @@ private struct CameraPreview: UIViewControllerRepresentable {
 /// `AVCaptureSession` is not `Sendable`, but Apple documents driving it from a
 /// single serial queue as correct use. This carries it to that queue explicitly
 /// rather than leaving the guarantee implicit.
-private struct SessionBox: @unchecked Sendable {
+///
+/// `nonisolated` because the target defaults to main-actor isolation, which
+/// would otherwise make the box itself main-actor bound — and reading
+/// `box.session` on `sessionQueue` a main-actor access from the wrong thread.
+private nonisolated struct SessionBox: @unchecked Sendable {
     let session: AVCaptureSession
 }
 
