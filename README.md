@@ -2,12 +2,12 @@
 
 <p align="center">
   <strong>Your DNS, DHCP and IPAM estate, on the phone in your pocket.</strong><br/>
-  A native iOS client for <a href="https://github.com/spatiumddi/spatiumddi">SpatiumDDI</a> — built for the operator who is away from the console.
+  A native iOS client for <a href="https://github.com/spatiumnorth/spatiumddi">SpatiumDDI</a> — built for the operator who is away from the console.
 </p>
 
 <p align="center">
-  <a href="https://github.com/spatiumddi/spatiumddi-mobile/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/spatiumddi/spatiumddi-mobile/ci.yml?branch=main&label=CI" alt="CI"/></a>
-  <a href="https://github.com/spatiumddi/spatiumddi-mobile/actions/workflows/security.yml"><img src="https://img.shields.io/github/actions/workflow/status/spatiumddi/spatiumddi-mobile/security.yml?branch=main&label=security" alt="Security"/></a>
+  <a href="https://github.com/spatiumnorth/spatiumddi-mobile/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/spatiumnorth/spatiumddi-mobile/ci.yml?branch=main&label=CI" alt="CI"/></a>
+  <a href="https://github.com/spatiumnorth/spatiumddi-mobile/actions/workflows/security.yml"><img src="https://img.shields.io/github/actions/workflow/status/spatiumnorth/spatiumddi-mobile/security.yml?branch=main&label=security" alt="Security"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="License"/></a>
   <img src="https://img.shields.io/badge/platform-iOS%2018%2B%20%C2%B7%20iPadOS-lightgrey" alt="Platform"/>
   <img src="https://img.shields.io/badge/Swift-6.0-orange" alt="Swift 6"/>
@@ -63,7 +63,7 @@ question nobody asked.
 It talks to a SpatiumDDI control plane over its public REST API and contains no
 server-side code. **This repo is a client of a contract it does not own** — the
 platform, the API and the roadmap all live in
-[spatiumddi/spatiumddi](https://github.com/spatiumddi/spatiumddi).
+[spatiumnorth/spatiumddi](https://github.com/spatiumnorth/spatiumddi).
 
 ## What works today
 
@@ -107,9 +107,9 @@ sheet has dismissed.</sub></p>
 
 ## Roadmap
 
-Phasing follows [spatiumddi#884](https://github.com/spatiumddi/spatiumddi/issues/884),
+Phasing follows [spatiumddi#884](https://github.com/spatiumnorth/spatiumddi/issues/884),
 and the roadmap itself lives on
-[this tracker](https://github.com/spatiumddi/spatiumddi-mobile/issues?q=is%3Aissue+is%3Aopen+label%3Aroadmap),
+[this tracker](https://github.com/spatiumnorth/spatiumddi-mobile/issues?q=is%3Aissue+is%3Aopen+label%3Aroadmap),
 filterable by label: `phase-2` / `phase-3` / `phase-4` for the phases,
 **`parity`** for what the web console has that the app does not yet,
 **`mobile-native`** for what only exists because this is a phone, and
@@ -130,19 +130,19 @@ IP, toggle maintenance mode. Approvals-on-the-go is the best mobile write story
 there is; the rest of the platform's surface stays desktop work.
 
 **Landed:** allocating an address and creating a DNS record
-([#7](https://github.com/spatiumddi/spatiumddi-mobile/issues/7)); editing and
-deleting both ([#8](https://github.com/spatiumddi/spatiumddi-mobile/issues/8));
+([#7](https://github.com/spatiumnorth/spatiumddi-mobile/issues/7)); editing and
+deleting both ([#8](https://github.com/spatiumnorth/spatiumddi-mobile/issues/8));
 resolving an alert
-([#9](https://github.com/spatiumddi/spatiumddi-mobile/issues/9)), deciding a
+([#9](https://github.com/spatiumnorth/spatiumddi-mobile/issues/9)), deciding a
 change request
-([#10](https://github.com/spatiumddi/spatiumddi-mobile/issues/10)) and
+([#10](https://github.com/spatiumnorth/spatiumddi-mobile/issues/10)) and
 acknowledging a new-device sighting
-([#12](https://github.com/spatiumddi/spatiumddi-mobile/issues/12)).
+([#12](https://github.com/spatiumnorth/spatiumddi-mobile/issues/12)).
 
 **Next:** toggle maintenance mode
-([#11](https://github.com/spatiumddi/spatiumddi-mobile/issues/11)) and revoke a
+([#11](https://github.com/spatiumnorth/spatiumddi-mobile/issues/11)) and revoke a
 lost device's token
-([#13](https://github.com/spatiumddi/spatiumddi-mobile/issues/13)).
+([#13](https://github.com/spatiumnorth/spatiumddi-mobile/issues/13)).
 
 Every write is confirmed, and the confirmation names the actual thing — the
 address and the subnet, or the record in zone-file form — rather than asking
@@ -177,7 +177,7 @@ An address becomes an `orphan` row that can be re-allocated, but its DNS record
 is released either way. A record is restorable from Trash, but stops resolving
 now. Neither offers permanent removal from a phone.
 
-### Phase 3 — push notifications 🔗 [spatiumddi#912](https://github.com/spatiumddi/spatiumddi/issues/912)
+### Phase 3 — push notifications 🔗 [spatiumddi#912](https://github.com/spatiumnorth/spatiumddi/issues/912)
 
 **This is the feature that makes the rest of the app worth having.** An alert list
 you have to remember to open is a dashboard. The operator this app is for is the
@@ -185,7 +185,7 @@ one who is *away* — and for them the gap between "DHCP pool exhausted" arrivin
 at 02:00 and being found at 09:00 is the whole value proposition.
 
 Blocked on upstream work that does not exist yet, specified in
-[spatiumddi#912](https://github.com/spatiumddi/spatiumddi/issues/912):
+[spatiumddi#912](https://github.com/spatiumnorth/spatiumddi/issues/912):
 
 - a **device registry** — `(user, device token, platform, build)`, so the control
   plane knows where to send
@@ -201,42 +201,42 @@ text names internal hostnames and subnets, and this app does not leak those.
 The app half — registration, the opaque-payload contract, deep links through
 the unlock flow, and a notification service extension designed for what it can
 actually read while the device is locked — is
-[#21](https://github.com/spatiumddi/spatiumddi-mobile/issues/21) here.
+[#21](https://github.com/spatiumnorth/spatiumddi-mobile/issues/21) here.
 
 ### Beyond the phases — parity with the web console
 
 A gap analysis against the platform's web GUI, surface by surface, is filed as
 labelled issues. **Landed:** network tools and Wake-on-LAN
-([#14](https://github.com/spatiumddi/spatiumddi-mobile/issues/14)) — ten
+([#14](https://github.com/spatiumnorth/spatiumddi-mobile/issues/14)) — ten
 diagnostics run from the control plane, of which only Wake-on-LAN changes
 anything, and it reports that the packet was *sent* rather than implying a
 machine woke up that nobody checked on.
 
 Still open: chart and Top-N report parity
-([#15](https://github.com/spatiumddi/spatiumddi-mobile/issues/15)),
+([#15](https://github.com/spatiumnorth/spatiumddi-mobile/issues/15)),
 "where is this MAC" from switch ARP/FDB/LLDP polling
-([#16](https://github.com/spatiumddi/spatiumddi-mobile/issues/16)), the
+([#16](https://github.com/spatiumnorth/spatiumddi-mobile/issues/16)), the
 remaining module surfaces ranked by mobile fit
-([#17](https://github.com/spatiumddi/spatiumddi-mobile/issues/17)), the next
+([#17](https://github.com/spatiumnorth/spatiumddi-mobile/issues/17)), the next
 ring of estate writes — DHCP reservations first
-([#18](https://github.com/spatiumddi/spatiumddi-mobile/issues/18)) — and the
-Operator Copilot ([#19](https://github.com/spatiumddi/spatiumddi-mobile/issues/19)).
+([#18](https://github.com/spatiumnorth/spatiumddi-mobile/issues/18)) — and the
+Operator Copilot ([#19](https://github.com/spatiumnorth/spatiumddi-mobile/issues/19)).
 
-Upstream [spatiumddi#917](https://github.com/spatiumddi/spatiumddi/issues/917)
+Upstream [spatiumddi#917](https://github.com/spatiumnorth/spatiumddi/issues/917)
 has since landed the fleet-wide lease lookup, hygiene report and vendor rollup
 the app asked for; adopting them at the next re-pin is
-[#20](https://github.com/spatiumddi/spatiumddi-mobile/issues/20).
+[#20](https://github.com/spatiumnorth/spatiumddi-mobile/issues/20).
 
 The `mobile-native` set is the part with no web equivalent: home-screen widgets
-([#22](https://github.com/spatiumddi/spatiumddi-mobile/issues/22)), App Intents
-([#23](https://github.com/spatiumddi/spatiumddi-mobile/issues/23)), and iPad
-polish ([#24](https://github.com/spatiumddi/spatiumddi-mobile/issues/24)).
+([#22](https://github.com/spatiumnorth/spatiumddi-mobile/issues/22)), App Intents
+([#23](https://github.com/spatiumnorth/spatiumddi-mobile/issues/23)), and iPad
+polish ([#24](https://github.com/spatiumnorth/spatiumddi-mobile/issues/24)).
 
 ### Phase 4 — Android
 
 Kotlin native vs. KMP vs. React Native is a Phase 4 call, decided then, on
 evidence — the criteria and the spikes that will decide it are
-[#27](https://github.com/spatiumddi/spatiumddi-mobile/issues/27). Deliberately
+[#27](https://github.com/spatiumnorth/spatiumddi-mobile/issues/27). Deliberately
 not committed to now.
 
 ## Requirements
@@ -254,7 +254,7 @@ at all.
 ## Getting started
 
 ```bash
-git clone https://github.com/spatiumddi/spatiumddi-mobile.git
+git clone https://github.com/spatiumnorth/spatiumddi-mobile.git
 cd spatiumddi-mobile
 open SpatiumDDI/SpatiumDDI.xcodeproj
 ```
@@ -323,16 +323,16 @@ from the server within one release, and the drift is silent.
 
 | What | Where |
 |---|---|
-| Anything the app does — features, UX, bugs, roadmap | [this tracker](https://github.com/spatiumddi/spatiumddi-mobile/issues) |
-| Work the platform has to do — a new or changed endpoint, a server-side capability | [spatiumddi/spatiumddi](https://github.com/spatiumddi/spatiumddi/issues) |
+| Anything the app does — features, UX, bugs, roadmap | [this tracker](https://github.com/spatiumnorth/spatiumddi-mobile/issues) |
+| Work the platform has to do — a new or changed endpoint, a server-side capability | [spatiumnorth/spatiumddi](https://github.com/spatiumnorth/spatiumddi/issues) |
 | Security vulnerabilities | See [SECURITY.md](SECURITY.md) |
 
 The test is simple: **could the app ship this without a server change?** If yes,
 it belongs here. Push notifications
-([spatiumddi#912](https://github.com/spatiumddi/spatiumddi/issues/912)), pool
-occupancy ([#913](https://github.com/spatiumddi/spatiumddi/issues/913)) and the
+([spatiumddi#912](https://github.com/spatiumnorth/spatiumddi/issues/912)), pool
+occupancy ([#913](https://github.com/spatiumnorth/spatiumddi/issues/913)) and the
 DNS query log's missing `rcode`
-([#914](https://github.com/spatiumddi/spatiumddi/issues/914)) are upstream
+([#914](https://github.com/spatiumnorth/spatiumddi/issues/914)) are upstream
 because each needs the control plane to grow something first.
 
 Splitting a roadmap across two trackers is how items get lost — so the split is

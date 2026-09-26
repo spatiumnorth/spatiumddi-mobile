@@ -9,10 +9,10 @@ constraints the code is built to, and several of them are enforced by tests.
 **Do not open a public issue for a security problem.**
 
 Report it through
-[GitHub's private vulnerability reporting](https://github.com/spatiumddi/spatiumddi-mobile/security/advisories/new)
+[GitHub's private vulnerability reporting](https://github.com/spatiumnorth/spatiumddi-mobile/security/advisories/new)
 on this repository. If the issue is in the control plane rather than the app,
 report it against
-[spatiumddi/spatiumddi](https://github.com/spatiumddi/spatiumddi/security/advisories/new)
+[spatiumnorth/spatiumddi](https://github.com/spatiumnorth/spatiumddi/security/advisories/new)
 instead.
 
 Please include what you did, what happened, and what you expected. If you have a
@@ -136,7 +136,7 @@ that does not currently exist. Operators run this self-hosted and frequently
 air-gapped; an app that phones home is a non-starter.
 
 This constraint is why push notifications
-([spatiumddi#912](https://github.com/spatiumddi/spatiumddi/issues/912)) are a
+([spatiumddi#912](https://github.com/spatiumnorth/spatiumddi/issues/912)) are a
 genuinely hard design problem rather than a small feature: any relay-based
 delivery puts a third party in the path, so the payload must carry nothing
 sensitive and the whole channel must be default-off.

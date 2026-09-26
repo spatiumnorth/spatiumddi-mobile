@@ -19,7 +19,7 @@ import OpenAPIRuntime
 /// than hoping the platform copes.
 ///
 /// Delete this once the server serialises at millisecond precision —
-/// see spatiumddi/spatiumddi#907.
+/// see spatiumnorth/spatiumddi#907.
 public struct LenientDateTranscoder: DateTranscoder {
     public init() {}
 
