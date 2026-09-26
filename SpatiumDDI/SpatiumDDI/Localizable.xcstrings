@@ -13,6 +13,9 @@
     "%@ already points at %@." : {
       "extractionState" : "extracted_with_value"
     },
+    "%@ and %@" : {
+      "extractionState" : "extracted_with_value"
+    },
     "%@ is already in use in this zone." : {
       "extractionState" : "extracted_with_value"
     },
@@ -67,6 +70,9 @@
     "%@, %@" : {
       "extractionState" : "extracted_with_value"
     },
+    "%@:%@ · %@" : {
+      "extractionState" : "extracted_with_value"
+    },
     "%@:%lld" : {
       "extractionState" : "extracted_with_value"
     },
@@ -76,13 +82,34 @@
     "%lld %@" : {
       "extractionState" : "extracted_with_value"
     },
+    "%lld DHCP acknowledgements and %lld refusals over %@." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "%lld DNS queries over %@, of which %lld failed and %lld were for names that do not exist." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "%lld acknowledgements and %lld refusals over the last %@." : {
+      "extractionState" : "extracted_with_value"
+    },
     "%lld days" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "%lld hits" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "%lld queries to %@ over %@, of which %lld failed." : {
       "extractionState" : "extracted_with_value"
     },
     "%lldd left" : {
       "extractionState" : "extracted_with_value"
     },
     "0" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "1 hit" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "1 hour" : {
       "extractionState" : "extracted_with_value"
     },
     "10" : {
@@ -94,22 +121,70 @@
     "10.0.1.42" : {
       "extractionState" : "extracted_with_value"
     },
+    "10.1.0.0/24" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "10.1.0.50" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "1h" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "24 hours" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "24h" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "3600" : {
+      "extractionState" : "extracted_with_value"
+    },
     "443" : {
       "extractionState" : "extracted_with_value"
     },
+    "6 hours" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "6h" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "7 days" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "7d" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "A MAC address is what gets blocked." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "A MAC address is what the reservation matches on." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "A TTL is a whole number of seconds, from 0 to 2147483647." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "A blocked MAC gets no address from any server in this group. It is not a firewall rule — the device can still use a static address." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "A change window is already running. Saving replaces its message and leaves it running." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "A change window shows every user a banner and makes the server refuse changes. It can be lifted from here too — the settings path stays open while the window is running." : {
+      "extractionState" : "extracted_with_value"
+    },
     "A code from the web console's API Tokens page fills in the address and signs you in. Typing the address above and entering a token by hand works just as well." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "A description is worth the seconds — the next person here will be reading it." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "A device other than the recorded one was seen on these within %lld days — something is using an address IPAM gave to someone else." : {
       "extractionState" : "extracted_with_value"
     },
     "A forward record is created in this zone, and a reverse record if one is configured." : {
       "extractionState" : "extracted_with_value"
     },
     "A host name or IP address, plus a port if your control plane isn't on 443. Name it if you like — \"Lab\", \"Prod EU\"." : {
-      "extractionState" : "extracted_with_value"
-    },
-    "A host name or IP address. Add a port if your control plane doesn't use 443." : {
-      "extractionState" : "extracted_with_value"
-    },
-    "A host name or IP address. Add a port if your control plane doesn't use 443. The name is yours — \"Lab\", \"Prod EU\" — and is what the app calls this server from then on." : {
       "extractionState" : "extracted_with_value"
     },
     "A magic packet goes to %@, %@." : {
@@ -130,13 +205,22 @@
     "A token is never stored unprotected. Set a device passcode — and biometrics if this device has them — then come back." : {
       "extractionState" : "extracted_with_value"
     },
-    "A token is only stored behind a biometric lock. Set up biometrics and a device passcode to continue." : {
+    "A zone needs a default TTL." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "A zone needs a primary name server — it's the MNAME in the SOA." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "A zone needs an admin email — it's the RNAME in the SOA." : {
       "extractionState" : "extracted_with_value"
     },
     "ACK" : {
       "extractionState" : "extracted_with_value"
     },
     "API Token" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "AS path" : {
       "extractionState" : "extracted_with_value"
     },
     "AS%lld" : {
@@ -149,6 +233,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Access" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Account" : {
       "extractionState" : "extracted_with_value"
     },
     "Acknowledge" : {
@@ -172,6 +259,9 @@
     "Add" : {
       "extractionState" : "extracted_with_value"
     },
+    "Add Reservation" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Add Server" : {
       "extractionState" : "extracted_with_value"
     },
@@ -184,10 +274,19 @@
     "Address" : {
       "extractionState" : "extracted_with_value"
     },
+    "Address Hygiene" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Address family" : {
       "extractionState" : "extracted_with_value"
     },
     "Addresses" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Addresses IPAM manages, by the MAC recorded on each." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Addresses nothing has answered for; where IPAM and the network disagree; and whose hardware is out there." : {
       "extractionState" : "extracted_with_value"
     },
     "Admin" : {
@@ -220,19 +319,25 @@
     "Allocated" : {
       "extractionState" : "extracted_with_value"
     },
-    "Allocate…" : {
-      "extractionState" : "extracted_with_value"
-    },
     "An A record's value is a single IPv4 address." : {
       "extractionState" : "extracted_with_value"
     },
     "An AAAA record's value is a single IPv6 address." : {
       "extractionState" : "extracted_with_value"
     },
+    "An MX record needs a priority." : {
+      "extractionState" : "extracted_with_value"
+    },
     "An SRV is priority, weight, port and target. All three numbers are required." : {
       "extractionState" : "extracted_with_value"
     },
     "An SRV needs a priority, a weight and a port." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "An address is what the reservation hands out." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "An address nothing has answered for in that long. \"Never seen\" means discovery has no record of it at all, which is not the same as it having gone quiet." : {
       "extractionState" : "extracted_with_value"
     },
     "Apache License 2.0" : {
@@ -253,13 +358,13 @@
     "Approve and run this change?" : {
       "extractionState" : "extracted_with_value"
     },
-    "Approving and rejecting are Phase 2 — decide this in the web console for now." : {
-      "extractionState" : "extracted_with_value"
-    },
     "Approving pins this exact certificate for %@. If the server later presents a different one, you'll be asked again." : {
       "extractionState" : "extracted_with_value"
     },
     "Approving runs the change now, as you. Rejecting declines it and changes nothing." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Asking the switches…" : {
       "extractionState" : "extracted_with_value"
     },
     "At" : {
@@ -271,10 +376,40 @@
     "Auth source" : {
       "extractionState" : "extracted_with_value"
     },
+    "Authority" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Back at 14:00 — replacing the core switch" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Block It" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Block a MAC" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Block this MAC?" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Blocked" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Blocked MACs" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Blocks" : {
       "extractionState" : "extracted_with_value"
     },
+    "Both" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Both land in the zone's SOA record and are republished to every server in the group." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Both of the above. Slower." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Both, counted once per MAC." : {
       "extractionState" : "extracted_with_value"
     },
     "Broadcast" : {
@@ -286,10 +421,16 @@
     "Built against" : {
       "extractionState" : "extracted_with_value"
     },
+    "Busiest DNS clients" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Busiest subnets" : {
       "extractionState" : "extracted_with_value"
     },
     "By" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "By vendor" : {
       "extractionState" : "extracted_with_value"
     },
     "Can't reach the server — check this device's network." : {
@@ -322,7 +463,10 @@
     "Change Requests" : {
       "extractionState" : "extracted_with_value"
     },
-    "Change Server" : {
+    "Change the Message" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Changing the maintenance window needs write access to platform settings." : {
       "extractionState" : "extracted_with_value"
     },
     "Check" : {
@@ -352,7 +496,16 @@
     "Client Lookup" : {
       "extractionState" : "extracted_with_value"
     },
+    "Clients holding a DHCP lease right now." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Communities" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Configuration" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Configured peers" : {
       "extractionState" : "extracted_with_value"
     },
     "Confirm" : {
@@ -370,6 +523,9 @@
     "Consecutive failures" : {
       "extractionState" : "extracted_with_value"
     },
+    "Contact" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Continue" : {
       "extractionState" : "extracted_with_value"
     },
@@ -382,19 +538,25 @@
     "Couldn't save the trust decision. %@" : {
       "extractionState" : "extracted_with_value"
     },
+    "Count" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Count per %@" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Counts what is tagged to this customer in SpatiumDDI. Anything recorded elsewhere isn't included." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Create" : {
-      "extractionState" : "extracted_with_value"
-    },
-    "Create Record" : {
-      "extractionState" : "extracted_with_value"
-    },
-    "Create Record…" : {
       "extractionState" : "extracted_with_value"
     },
     "Create a token in the SpatiumDDI web UI under your account settings, then paste it here." : {
       "extractionState" : "extracted_with_value"
     },
     "Create this record?" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Create this reservation?" : {
       "extractionState" : "extracted_with_value"
     },
     "Created" : {
@@ -415,10 +577,22 @@
     "DHCP Log" : {
       "extractionState" : "extracted_with_value"
     },
-    "DHCP acknowledgement and negative-acknowledgement rate over the last %@" : {
+    "DHCP acknowledgements" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "DHCP acknowledgements and refusals" : {
       "extractionState" : "extracted_with_value"
     },
     "DNS" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "DNS Servers" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "DNS queries" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "DNS zones" : {
       "extractionState" : "extracted_with_value"
     },
     "DNS: %@" : {
@@ -448,10 +622,25 @@
     "Delete this address?" : {
       "extractionState" : "extracted_with_value"
     },
+    "Delete this lease?" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Delete this record?" : {
       "extractionState" : "extracted_with_value"
     },
+    "Delete this reservation?" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Demo mode — this control plane holds seeded data." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Deprecate" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Deprecate %lld" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Deprecate ^[%lld address](inflect: true)?" : {
       "extractionState" : "extracted_with_value"
     },
     "Depth" : {
@@ -469,7 +658,16 @@
     "Device passcode" : {
       "extractionState" : "extracted_with_value"
     },
+    "Devices" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Devices — showing %lld of %lld" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Dig" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Distinct vendors" : {
       "extractionState" : "extracted_with_value"
     },
     "Domain" : {
@@ -484,13 +682,16 @@
     "Don't Trust" : {
       "extractionState" : "extracted_with_value"
     },
-    "Done" : {
+    "Down" : {
       "extractionState" : "extracted_with_value"
     },
     "Driver" : {
       "extractionState" : "extracted_with_value"
     },
     "Dynamic DNS" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Each is marked deprecated. The row and its history stay, and it stops counting as allocated." : {
       "extractionState" : "extracted_with_value"
     },
     "Each server keeps its own token and its own approved certificate. Nothing is shared between them, and switching signs out of the one you're leaving." : {
@@ -503,6 +704,18 @@
       "extractionState" : "extracted_with_value"
     },
     "Edit Record" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Edit Subnet" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Edit Subnet Details" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Edit Zone" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Edit Zone Details" : {
       "extractionState" : "extracted_with_value"
     },
     "Email" : {
@@ -553,7 +766,13 @@
     "Enter a port between 1 and 65535." : {
       "extractionState" : "extracted_with_value"
     },
+    "Enter a prefix to see who announces it." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Enter an address or a CIDR range to scan." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Enter an address to see what routes it." : {
       "extractionState" : "extracted_with_value"
     },
     "Enter at least one MAC address." : {
@@ -565,7 +784,25 @@
     "Enter the MAC address of the machine to wake." : {
       "extractionState" : "extracted_with_value"
     },
+    "Error" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Established" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Every DHCP server in %@ will refuse it." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Every DNS and DHCP server this control plane knows about, added together." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Every announcement of this exact prefix, from every peer." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Every host this scan found answering is created in IPAM, or has its last-seen time updated if it is already there. Addresses outside a known subnet are skipped." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Everyone using %@ sees a banner, and the server refuses changes until the window is lifted." : {
       "extractionState" : "extracted_with_value"
     },
     "Everything at once. Slowest, and the most obvious in a log." : {
@@ -607,7 +844,13 @@
     "Filter by MAC (optional)" : {
       "extractionState" : "extracted_with_value"
     },
+    "Filter by MAC, IP or port" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Filter by host or issuer" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Filter by name, address or vendor" : {
       "extractionState" : "extracted_with_value"
     },
     "Filter domains" : {
@@ -625,6 +868,12 @@
     "Finding a free address…" : {
       "extractionState" : "extracted_with_value"
     },
+    "Flat across the whole period." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "For" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Forget Trusted Certificate" : {
       "extractionState" : "extracted_with_value"
     },
@@ -634,7 +883,16 @@
     "Free" : {
       "extractionState" : "extracted_with_value"
     },
+    "Free but answering" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "From the SNMP poller's ARP and forwarding tables — where this MAC actually is." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Gateway" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Gateway (optional)" : {
       "extractionState" : "extracted_with_value"
     },
     "Group" : {
@@ -682,6 +940,9 @@
     "Host name" : {
       "extractionState" : "extracted_with_value"
     },
+    "Host name (optional)" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Host or IP" : {
       "extractionState" : "extracted_with_value"
     },
@@ -698,6 +959,12 @@
       "extractionState" : "extracted_with_value"
     },
     "IP Spaces" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "IP blocks" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "IP spaces" : {
       "extractionState" : "extracted_with_value"
     },
     "IP, name, MAC, zone" : {
@@ -718,6 +985,9 @@
     "In %@" : {
       "extractionState" : "extracted_with_value"
     },
+    "Include never-seen addresses" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Include randomised MACs" : {
       "extractionState" : "extracted_with_value"
     },
@@ -727,7 +997,16 @@
     "Inside" : {
       "extractionState" : "extracted_with_value"
     },
+    "Integrations" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Issuer" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "It can take an address from this group again, at its next request." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "It gets no address from %@ from now on. A device already holding a lease keeps it until that lease expires." : {
       "extractionState" : "extracted_with_value"
     },
     "It stops counting as new. This says you have seen it, and changes nothing about what it is allowed to do." : {
@@ -742,7 +1021,13 @@
     "Kind" : {
       "extractionState" : "extracted_with_value"
     },
+    "Label" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Last checked" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Last poll" : {
       "extractionState" : "extracted_with_value"
     },
     "Last pushed" : {
@@ -752,6 +1037,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Last seen" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Last sync" : {
       "extractionState" : "extracted_with_value"
     },
     "Lease history" : {
@@ -769,6 +1057,9 @@
     "Leases — showing %lld of %lld" : {
       "extractionState" : "extracted_with_value"
     },
+    "Leasing now" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Leave the host name empty to take the address without publishing a DNS record. \"Reserved\" holds an address without saying a machine is on it yet." : {
       "extractionState" : "extracted_with_value"
     },
@@ -778,10 +1069,28 @@
     "Licence" : {
       "extractionState" : "extracted_with_value"
     },
+    "Lift It" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Lift Maintenance Mode" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Lift maintenance mode?" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Linked" : {
       "extractionState" : "extracted_with_value"
     },
     "Look Up" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Look up" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Looking Glass" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Lost or stolen" : {
       "extractionState" : "extracted_with_value"
     },
     "Lower is preferred. Left empty, the server uses 10." : {
@@ -805,7 +1114,13 @@
     "MAC addresses" : {
       "extractionState" : "extracted_with_value"
     },
+    "MACs seen" : {
+      "extractionState" : "extracted_with_value"
+    },
     "MTR" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Maintenance" : {
       "extractionState" : "extracted_with_value"
     },
     "Maintenance in progress" : {
@@ -817,6 +1132,9 @@
     "Manufacturer" : {
       "extractionState" : "extracted_with_value"
     },
+    "Marked available in IPAM, but something answered within %lld days. Allocating one would hand out an address that's already in use." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Masters" : {
       "extractionState" : "extracted_with_value"
     },
@@ -824,6 +1142,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Menu" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Message" : {
       "extractionState" : "extracted_with_value"
     },
     "Min lease" : {
@@ -835,7 +1156,13 @@
     "Modified" : {
       "extractionState" : "extracted_with_value"
     },
+    "Most recent first. Showing %lld of %lld records — narrow the search to see older ones." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Most recent first. ^[%lld record](inflect: true)." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Most-changed resources" : {
       "extractionState" : "extracted_with_value"
     },
     "Must be inside %@. The server checks, and says so if it isn't." : {
@@ -886,7 +1213,13 @@
     "New Record" : {
       "extractionState" : "extracted_with_value"
     },
+    "New Reservation" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Next available" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Next hop" : {
       "extractionState" : "extracted_with_value"
     },
     "Nmap" : {
@@ -899,6 +1232,9 @@
       "extractionState" : "extracted_with_value"
     },
     "No ASNs are tracked." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "No BGP peers are configured." : {
       "extractionState" : "extracted_with_value"
     },
     "No DHCP server groups are defined." : {
@@ -922,6 +1258,12 @@
     "No Kea DHCP servers are registered. This log is Kea-only; Windows DHCP records its activity elsewhere." : {
       "extractionState" : "extracted_with_value"
     },
+    "No LLDP neighbours have been seen." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "No MAC is blocked in this group." : {
+      "extractionState" : "extracted_with_value"
+    },
     "No VRFs are defined." : {
       "extractionState" : "extracted_with_value"
     },
@@ -929,6 +1271,9 @@
       "extractionState" : "extracted_with_value"
     },
     "No address matches that IP, hostname or MAC." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "No addresses are attributed to a customer." : {
       "extractionState" : "extracted_with_value"
     },
     "No addresses are recorded in this subnet." : {
@@ -955,10 +1300,22 @@
     "No circuits are recorded." : {
       "extractionState" : "extracted_with_value"
     },
+    "No client queried in the last day." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "No collector has a route covering %@." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "No collectors are reporting." : {
+      "extractionState" : "extracted_with_value"
+    },
     "No customers are defined." : {
       "extractionState" : "extracted_with_value"
     },
     "No data from your control plane is written to disk." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "No device matches that name, address or vendor." : {
       "extractionState" : "extracted_with_value"
     },
     "No domain matches this filter." : {
@@ -976,6 +1333,15 @@
     "No hostname, FQDN or MAC is recorded for this address." : {
       "extractionState" : "extracted_with_value"
     },
+    "No integrations" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "No integrations are switched on for this control plane." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "No interfaces have been read from this device." : {
+      "extractionState" : "extracted_with_value"
+    },
     "No lease has ever been recorded for \"%@\" on any DHCP server. Either it has never asked, or it is asking a server this platform doesn't manage." : {
       "extractionState" : "extracted_with_value"
     },
@@ -985,10 +1351,19 @@
     "No matches" : {
       "extractionState" : "extracted_with_value"
     },
+    "No message — the banner will not say why." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "No network devices are registered for polling." : {
+      "extractionState" : "extracted_with_value"
+    },
     "No new devices have been seen." : {
       "extractionState" : "extracted_with_value"
     },
     "No open ports found." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "No polled switch has this MAC in its forwarding table. Either it is not plugged into one, or the switch it is on has not been polled since." : {
       "extractionState" : "extracted_with_value"
     },
     "No providers are defined." : {
@@ -1018,6 +1393,9 @@
     "No token to sign in with." : {
       "extractionState" : "extracted_with_value"
     },
+    "No traffic in this window." : {
+      "extractionState" : "extracted_with_value"
+    },
     "No traffic statistics." : {
       "extractionState" : "extracted_with_value"
     },
@@ -1025,6 +1403,12 @@
       "extractionState" : "extracted_with_value"
     },
     "No users." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "No vendor matches that name." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "No vendors recorded." : {
       "extractionState" : "extracted_with_value"
     },
     "No zone matches this filter." : {
@@ -1042,6 +1426,12 @@
     "Not before" : {
       "extractionState" : "extracted_with_value"
     },
+    "Not blocked" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Not changed" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Not created" : {
       "extractionState" : "extracted_with_value"
     },
@@ -1049,6 +1439,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Not deleted" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Not enough history yet to draw a trend." : {
       "extractionState" : "extracted_with_value"
     },
     "Not resolved" : {
@@ -1072,10 +1465,22 @@
     "Note (optional)" : {
       "extractionState" : "extracted_with_value"
     },
+    "Notes (optional)" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Nothing announces that prefix." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Nothing firing." : {
       "extractionState" : "extracted_with_value"
     },
+    "Nothing has been changed recently." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Nothing has been changed. Continuing waives every warning above at once." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Nothing has been recorded for this server." : {
       "extractionState" : "extracted_with_value"
     },
     "Nothing has been recorded." : {
@@ -1084,13 +1489,25 @@
     "Nothing has been written. Continuing waives every warning above at once — read them all before you do." : {
       "extractionState" : "extracted_with_value"
     },
+    "Nothing has gone stale in this window." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Nothing here" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Nothing here." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Nothing in this table matches." : {
       "extractionState" : "extracted_with_value"
     },
     "Nothing is waiting for a decision." : {
       "extractionState" : "extracted_with_value"
     },
     "Nothing logged for that MAC. It may not be reaching this server at all." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Nothing was changed — the server is in a change window: %@" : {
       "extractionState" : "extracted_with_value"
     },
     "OS fingerprint" : {
@@ -1102,7 +1519,13 @@
     "One per line, or separated by commas. %lld so far." : {
       "extractionState" : "extracted_with_value"
     },
+    "Only the first %lld of %lld polled devices were asked." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Only the person who raised this request can withdraw it." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Only this server's share of the group's traffic." : {
       "extractionState" : "extracted_with_value"
     },
     "Open source" : {
@@ -1120,10 +1543,28 @@
     "Or scan an enrolment code" : {
       "extractionState" : "extracted_with_value"
     },
+    "Origin" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Other" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Overlays" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Overview" : {
       "extractionState" : "extracted_with_value"
     },
+    "Owners by address count" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Ownership" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Owns" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Owns nothing this platform tracks." : {
       "extractionState" : "extracted_with_value"
     },
     "Packet" : {
@@ -1132,7 +1573,16 @@
     "Paste MAC addresses to name their vendors." : {
       "extractionState" : "extracted_with_value"
     },
+    "Peers" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Percent used" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Permissions" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Phone" : {
       "extractionState" : "extracted_with_value"
     },
     "Phones rotate their MAC by design, so those sightings are usually noise." : {
@@ -1145,6 +1595,15 @@
       "extractionState" : "extracted_with_value"
     },
     "Point the camera at the enrolment code shown in the SpatiumDDI web UI." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Policy" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Poll Now" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Poll queued %@. Pull to refresh once it has run." : {
       "extractionState" : "extracted_with_value"
     },
     "Pools" : {
@@ -1198,6 +1657,21 @@
     "Protocol" : {
       "extractionState" : "extracted_with_value"
     },
+    "Pushed to the DHCP servers in this group. The device picks it up at its next renewal, not immediately." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Quarantine" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Queries" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Query rate" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Queues a poll and returns immediately — the tables below refresh once it has run, not when this returns." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Quick" : {
       "extractionState" : "extracted_with_value"
     },
@@ -1207,13 +1681,28 @@
     "Reachable" : {
       "extractionState" : "extracted_with_value"
     },
+    "Reason" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Recent errors" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Recent events" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Recent scans" : {
       "extractionState" : "extracted_with_value"
     },
     "Record" : {
       "extractionState" : "extracted_with_value"
     },
+    "Recorded on the subnet and offered to DHCP clients as their router." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Records" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Records that don't set their own TTL use this. Resolvers holding the old value keep it until it expires — up to %@ from now." : {
       "extractionState" : "extracted_with_value"
     },
     "Records — showing %lld of %lld" : {
@@ -1258,10 +1747,22 @@
     "Renumbering or freeing this address affects these too. Follow them up in the web console." : {
       "extractionState" : "extracted_with_value"
     },
+    "Replace It" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Replace the message?" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Report an app bug" : {
       "extractionState" : "extracted_with_value"
     },
+    "Reports" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Requested" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Reservation" : {
       "extractionState" : "extracted_with_value"
     },
     "Reservations" : {
@@ -1271,6 +1772,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Reserved until" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Reserved, and nothing has seen them in %lld days." : {
       "extractionState" : "extracted_with_value"
     },
     "Resolve" : {
@@ -1288,6 +1792,21 @@
     "Result" : {
       "extractionState" : "extracted_with_value"
     },
+    "Revoke" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Revoke this device's own token?" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Revoke this session?" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Revoke this token?" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Rogue device" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Role" : {
       "extractionState" : "extracted_with_value"
     },
@@ -1297,7 +1816,13 @@
     "Round trip" : {
       "extractionState" : "extracted_with_value"
     },
+    "Route" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Router advertisements" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Routes RPKI invalid" : {
       "extractionState" : "extracted_with_value"
     },
     "Run" : {
@@ -1315,10 +1840,19 @@
     "Runs the preset as the control plane defines it." : {
       "extractionState" : "extracted_with_value"
     },
+    "SERVFAIL" : {
+      "extractionState" : "extracted_with_value"
+    },
     "SHA-256 Fingerprint" : {
       "extractionState" : "extracted_with_value"
     },
     "SNI name (optional)" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "SNMP" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Sampled" : {
       "extractionState" : "extracted_with_value"
     },
     "Save" : {
@@ -1354,7 +1888,7 @@
     "Search" : {
       "extractionState" : "extracted_with_value"
     },
-    "Searches every DHCP server's lease history. A MAC can be entered with or without colons." : {
+    "Searches lease history across every DHCP server you can read. A MAC can be entered with or without colons." : {
       "extractionState" : "extracted_with_value"
     },
     "See all alerts" : {
@@ -1364,6 +1898,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Seen by" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Seen on the network" : {
       "extractionState" : "extracted_with_value"
     },
     "Self-hosted control planes usually present a certificate from a private CA. Approve it only if the fingerprint below matches the one your server reports." : {
@@ -1376,6 +1913,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Serial" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Series" : {
       "extractionState" : "extracted_with_value"
     },
     "Server" : {
@@ -1396,6 +1936,9 @@
     "Service versions" : {
       "extractionState" : "extracted_with_value"
     },
+    "Services" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Services and OS" : {
       "extractionState" : "extracted_with_value"
     },
@@ -1408,7 +1951,13 @@
     "Showing %lld of %lld matches. Narrow the search to see more." : {
       "extractionState" : "extracted_with_value"
     },
+    "Showing %lld of %lld. %@" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Shown instead of %@. Leave it empty to use the address." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Shown to everyone using %@ until the window is lifted." : {
       "extractionState" : "extracted_with_value"
     },
     "Sightings" : {
@@ -1435,9 +1984,6 @@
     "Signed in as" : {
       "extractionState" : "extracted_with_value"
     },
-    "Signing out deletes this device's stored token for %@." : {
-      "extractionState" : "extracted_with_value"
-    },
     "Signing out deletes this device's stored token for %@. The server stays in your list, with its name and its approved certificate." : {
       "extractionState" : "extracted_with_value"
     },
@@ -1456,7 +2002,31 @@
     "Specific" : {
       "extractionState" : "extracted_with_value"
     },
+    "Stale" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Stale Addresses" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Stale for" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Stale reservations" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Stale — showing %lld of %lld" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Start It" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Start Scan" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Start a Change Window" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Start a change window?" : {
       "extractionState" : "extracted_with_value"
     },
     "State" : {
@@ -1489,13 +2059,22 @@
     "Switch Server" : {
       "extractionState" : "extracted_with_value"
     },
+    "System name" : {
+      "extractionState" : "extracted_with_value"
+    },
     "TLS Certificate" : {
       "extractionState" : "extracted_with_value"
     },
     "TTL" : {
       "extractionState" : "extracted_with_value"
     },
+    "Table" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Tags" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Tap a row to select it. Deprecating keeps the row and its history." : {
       "extractionState" : "extracted_with_value"
     },
     "Target" : {
@@ -1505,6 +2084,18 @@
       "extractionState" : "extracted_with_value"
     },
     "Test" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "That MAC stops being pinned to this address, and this scope has no pool to fall back on — so at its next renewal the device gets nothing at all." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "That MAC stops being pinned to this address. At its next renewal it gets whatever the pool hands out instead, which will not be this address." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "That MAC stops being pinned to this address. What it gets at its next renewal depends on whether this scope has a pool." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "That browser session is signed out immediately and lands back at the login page. Anything unsaved in it is lost." : {
       "extractionState" : "extracted_with_value"
     },
     "That code carries a different certificate fingerprint than the one you approved for %@. Do not continue until you know why." : {
@@ -1522,6 +2113,9 @@
     "That conflicts with something already on the server. Nothing was changed." : {
       "extractionState" : "extracted_with_value"
     },
+    "That doesn't look like a MAC address — six pairs of hex digits." : {
+      "extractionState" : "extracted_with_value"
+    },
     "That doesn't look like an API token or a JWT. Check what you pasted." : {
       "extractionState" : "extracted_with_value"
     },
@@ -1531,7 +2125,13 @@
     "The %@ feature module is switched off on this server." : {
       "extractionState" : "extracted_with_value"
     },
+    "The CIDR isn't editable here. Resizing a subnet moves every address in it, so it stays on the web console behind its typed-CIDR confirmation." : {
+      "extractionState" : "extracted_with_value"
+    },
     "The DHCP reservation on this address is removed with it, and pushed to the DHCP server." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "The SOA serial increments and the zone is pushed to its servers." : {
       "extractionState" : "extracted_with_value"
     },
     "The address becomes an orphan row in this subnet and can be allocated again. Its DNS record is deleted either way — the name is released." : {
@@ -1540,7 +2140,22 @@
     "The address becomes an orphan row in this subnet and can be re-allocated. Its DNS record is deleted either way — the name is released." : {
       "extractionState" : "extracted_with_value"
     },
+    "The address has to be inside %@ — the server refuses anything else." : {
+      "extractionState" : "extracted_with_value"
+    },
     "The address itself can't be changed here — the server doesn't move a row to a different IP. Delete it and allocate the one you want." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "The app can't clear a MAC address yet — only change it. Put it back, or clear it in the web console." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "The app can't remove a gateway yet — only change it. Put it back, or remove it in the web console." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "The app can't reset a record to the zone's TTL yet — only change it. Put a value back, or reset it in the web console." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "The change window on %@ keeps running. Only the banner text changes." : {
       "extractionState" : "extracted_with_value"
     },
     "The command timed out." : {
@@ -1549,10 +2164,28 @@
     "The common ports on one host. Fast." : {
       "extractionState" : "extracted_with_value"
     },
+    "The device's ports, as SNMP reports them." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "The estate is in a change window." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "The gateway is what DHCP hands to clients in this subnet. Changing it reaches every device that renews after the push." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "The last configuration push did not apply." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "The most specific route that would carry this address." : {
+      "extractionState" : "extracted_with_value"
+    },
     "The only tool here that changes anything, and what it changes is whether a machine is switched on." : {
       "extractionState" : "extracted_with_value"
     },
     "The packet left the control plane. Whether the machine wakes depends on it, and nothing here can tell you." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "The reason is recorded against the block, and read by whoever finds it later." : {
       "extractionState" : "extracted_with_value"
     },
     "The registrar's nameservers don't match what's expected here." : {
@@ -1570,7 +2203,13 @@
     "The reverse record %@ already points at %@." : {
       "extractionState" : "extracted_with_value"
     },
+    "The server capped this batch, so some selected addresses were not deprecated." : {
+      "extractionState" : "extracted_with_value"
+    },
     "The server didn't offer a free address in this subnet. Enter one specifically, or pick another subnet." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "The server didn't report its maintenance state." : {
       "extractionState" : "extracted_with_value"
     },
     "The server didn't respond in time." : {
@@ -1585,13 +2224,16 @@
     "The server enforces these independently. What this app shows or hides is a convenience, not a security boundary." : {
       "extractionState" : "extracted_with_value"
     },
+    "The server forgets this lease and may hand the address to something else. The device holding it does not find out — it keeps using the address until its own timer expires." : {
+      "extractionState" : "extracted_with_value"
+    },
     "The server is in a change window and nothing was changed. Try again once it's finished." : {
       "extractionState" : "extracted_with_value"
     },
-    "The server is in a change window. Try again once it's finished." : {
+    "The server is rate-limiting requests. Wait a moment and try again." : {
       "extractionState" : "extracted_with_value"
     },
-    "The server is rate-limiting requests. Wait a moment and try again." : {
+    "The server isn't serving right now (HTTP 503). Try again in a moment." : {
       "extractionState" : "extracted_with_value"
     },
     "The server matches a MAC exactly, so enter all twelve digits — separators don't matter. Leave it empty to see everything. The log keeps 24 hours." : {
@@ -1612,10 +2254,19 @@
     "The server reported an error (HTTP %lld)." : {
       "extractionState" : "extracted_with_value"
     },
+    "The server reports this as the session making this request." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "The server returned no samples for this window." : {
+      "extractionState" : "extracted_with_value"
+    },
     "The server truncated this log — narrow the filter to see further back." : {
       "extractionState" : "extracted_with_value"
     },
     "The server wants a second look" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "The server was unavailable (HTTP 503), so it isn't known whether this change landed. Check before trying again." : {
       "extractionState" : "extracted_with_value"
     },
     "The server's certificate changed since you connected. Reconnect to review it." : {
@@ -1627,10 +2278,16 @@
     "The token is stored in the Keychain and unlocked with %@. It never leaves this device except as an Authorization header to %@." : {
       "extractionState" : "extracted_with_value"
     },
+    "The zone's name, type and DNSSEC policy aren't editable here — those are creation-time and desk decisions." : {
+      "extractionState" : "extracted_with_value"
+    },
     "The zone's serial is bumped and the change is pushed to every server in the group." : {
       "extractionState" : "extracted_with_value"
     },
     "This Device" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "This IP" : {
       "extractionState" : "extracted_with_value"
     },
     "This MAC is randomised, so the same device will appear again under a different one." : {
@@ -1672,16 +2329,28 @@
     "This certificate matches the fingerprint in the code you scanned." : {
       "extractionState" : "extracted_with_value"
     },
+    "This control plane reports no integrations." : {
+      "extractionState" : "extracted_with_value"
+    },
     "This deletes the stored token for %@ and the certificate you approved for it. Nothing on the server changes." : {
       "extractionState" : "extracted_with_value"
     },
+    "This device has no ARP entries — it may never have been polled." : {
+      "extractionState" : "extracted_with_value"
+    },
     "This device has no biometric hardware, so a passcode is the strongest protection available here." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "This device has no forwarding entries." : {
       "extractionState" : "extracted_with_value"
     },
     "This device has no network connection." : {
       "extractionState" : "extracted_with_value"
     },
     "This group has no scopes." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "This group has no servers." : {
       "extractionState" : "extracted_with_value"
     },
     "This group has no zones." : {
@@ -1693,7 +2362,13 @@
     "This is a development build, so it can't be checked against the minimum supported release (%@)." : {
       "extractionState" : "extracted_with_value"
     },
+    "This is the token this app is signed in with. Revoking it signs you out on this device immediately — sign in again to mint a replacement." : {
+      "extractionState" : "extracted_with_value"
+    },
     "This is your own request. The platform needs a second person to approve it — you can withdraw it instead." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "This prefix" : {
       "extractionState" : "extracted_with_value"
     },
     "This record is generated by an integration and managed by its reconciler. Changes here would be overwritten on the next sync, and the server refuses them." : {
@@ -1735,6 +2410,9 @@
     "This subnet's own zone" : {
       "extractionState" : "extracted_with_value"
     },
+    "This token is already inactive, so revoking it changes nothing that is still working." : {
+      "extractionState" : "extracted_with_value"
+    },
     "This zone has no records." : {
       "extractionState" : "extracted_with_value"
     },
@@ -1754,6 +2432,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Traffic" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Translates to" : {
       "extractionState" : "extracted_with_value"
     },
     "Trash" : {
@@ -1786,6 +2467,12 @@
     "UDP top 1000" : {
       "extractionState" : "extracted_with_value"
     },
+    "Unblock" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Unblock this MAC?" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Unexpected response from the server (HTTP %lld)." : {
       "extractionState" : "extracted_with_value"
     },
@@ -1795,10 +2482,16 @@
     "Unknown" : {
       "extractionState" : "extracted_with_value"
     },
+    "Unknown MAC in a static range" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Unlock" : {
       "extractionState" : "extracted_with_value"
     },
     "Unlock with %@ to continue." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Unnamed scope" : {
       "extractionState" : "extracted_with_value"
     },
     "Unresolved alerts" : {
@@ -1810,7 +2503,16 @@
     "Update available: %@" : {
       "extractionState" : "extracted_with_value"
     },
+    "Uptime" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Use @ for the zone itself. Leave the TTL empty to inherit the zone's %lld seconds." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Used" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Used by every record in the zone that doesn't set its own." : {
       "extractionState" : "extracted_with_value"
     },
     "User" : {
@@ -1820,6 +2522,15 @@
       "extractionState" : "extracted_with_value"
     },
     "Utilisation" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Utilisation moved from %@%% to %@%% over %lld samples." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Utilisation over 90 days" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Utilisation trend" : {
       "extractionState" : "extracted_with_value"
     },
     "VLAN %lld" : {
@@ -1841,6 +2552,12 @@
       "extractionState" : "extracted_with_value"
     },
     "Vendor" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Vendor name" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Vendors" : {
       "extractionState" : "extracted_with_value"
     },
     "Verdict" : {
@@ -1882,16 +2599,46 @@
     "Weight" : {
       "extractionState" : "extracted_with_value"
     },
+    "What LLDP says is on the other end of each port." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "What counts as stale" : {
+      "extractionState" : "extracted_with_value"
+    },
     "What is listening, and which version of it." : {
       "extractionState" : "extracted_with_value"
     },
     "What it would do" : {
       "extractionState" : "extracted_with_value"
     },
+    "What the SNMP poller has learned. Adding or configuring a device is desk work." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "What the collectors are hearing right now." : {
+      "extractionState" : "extracted_with_value"
+    },
     "What the server recorded for this MAC — allocations, declines and NAKs. Kea servers only, and the log keeps 24 hours." : {
       "extractionState" : "extracted_with_value"
     },
+    "What this address becomes on the other side of a NAT, as modelled here." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Whatever holds this token stops working immediately, including a lost or stolen device. It cannot be restored; a replacement has to be minted." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Whenever that MAC asks, this scope answers with that address." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Whether this subnet is filling up, or has always looked like this." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Which IP the device has resolved to which MAC — a layer-3 answer." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Which addresses in the range answer at all. No port detail." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Which port learned which MAC — the answer to \"where is this device plugged in\"." : {
       "extractionState" : "extracted_with_value"
     },
     "Why this needs approval" : {
@@ -1901,6 +2648,12 @@
       "extractionState" : "extracted_with_value"
     },
     "Will create" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Window" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "With a known vendor" : {
       "extractionState" : "extracted_with_value"
     },
     "Withdraw" : {
@@ -1915,13 +2668,19 @@
     "Withdrawing takes it off the approvers' queue. Nothing is changed." : {
       "extractionState" : "extracted_with_value"
     },
+    "Without a message the banner just says the server is in a change window. Anyone who wanted to know why will ask you instead." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Writes are open. No change window is running." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Writes reopen on %@ immediately and the banner disappears for everyone using it." : {
+      "extractionState" : "extracted_with_value"
+    },
     "You don't have permission to make this change. Ask an administrator to review your role." : {
       "extractionState" : "extracted_with_value"
     },
     "You don't have permission to read this. Ask an administrator to review your role." : {
-      "extractionState" : "extracted_with_value"
-    },
-    "You'll be shown exactly what will be created before anything is sent." : {
       "extractionState" : "extracted_with_value"
     },
     "Your session is no longer valid. Sign in again." : {
@@ -1948,19 +2707,55 @@
     "Zones" : {
       "extractionState" : "extracted_with_value"
     },
+    "^[%lld DISCOVER](inflect: true) in this window" : {
+      "extractionState" : "extracted_with_value"
+    },
     "^[%lld DNS alias](inflect: true)" : {
       "extractionState" : "extracted_with_value"
     },
     "^[%lld IPv6 subnet](inflect: true) excluded — utilisation isn't a useful measure of a /64." : {
       "extractionState" : "extracted_with_value"
     },
+    "^[%lld MAC](inflect: true) from a matching vendor" : {
+      "extractionState" : "extracted_with_value"
+    },
     "^[%lld NAT mapping](inflect: true)" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "^[%lld NXDOMAIN](inflect: true) · ^[%lld SERVFAIL](inflect: true)" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "^[%lld RPKI-invalid route](inflect: true)" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "^[%lld address](inflect: true) deprecated." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "^[%lld address](inflect: true) skipped." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "^[%lld alternate path](inflect: true) available." : {
       "extractionState" : "extracted_with_value"
     },
     "^[%lld block](inflect: true)" : {
       "extractionState" : "extracted_with_value"
     },
+    "^[%lld day](inflect: true)" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "^[%lld day](inflect: true) stale" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "^[%lld flap](inflect: true)" : {
+      "extractionState" : "extracted_with_value"
+    },
     "^[%lld member](inflect: true)" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "^[%lld prefix](inflect: true) accepted" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "^[%lld route](inflect: true) flapping." : {
       "extractionState" : "extracted_with_value"
     },
     "^[%lld row](inflect: true) in this deletion" : {
@@ -1969,7 +2764,13 @@
     "^[%lld space](inflect: true)" : {
       "extractionState" : "extracted_with_value"
     },
+    "^[%lld target](inflect: true) missed the sync interval." : {
+      "extractionState" : "extracted_with_value"
+    },
     "a while" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "aa:bb:cc:dd:ee:ff" : {
       "extractionState" : "extracted_with_value"
     },
     "acknowledged" : {
@@ -1982,6 +2783,12 @@
       "extractionState" : "extracted_with_value"
     },
     "auto-generated" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "best" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "blocked %@" : {
       "extractionState" : "extracted_with_value"
     },
     "by %@" : {
@@ -2002,6 +2809,9 @@
     "disabled" : {
       "extractionState" : "extracted_with_value"
     },
+    "down since %@" : {
+      "extractionState" : "extracted_with_value"
+    },
     "empty" : {
       "extractionState" : "extracted_with_value"
     },
@@ -2020,6 +2830,9 @@
     "holder drift" : {
       "extractionState" : "extracted_with_value"
     },
+    "hostmaster@example.com" : {
+      "extractionState" : "extracted_with_value"
+    },
     "import %@ · export %@" : {
       "extractionState" : "extracted_with_value"
     },
@@ -2027,6 +2840,9 @@
       "extractionState" : "extracted_with_value"
     },
     "last login %@" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "last tried %@" : {
       "extractionState" : "extracted_with_value"
     },
     "last used %@" : {
@@ -2041,13 +2857,31 @@
     "maintenance" : {
       "extractionState" : "extracted_with_value"
     },
+    "never seen" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "not enforced" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "not polled" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "ns1.example.com." : {
+      "extractionState" : "extracted_with_value"
+    },
     "on the control plane's own broadcast domain" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "polled %@" : {
       "extractionState" : "extracted_with_value"
     },
     "port %lld" : {
       "extractionState" : "extracted_with_value"
     },
     "pri %lld" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "primary" : {
       "extractionState" : "extracted_with_value"
     },
     "public" : {
@@ -2071,6 +2905,9 @@
     "sddi_…" : {
       "extractionState" : "extracted_with_value"
     },
+    "seen %@" : {
+      "extractionState" : "extracted_with_value"
+    },
     "seen %@ · expires %@" : {
       "extractionState" : "extracted_with_value"
     },
@@ -2080,7 +2917,16 @@
     "serial %lld" : {
       "extractionState" : "extracted_with_value"
     },
+    "since %@" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "stale" : {
+      "extractionState" : "extracted_with_value"
+    },
     "superadmin" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "synced %@" : {
       "extractionState" : "extracted_with_value"
     },
     "term ends %@" : {
@@ -2092,16 +2938,28 @@
     "to %@" : {
       "extractionState" : "extracted_with_value"
     },
+    "totals per %@" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "unmapped" : {
+      "extractionState" : "extracted_with_value"
+    },
     "very large" : {
       "extractionState" : "extracted_with_value"
     },
     "view" : {
       "extractionState" : "extracted_with_value"
     },
+    "withdrawn %@" : {
+      "extractionState" : "extracted_with_value"
+    },
     "wt %lld" : {
       "extractionState" : "extracted_with_value"
     },
     "your passcode" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "…and ^[%lld more](inflect: true)" : {
       "extractionState" : "extracted_with_value"
     }
   },
