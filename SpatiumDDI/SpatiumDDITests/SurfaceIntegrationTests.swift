@@ -367,4 +367,82 @@ struct SurfaceIntegrationTests {
 
         try store.removePin(for: #require(LiveServer.address))
     }
+
+    // MARK: - Surfaces the 2026.09.04-1 re-pin added (#20)
+
+    /// Generated since the re-pin; before it, this was the one hand-decoded
+    /// report in the app. A null `days_stale` must survive as nil — "never
+    /// seen" — not arrive as zero.
+    @Test("The stale-address report decodes through the generated type")
+    func staleReportDecodes() async throws {
+        let (session, store) = try await LiveServer.pinnedSession()
+        defer { session.invalidate() }
+
+        let report = try await session.client
+            .getStaleIpReportApiV1IpamReportsStaleIpsGet(
+                query: .init(staleDays: 1, includeNeverSeen: true, limit: 20)
+            ).ok.body.json
+        #expect(report.total >= report.entries.count)
+        #expect(report.entries.allSatisfy { !$0.id.isEmpty && !$0.address.isEmpty && !$0.status.isEmpty })
+        #expect(report.entries.allSatisfy { ($0.daysStale ?? 0) >= 0 })
+
+        try store.removePin(for: #require(LiveServer.address))
+    }
+
+    @Test("Fleet-wide leases and lease history decode")
+    func fleetLeasesDecode() async throws {
+        let (session, store) = try await LiveServer.pinnedSession()
+        defer { session.invalidate() }
+
+        let leases = try await session.client
+            .listAllLeasesApiV1DhcpLeasesGet(query: .init(page: 1, pageSize: 50)).ok.body.json
+        #expect(leases.total >= leases.items.count)
+        #expect(leases.items.allSatisfy { !$0.macAddress.isEmpty && !$0.ipAddress.isEmpty })
+
+        let history = try await session.client
+            .listAllLeaseHistoryApiV1DhcpLeaseHistoryGet(query: .init(page: 1, perPage: 50)).ok.body.json
+        #expect(history.total >= history.items.count)
+        #expect(history.items.allSatisfy { !$0.macAddress.isEmpty && !$0.leaseState.isEmpty })
+
+        try store.removePin(for: #require(LiveServer.address))
+    }
+
+    @Test("The hygiene report's counts agree with its lists")
+    func hygieneDecodes() async throws {
+        let (session, store) = try await LiveServer.pinnedSession()
+        defer { session.invalidate() }
+
+        let report = try await session.client
+            .getIpHygieneReportApiV1IpamReportsHygieneGet(query: .init(limit: 50)).ok.body.json
+        // A list can be truncated to `limit`; a count is never smaller than it.
+        #expect(report.counts.freeButResponding >= report.freeButResponding.count)
+        #expect(report.counts.staleReservations >= report.staleReservations.count)
+        #expect(report.counts.unknownMacInStaticRange >= report.unknownMacInStaticRange.count)
+
+        try store.removePin(for: #require(LiveServer.address))
+    }
+
+    @Test("The vendor rollup and a customer summary decode")
+    func rollupsDecode() async throws {
+        let (session, store) = try await LiveServer.pinnedSession()
+        defer { session.invalidate() }
+
+        let vendors = try await session.client
+            .getVendorRollupApiV1IpamReportsVendorsGet(query: .init(limit: 20)).ok.body.json
+        #expect(vendors.totalWithVendor <= vendors.totalMacsSeen)
+        #expect(vendors.vendors.allSatisfy { !$0.vendor.isEmpty && $0.count > 0 })
+
+        let customers = try await session.client
+            .listCustomersApiV1CustomersGet(query: .init(limit: 1)).ok.body.json
+        if let customer = customers.items.first {
+            let summary = try await session.client
+                .getCustomerSummaryRouteApiV1CustomersCustomerIdSummaryGet(
+                    path: .init(customerId: customer.id)
+                ).ok.body.json
+            #expect(summary.id == customer.id)
+            #expect(summary.ownedResourceTotal >= 0)
+        }
+
+        try store.removePin(for: #require(LiveServer.address))
+    }
 }

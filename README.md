@@ -243,7 +243,7 @@ not committed to now.
 
 - **iOS / iPadOS 18** or later
 - **Xcode 26** or later (Swift 6 language mode, default main-actor isolation); CI builds with Xcode 27
-- A **SpatiumDDI control plane** at `2026.08.22-1` or newer, reachable over HTTPS
+- A **SpatiumDDI control plane** at `2026.09.04-1` or newer, reachable over HTTPS
 
 The minimum server version is not arbitrary: it is the release the API client was
 generated from, and therefore the only contract this build has actually been

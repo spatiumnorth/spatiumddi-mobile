@@ -458,6 +458,45 @@
         "title": "APITokenRow",
         "type": "object"
       },
+      "ASNAnnouncedPrefixes": {
+        "additionalProperties": true,
+        "properties": {
+          "asn": {
+            "title": "Asn",
+            "type": "integer"
+          },
+          "available": {
+            "title": "Available",
+            "type": "boolean"
+          },
+          "error": {
+            "title": "Error",
+            "type": "string"
+          },
+          "ipv4_count": {
+            "title": "Ipv4 Count",
+            "type": "integer"
+          },
+          "ipv6_count": {
+            "title": "Ipv6 Count",
+            "type": "integer"
+          },
+          "prefixes": {
+            "default": [],
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Prefixes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "available"
+        ],
+        "title": "ASNAnnouncedPrefixes",
+        "type": "object"
+      },
       "ASNBulkDelete": {
         "properties": {
           "ids": {
@@ -556,6 +595,41 @@
         "title": "ASNDriftRow",
         "type": "object"
       },
+      "ASNIxpPresence": {
+        "additionalProperties": true,
+        "properties": {
+          "asn": {
+            "title": "Asn",
+            "type": "integer"
+          },
+          "available": {
+            "title": "Available",
+            "type": "boolean"
+          },
+          "error": {
+            "title": "Error",
+            "type": "string"
+          },
+          "ixp_count": {
+            "title": "Ixp Count",
+            "type": "integer"
+          },
+          "ixps": {
+            "default": [],
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Ixps",
+            "type": "array"
+          }
+        },
+        "required": [
+          "available"
+        ],
+        "title": "ASNIxpPresence",
+        "type": "object"
+      },
       "ASNListResponse": {
         "properties": {
           "items": {
@@ -585,6 +659,107 @@
           "offset"
         ],
         "title": "ASNListResponse",
+        "type": "object"
+      },
+      "ASNNetwork": {
+        "additionalProperties": true,
+        "properties": {
+          "aka": {
+            "title": "Aka",
+            "type": "string"
+          },
+          "asn": {
+            "title": "Asn",
+            "type": "integer"
+          },
+          "available": {
+            "title": "Available",
+            "type": "boolean"
+          },
+          "error": {
+            "title": "Error",
+            "type": "string"
+          },
+          "found": {
+            "title": "Found",
+            "type": "boolean"
+          },
+          "info_scope": {
+            "title": "Info Scope",
+            "type": "string"
+          },
+          "info_traffic": {
+            "title": "Info Traffic",
+            "type": "string"
+          },
+          "info_type": {
+            "title": "Info Type",
+            "type": "string"
+          },
+          "irr_as_set": {
+            "title": "Irr As Set",
+            "type": "string"
+          },
+          "looking_glass": {
+            "title": "Looking Glass",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "policy_general": {
+            "title": "Policy General",
+            "type": "string"
+          },
+          "policy_locations": {
+            "title": "Policy Locations",
+            "type": "string"
+          }
+        },
+        "required": [
+          "available"
+        ],
+        "title": "ASNNetwork",
+        "type": "object"
+      },
+      "ASNOverview": {
+        "additionalProperties": true,
+        "properties": {
+          "announced": {
+            "title": "Announced",
+            "type": "boolean"
+          },
+          "asn": {
+            "title": "Asn",
+            "type": "integer"
+          },
+          "available": {
+            "title": "Available",
+            "type": "boolean"
+          },
+          "block": {
+            "additionalProperties": true,
+            "title": "Block",
+            "type": "object"
+          },
+          "error": {
+            "title": "Error",
+            "type": "string"
+          },
+          "holder": {
+            "title": "Holder",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "available"
+        ],
+        "title": "ASNOverview",
         "type": "object"
       },
       "ASNRead": {
@@ -2893,7 +3068,8 @@
           "kind": {
             "enum": [
               "Deployment",
-              "DaemonSet"
+              "DaemonSet",
+              "StatefulSet"
             ],
             "title": "Kind",
             "type": "string"
@@ -3346,6 +3522,83 @@
           "desired_appliance_version"
         ],
         "title": "ApplianceUpgradeRequest",
+        "type": "object"
+      },
+      "ApplianceWorkloadRow": {
+        "description": "One restartable workload on an appliance's k3s.",
+        "properties": {
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "desired": {
+            "title": "Desired",
+            "type": "integer"
+          },
+          "image": {
+            "title": "Image",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "last_restarted_at": {
+            "title": "Last Restarted At",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "namespace": {
+            "title": "Namespace",
+            "type": "string"
+          },
+          "ready": {
+            "title": "Ready",
+            "type": "integer"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "name",
+          "namespace",
+          "component",
+          "image",
+          "desired",
+          "ready",
+          "state"
+        ],
+        "title": "ApplianceWorkloadRow",
+        "type": "object"
+      },
+      "ApplianceWorkloadsResponse": {
+        "properties": {
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Errors",
+            "type": "array"
+          },
+          "workloads": {
+            "items": {
+              "$ref": "#/components/schemas/ApplianceWorkloadRow"
+            },
+            "title": "Workloads",
+            "type": "array"
+          }
+        },
+        "required": [
+          "workloads",
+          "errors"
+        ],
+        "title": "ApplianceWorkloadsResponse",
         "type": "object"
       },
       "ApplicationCreate": {
@@ -5453,6 +5706,61 @@
         "title": "BackfillReverseZonesResponse",
         "type": "object"
       },
+      "BackupSection": {
+        "description": "One selectable slice of the backup, as offered to the operator.",
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "selectable": {
+            "title": "Selectable",
+            "type": "boolean"
+          },
+          "table_count": {
+            "title": "Table Count",
+            "type": "integer"
+          },
+          "volatile": {
+            "title": "Volatile",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "description",
+          "table_count",
+          "volatile",
+          "selectable"
+        ],
+        "title": "BackupSection",
+        "type": "object"
+      },
+      "BackupSectionCatalog": {
+        "properties": {
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/BackupSection"
+            },
+            "title": "Sections",
+            "type": "array"
+          }
+        },
+        "required": [
+          "sections"
+        ],
+        "title": "BackupSectionCatalog",
+        "type": "object"
+      },
       "BackupTargetCreate": {
         "properties": {
           "config": {
@@ -5519,6 +5827,24 @@
           "passphrase"
         ],
         "title": "BackupTargetCreate",
+        "type": "object"
+      },
+      "BackupTargetKinds": {
+        "description": "The destination kinds this build supports (s3 / sftp / \u2026).",
+        "properties": {
+          "kinds": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Kinds",
+            "type": "array"
+          }
+        },
+        "required": [
+          "kinds"
+        ],
+        "title": "BackupTargetKinds",
         "type": "object"
       },
       "BackupTargetResponse": {
@@ -7236,7 +7562,7 @@
         "type": "object"
       },
       "BulkDeleteRecordsRequest": {
-        "description": "IDs of auto- or manually-created records to delete in one shot.\n\nAll IDs must belong to the zone in the URL \u2014 cross-zone deletion\nisn't allowed here (the UI scopes bulk ops to a single zone). Any\nrecord ID that doesn't belong to the zone is skipped with a reason\nso a partial payload doesn't fail the whole batch.",
+        "description": "IDs of auto- or manually-created records to delete in one shot.\n\nAll IDs must belong to the zone in the URL \u2014 cross-zone deletion\nisn't allowed here (the UI scopes bulk ops to a single zone). Any\nrecord ID that doesn't belong to the zone is skipped with a reason\nso a partial payload doesn't fail the whole batch. Duplicate ids count\nonce: ``[X, X]`` must not enqueue two ops, write two audit rows and\nreport ``deleted: 2`` for one row.",
         "properties": {
           "record_ids": {
             "items": {
@@ -7258,6 +7584,11 @@
           "deleted": {
             "title": "Deleted",
             "type": "integer"
+          },
+          "deletion_batch_id": {
+            "format": "uuid",
+            "title": "Deletion Batch Id",
+            "type": "string"
           },
           "skipped": {
             "items": {
@@ -7753,6 +8084,167 @@
           "default"
         ],
         "title": "CatalogTemplateGroup",
+        "type": "object"
+      },
+      "CertChainEntry": {
+        "additionalProperties": true,
+        "description": "One parsed certificate from the captured bundle.\n\nEvery field ``parse_chain_pem`` emits is declared, not just the obvious\nones: leaving the rest to ``extra`` would keep them off the published\nschema, so a generated client would be missing exactly the fields the\nexisting chain view already renders (``TLSChainCert`` in the frontend).\nTyping half a model is the failure this whole change is about.",
+        "properties": {
+          "fingerprint_sha256": {
+            "title": "Fingerprint Sha256",
+            "type": "string"
+          },
+          "is_ca": {
+            "title": "Is Ca",
+            "type": "boolean"
+          },
+          "issuer_cn": {
+            "title": "Issuer Cn",
+            "type": "string"
+          },
+          "key_algo": {
+            "title": "Key Algo",
+            "type": "string"
+          },
+          "key_size": {
+            "title": "Key Size",
+            "type": "integer"
+          },
+          "not_after": {
+            "format": "date-time",
+            "title": "Not After",
+            "type": "string"
+          },
+          "not_before": {
+            "format": "date-time",
+            "title": "Not Before",
+            "type": "string"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "self_signed": {
+            "title": "Self Signed",
+            "type": "boolean"
+          },
+          "serial": {
+            "title": "Serial",
+            "type": "string"
+          },
+          "sig_algo": {
+            "title": "Sig Algo",
+            "type": "string"
+          },
+          "subject_cn": {
+            "title": "Subject Cn",
+            "type": "string"
+          }
+        },
+        "title": "CertChainEntry",
+        "type": "object"
+      },
+      "CertChainResponse": {
+        "description": "The latest successful probe's captured chain. Public material only \u2014\nno private key is ever stored or returned.",
+        "properties": {
+          "chain": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CertChainEntry"
+            },
+            "title": "Chain",
+            "type": "array"
+          },
+          "chain_depth": {
+            "title": "Chain Depth",
+            "type": "integer"
+          },
+          "chain_error": {
+            "title": "Chain Error",
+            "type": "string"
+          },
+          "chain_pem": {
+            "title": "Chain Pem",
+            "type": "string"
+          },
+          "chain_valid": {
+            "title": "Chain Valid",
+            "type": "boolean"
+          },
+          "fingerprint_sha256": {
+            "title": "Fingerprint Sha256",
+            "type": "string"
+          },
+          "issuer_cn": {
+            "title": "Issuer Cn",
+            "type": "string"
+          },
+          "key_algo": {
+            "title": "Key Algo",
+            "type": "string"
+          },
+          "key_size": {
+            "title": "Key Size",
+            "type": "integer"
+          },
+          "leaf_pem": {
+            "title": "Leaf Pem",
+            "type": "string"
+          },
+          "not_after": {
+            "format": "date-time",
+            "title": "Not After",
+            "type": "string"
+          },
+          "not_before": {
+            "format": "date-time",
+            "title": "Not Before",
+            "type": "string"
+          },
+          "probed_at": {
+            "format": "date-time",
+            "title": "Probed At",
+            "type": "string"
+          },
+          "sans": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Sans",
+            "type": "array"
+          },
+          "self_signed": {
+            "title": "Self Signed",
+            "type": "boolean"
+          },
+          "serial": {
+            "title": "Serial",
+            "type": "string"
+          },
+          "sig_algo": {
+            "title": "Sig Algo",
+            "type": "string"
+          },
+          "subject_cn": {
+            "title": "Subject Cn",
+            "type": "string"
+          },
+          "target_id": {
+            "format": "uuid",
+            "title": "Target Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_id",
+          "probed_at"
+        ],
+        "title": "CertChainResponse",
         "type": "object"
       },
       "CertificateDetail": {
@@ -10778,6 +11270,60 @@
         "title": "CustomerListResponse",
         "type": "object"
       },
+      "CustomerOwnedResources": {
+        "description": "Counts of what a customer owns, per resource type.\n\nSoft-deleted rows are excluded where the model supports it \u2014 a\ndecommission check must not be blocked by resources already in the trash.",
+        "properties": {
+          "asns": {
+            "title": "Asns",
+            "type": "integer"
+          },
+          "circuits": {
+            "title": "Circuits",
+            "type": "integer"
+          },
+          "dns_zones": {
+            "title": "Dns Zones",
+            "type": "integer"
+          },
+          "domains": {
+            "title": "Domains",
+            "type": "integer"
+          },
+          "ip_blocks": {
+            "title": "Ip Blocks",
+            "type": "integer"
+          },
+          "ip_spaces": {
+            "title": "Ip Spaces",
+            "type": "integer"
+          },
+          "overlays": {
+            "title": "Overlays",
+            "type": "integer"
+          },
+          "services": {
+            "title": "Services",
+            "type": "integer"
+          },
+          "subnets": {
+            "title": "Subnets",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ip_spaces",
+          "ip_blocks",
+          "subnets",
+          "circuits",
+          "services",
+          "asns",
+          "dns_zones",
+          "domains",
+          "overlays"
+        ],
+        "title": "CustomerOwnedResources",
+        "type": "object"
+      },
       "CustomerRead": {
         "properties": {
           "account_number": {
@@ -10845,6 +11391,71 @@
           "modified_at"
         ],
         "title": "CustomerRead",
+        "type": "object"
+      },
+      "CustomerSummary": {
+        "description": "One customer plus everything it owns (issue #917).\n\n``GET /customers/{id}`` returns the row; answering \"is this customer safe\nto decommission?\" from it meant nine list calls against nine routers. The\ncopilot could already do this in one turn, which is exactly the asymmetry\n#917 catalogued.",
+        "properties": {
+          "account_number": {
+            "title": "Account Number",
+            "type": "string"
+          },
+          "contact_address": {
+            "title": "Contact Address",
+            "type": "string"
+          },
+          "contact_email": {
+            "title": "Contact Email",
+            "type": "string"
+          },
+          "contact_phone": {
+            "title": "Contact Phone",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "notes": {
+            "title": "Notes",
+            "type": "string"
+          },
+          "owned_resource_total": {
+            "title": "Owned Resource Total",
+            "type": "integer"
+          },
+          "owned_resources": {
+            "$ref": "#/components/schemas/CustomerOwnedResources"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tags": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Tags",
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "status",
+          "owned_resources",
+          "owned_resource_total"
+        ],
+        "title": "CustomerSummary",
         "type": "object"
       },
       "CustomerUpdate": {
@@ -11529,6 +12140,10 @@
             "title": "Ack",
             "type": "integer"
           },
+          "covered_seconds": {
+            "title": "Covered Seconds",
+            "type": "integer"
+          },
           "decline": {
             "title": "Decline",
             "type": "integer"
@@ -11565,6 +12180,7 @@
         },
         "required": [
           "t",
+          "covered_seconds",
           "discover",
           "offer",
           "request",
@@ -12383,6 +12999,38 @@
         "title": "DNSBLCheckRequest",
         "type": "object"
       },
+      "DNSBLCheckResult": {
+        "description": "Result of an on-demand check across every enabled list.",
+        "properties": {
+          "checked": {
+            "default": 0,
+            "title": "Checked",
+            "type": "integer"
+          },
+          "error": {
+            "title": "Error",
+            "type": "string"
+          },
+          "ip": {
+            "title": "Ip",
+            "type": "string"
+          },
+          "listed": {
+            "default": 0,
+            "title": "Listed",
+            "type": "integer"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ip"
+        ],
+        "title": "DNSBLCheckResult",
+        "type": "object"
+      },
       "DNSBLListCreate": {
         "properties": {
           "category": {
@@ -12566,6 +13214,69 @@
         "title": "DNSBLListUpdate",
         "type": "object"
       },
+      "DNSBLListingEntry": {
+        "description": "One list's verdict on an IP.",
+        "properties": {
+          "check_error": {
+            "title": "Check Error",
+            "type": "string"
+          },
+          "checked": {
+            "title": "Checked",
+            "type": "boolean"
+          },
+          "first_listed_at": {
+            "format": "date-time",
+            "title": "First Listed At",
+            "type": "string"
+          },
+          "last_checked_at": {
+            "format": "date-time",
+            "title": "Last Checked At",
+            "type": "string"
+          },
+          "list_id": {
+            "format": "uuid",
+            "title": "List Id",
+            "type": "string"
+          },
+          "list_name": {
+            "title": "List Name",
+            "type": "string"
+          },
+          "listed": {
+            "title": "Listed",
+            "type": "boolean"
+          },
+          "resolved_at": {
+            "format": "date-time",
+            "title": "Resolved At",
+            "type": "string"
+          },
+          "return_codes": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Return Codes",
+            "type": "array"
+          },
+          "txt_reason": {
+            "title": "Txt Reason",
+            "type": "string"
+          },
+          "zone_suffix": {
+            "title": "Zone Suffix",
+            "type": "string"
+          }
+        },
+        "required": [
+          "listed",
+          "checked"
+        ],
+        "title": "DNSBLListingEntry",
+        "type": "object"
+      },
       "DNSBLListingListResponse": {
         "properties": {
           "items": {
@@ -12596,6 +13307,32 @@
           "offset"
         ],
         "title": "DNSBLListingListResponse",
+        "type": "object"
+      },
+      "DNSBLListingsByIP": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/DNSBLListingEntry"
+            },
+            "title": "Entries",
+            "type": "array"
+          },
+          "ip": {
+            "title": "Ip",
+            "type": "string"
+          },
+          "listed_count": {
+            "title": "Listed Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ip",
+          "listed_count",
+          "entries"
+        ],
+        "title": "DNSBLListingsByIP",
         "type": "object"
       },
       "DNSBLPinnedIPCreate": {
@@ -12837,6 +13574,13 @@
             "title": "Qtype Distribution",
             "type": "array"
           },
+          "rcode_distribution": {
+            "items": {
+              "$ref": "#/components/schemas/DNSQueryAnalyticsRow"
+            },
+            "title": "Rcode Distribution",
+            "type": "array"
+          },
           "server_id": {
             "format": "uuid",
             "title": "Server Id",
@@ -12884,7 +13628,8 @@
           "top_qnames",
           "top_clients",
           "qtype_distribution",
-          "top_views"
+          "top_views",
+          "rcode_distribution"
         ],
         "title": "DNSQueryAnalyticsResponse",
         "type": "object"
@@ -12926,6 +13671,10 @@
           },
           "qtype": {
             "title": "Qtype",
+            "type": "string"
+          },
+          "rcode": {
+            "title": "Rcode",
             "type": "string"
           },
           "server_id": {
@@ -12983,6 +13732,10 @@
       },
       "DNSQueryLogRow": {
         "properties": {
+          "answer_count": {
+            "title": "Answer Count",
+            "type": "integer"
+          },
           "client_ip": {
             "title": "Client Ip",
             "type": "string"
@@ -13015,6 +13768,10 @@
             "title": "Raw",
             "type": "string"
           },
+          "rcode": {
+            "title": "Rcode",
+            "type": "string"
+          },
           "ts": {
             "format": "date-time",
             "title": "Ts",
@@ -13031,6 +13788,48 @@
           "raw"
         ],
         "title": "DNSQueryLogRow",
+        "type": "object"
+      },
+      "DNSSECKeyState": {
+        "description": "One key's state as last reported by the agent.\n\nBIND owns the private keys under inline-signing; this is a read-only\nmirror, so ``reported_at`` being stale is the signal that the agent has\nstopped reporting rather than that the key stopped rotating.",
+        "properties": {
+          "algorithm": {
+            "title": "Algorithm",
+            "type": "string"
+          },
+          "ds_records": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Ds Records",
+            "type": "array"
+          },
+          "key_tag": {
+            "title": "Key Tag",
+            "type": "integer"
+          },
+          "key_type": {
+            "title": "Key Type",
+            "type": "string"
+          },
+          "reported_at": {
+            "format": "date-time",
+            "title": "Reported At",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "timing": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Timing",
+            "type": "object"
+          }
+        },
+        "title": "DNSSECKeyState",
         "type": "object"
       },
       "DNSSECPolicyCreate": {
@@ -13272,6 +14071,10 @@
       },
       "DNSTimePoint": {
         "properties": {
+          "covered_seconds": {
+            "title": "Covered Seconds",
+            "type": "integer"
+          },
           "noerror": {
             "title": "Noerror",
             "type": "integer"
@@ -13310,6 +14113,7 @@
         },
         "required": [
           "t",
+          "covered_seconds",
           "queries_total",
           "noerror",
           "nxdomain",
@@ -13580,6 +14384,113 @@
         "title": "DefaultSystemPromptResponse",
         "type": "object"
       },
+      "DelegationPreviewResponse": {
+        "description": "What stamping a delegation into the parent zone would change.\n\n``has_parent`` false means no managed parent zone exists, so there is\nnothing to delegate *from* \u2014 every other field is absent, and a client\nmust not read that as \"nothing to do\".",
+        "properties": {
+          "child_apex_ns_count": {
+            "title": "Child Apex Ns Count",
+            "type": "integer"
+          },
+          "child_label": {
+            "title": "Child Label",
+            "type": "string"
+          },
+          "child_zone_id": {
+            "format": "uuid",
+            "title": "Child Zone Id",
+            "type": "string"
+          },
+          "child_zone_name": {
+            "title": "Child Zone Name",
+            "type": "string"
+          },
+          "existing_glue_records": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/DelegationRecordPreview"
+            },
+            "title": "Existing Glue Records",
+            "type": "array"
+          },
+          "existing_ns_records": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/DelegationRecordPreview"
+            },
+            "title": "Existing Ns Records",
+            "type": "array"
+          },
+          "glue_records_to_create": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/DelegationRecordPreview"
+            },
+            "title": "Glue Records To Create",
+            "type": "array"
+          },
+          "has_parent": {
+            "title": "Has Parent",
+            "type": "boolean"
+          },
+          "ns_records_to_create": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/DelegationRecordPreview"
+            },
+            "title": "Ns Records To Create",
+            "type": "array"
+          },
+          "parent_zone_id": {
+            "format": "uuid",
+            "title": "Parent Zone Id",
+            "type": "string"
+          },
+          "parent_zone_name": {
+            "title": "Parent Zone Name",
+            "type": "string"
+          },
+          "warnings": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "has_parent"
+        ],
+        "title": "DelegationPreviewResponse",
+        "type": "object"
+      },
+      "DelegationRecordPreview": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "record_type": {
+            "title": "Record Type",
+            "type": "string"
+          },
+          "ttl": {
+            "title": "Ttl",
+            "type": "integer"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "record_type",
+          "value"
+        ],
+        "title": "DelegationRecordPreview",
+        "type": "object"
+      },
       "DeleteApplianceRequest": {
         "description": "Body for ``DELETE /appliances/{id}`` \u2014 operator's current\npassword gates the destructive action. Same shape as the\nfactory-reset re-auth and the agent-bootstrap-key reveal: the\nserver verifies against the caller's ``hashed_password`` so a\nleaked session token alone can't drop fleet rows.",
         "properties": {
@@ -13642,6 +14553,373 @@
           "messages"
         ],
         "title": "DetectCIDRsResponse",
+        "type": "object"
+      },
+      "DeviceObservationOut": {
+        "properties": {
+          "avg_score": {
+            "title": "Avg Score",
+            "type": "integer"
+          },
+          "best_score": {
+            "title": "Best Score",
+            "type": "integer"
+          },
+          "device_class": {
+            "title": "Device Class",
+            "type": "string"
+          },
+          "device_count": {
+            "title": "Device Count",
+            "type": "integer"
+          },
+          "signature_count": {
+            "title": "Signature Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "device_class",
+          "device_count",
+          "signature_count"
+        ],
+        "title": "DeviceObservationOut",
+        "type": "object"
+      },
+      "DeviceObservationsOut": {
+        "properties": {
+          "classes": {
+            "items": {
+              "$ref": "#/components/schemas/DeviceObservationOut"
+            },
+            "title": "Classes",
+            "type": "array"
+          },
+          "note": {
+            "title": "Note",
+            "type": "string"
+          },
+          "total_devices": {
+            "title": "Total Devices",
+            "type": "integer"
+          },
+          "unclassified_devices": {
+            "title": "Unclassified Devices",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "classes",
+          "unclassified_devices",
+          "total_devices",
+          "note"
+        ],
+        "title": "DeviceObservationsOut",
+        "type": "object"
+      },
+      "DevicePolicyCreate": {
+        "properties": {
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "device_classes": {
+            "description": "Fingerbank device classes to match. These are fingerbank's own taxonomy strings, which sit at mixed granularity and are rarely the tidy category you would guess \u2014 real values include \"HP Print Server\", \"Generic IoT\", \"Generic Android\" and \"Operating System\". Always pick from GET /dhcp/server-groups/{id}/device-observations rather than typing one: a class string that does not appear there matches nothing.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Device Classes",
+            "type": "array"
+          },
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "include_ambiguous": {
+            "default": false,
+            "title": "Include Ambiguous",
+            "type": "boolean"
+          },
+          "lease_time": {
+            "description": "Kea valid-lifetime for matched devices, in seconds. A short lease is what makes a quarantine reversible.",
+            "maximum": 4294967295.0,
+            "minimum": 60.0,
+            "title": "Lease Time",
+            "type": "integer"
+          },
+          "match_override": {
+            "title": "Match Override",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "options": {
+            "additionalProperties": true,
+            "title": "Options",
+            "type": "object"
+          },
+          "priority": {
+            "default": 100,
+            "title": "Priority",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "DevicePolicyCreate",
+        "type": "object"
+      },
+      "DevicePolicyPreviewOut": {
+        "properties": {
+          "ambiguous_excluded": {
+            "title": "Ambiguous Excluded",
+            "type": "boolean"
+          },
+          "ambiguous_signatures": {
+            "items": {
+              "$ref": "#/components/schemas/SignatureOut"
+            },
+            "title": "Ambiguous Signatures",
+            "type": "array"
+          },
+          "class_name": {
+            "title": "Class Name",
+            "type": "string"
+          },
+          "compiled_expression": {
+            "title": "Compiled Expression",
+            "type": "string"
+          },
+          "confidence": {
+            "title": "Confidence",
+            "type": "integer"
+          },
+          "expression": {
+            "title": "Expression",
+            "type": "string"
+          },
+          "matched_device_count": {
+            "title": "Matched Device Count",
+            "type": "integer"
+          },
+          "matched_macs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Matched Macs",
+            "type": "array"
+          },
+          "matched_macs_truncated": {
+            "title": "Matched Macs Truncated",
+            "type": "boolean"
+          },
+          "max_signature_terms": {
+            "title": "Max Signature Terms",
+            "type": "integer"
+          },
+          "policy_id": {
+            "format": "uuid",
+            "title": "Policy Id",
+            "type": "string"
+          },
+          "renders": {
+            "description": "Whether this policy contributes a class to the next config bundle. False when it is disabled or compiles to nothing.",
+            "title": "Renders",
+            "type": "boolean"
+          },
+          "signature_count": {
+            "title": "Signature Count",
+            "type": "integer"
+          },
+          "signatures": {
+            "items": {
+              "$ref": "#/components/schemas/SignatureOut"
+            },
+            "title": "Signatures",
+            "type": "array"
+          },
+          "source": {
+            "description": "compiled | override | empty",
+            "title": "Source",
+            "type": "string"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "integer"
+          },
+          "unclassified_matches": {
+            "title": "Unclassified Matches",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "policy_id",
+          "class_name",
+          "expression",
+          "source",
+          "compiled_expression",
+          "signature_count",
+          "signatures",
+          "ambiguous_signatures",
+          "ambiguous_excluded",
+          "truncated",
+          "max_signature_terms",
+          "matched_macs",
+          "matched_macs_truncated",
+          "matched_device_count",
+          "unclassified_matches",
+          "warnings",
+          "renders"
+        ],
+        "title": "DevicePolicyPreviewOut",
+        "type": "object"
+      },
+      "DevicePolicyResponse": {
+        "properties": {
+          "class_name": {
+            "title": "Class Name",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "device_classes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Device Classes",
+            "type": "array"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "group_id": {
+            "format": "uuid",
+            "title": "Group Id",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "include_ambiguous": {
+            "title": "Include Ambiguous",
+            "type": "boolean"
+          },
+          "lease_time": {
+            "title": "Lease Time",
+            "type": "integer"
+          },
+          "match_override": {
+            "title": "Match Override",
+            "type": "string"
+          },
+          "modified_at": {
+            "format": "date-time",
+            "title": "Modified At",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "options": {
+            "additionalProperties": true,
+            "title": "Options",
+            "type": "object"
+          },
+          "priority": {
+            "title": "Priority",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "group_id",
+          "name",
+          "description",
+          "enabled",
+          "class_name",
+          "device_classes",
+          "options",
+          "include_ambiguous",
+          "priority",
+          "created_at",
+          "modified_at"
+        ],
+        "title": "DevicePolicyResponse",
+        "type": "object"
+      },
+      "DevicePolicyUpdate": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "device_classes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Device Classes",
+            "type": "array"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "include_ambiguous": {
+            "title": "Include Ambiguous",
+            "type": "boolean"
+          },
+          "lease_time": {
+            "maximum": 4294967295.0,
+            "minimum": 60.0,
+            "title": "Lease Time",
+            "type": "integer"
+          },
+          "match_override": {
+            "title": "Match Override",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "options": {
+            "additionalProperties": true,
+            "title": "Options",
+            "type": "object"
+          },
+          "priority": {
+            "title": "Priority",
+            "type": "integer"
+          }
+        },
+        "title": "DevicePolicyUpdate",
         "type": "object"
       },
       "DhcpAuditRequest": {
@@ -14267,6 +15545,39 @@
           "subnets_uncovered_cidrs"
         ],
         "title": "DriftReport",
+        "type": "object"
+      },
+      "DrillReadinessSummary": {
+        "description": "Per-target recovery readiness \u2014 \"can I restore this, and how do I know?\".\n\n``verified_targets`` counts targets with a *proven* restore, not targets\nwith a backup: an unverified archive is a hypothesis, and reporting the\ntwo as one number is how a restore fails on the day it matters.",
+        "properties": {
+          "targets": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Targets",
+            "type": "array"
+          },
+          "total_targets": {
+            "title": "Total Targets",
+            "type": "integer"
+          },
+          "unverified_targets": {
+            "title": "Unverified Targets",
+            "type": "integer"
+          },
+          "verified_targets": {
+            "title": "Verified Targets",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "targets",
+          "total_targets",
+          "verified_targets",
+          "unverified_targets"
+        ],
+        "title": "DrillReadinessSummary",
         "type": "object"
       },
       "DynamicUpdateCapsOut": {
@@ -15418,6 +16729,23 @@
         "title": "ExecuteResponse",
         "type": "object"
       },
+      "FactorySectionCatalog": {
+        "description": "Catalog the factory-reset page reflects on to render itself.",
+        "properties": {
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/SectionCatalogEntry"
+            },
+            "title": "Sections",
+            "type": "array"
+          }
+        },
+        "required": [
+          "sections"
+        ],
+        "title": "FactorySectionCatalog",
+        "type": "object"
+      },
       "FailedLoginRow": {
         "properties": {
           "failure_count": {
@@ -15871,6 +17199,140 @@
           "unlinked"
         ],
         "title": "FirewallObjectResponse",
+        "type": "object"
+      },
+      "FleetPoolOccupancyResponse": {
+        "properties": {
+          "active_lease_count": {
+            "title": "Active Lease Count",
+            "type": "integer"
+          },
+          "computed_at": {
+            "format": "date-time",
+            "title": "Computed At",
+            "type": "string"
+          },
+          "pool_count": {
+            "title": "Pool Count",
+            "type": "integer"
+          },
+          "pools": {
+            "items": {
+              "$ref": "#/components/schemas/FleetPoolOccupancyRow"
+            },
+            "title": "Pools",
+            "type": "array"
+          },
+          "pools_critical": {
+            "title": "Pools Critical",
+            "type": "integer"
+          },
+          "pools_warning": {
+            "title": "Pools Warning",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "computed_at",
+          "pool_count",
+          "pools_warning",
+          "pools_critical",
+          "active_lease_count",
+          "pools"
+        ],
+        "title": "FleetPoolOccupancyResponse",
+        "type": "object"
+      },
+      "FleetPoolOccupancyRow": {
+        "description": "One pool, plus the context needed to identify it without a\nfollow-up call \u2014 a pool name alone is frequently empty, and a\n``pool_id`` is not something an operator can act on.",
+        "properties": {
+          "assigned": {
+            "title": "Assigned",
+            "type": "integer"
+          },
+          "computed_at": {
+            "format": "date-time",
+            "title": "Computed At",
+            "type": "string"
+          },
+          "end_ip": {
+            "title": "End Ip",
+            "type": "string"
+          },
+          "free": {
+            "title": "Free",
+            "type": "integer"
+          },
+          "group_id": {
+            "format": "uuid",
+            "title": "Group Id",
+            "type": "string"
+          },
+          "group_name": {
+            "title": "Group Name",
+            "type": "string"
+          },
+          "percent": {
+            "title": "Percent",
+            "type": "number"
+          },
+          "pool_id": {
+            "format": "uuid",
+            "title": "Pool Id",
+            "type": "string"
+          },
+          "pool_name": {
+            "title": "Pool Name",
+            "type": "string"
+          },
+          "pool_type": {
+            "title": "Pool Type",
+            "type": "string"
+          },
+          "scope_id": {
+            "format": "uuid",
+            "title": "Scope Id",
+            "type": "string"
+          },
+          "scope_is_active": {
+            "title": "Scope Is Active",
+            "type": "boolean"
+          },
+          "scope_name": {
+            "title": "Scope Name",
+            "type": "string"
+          },
+          "start_ip": {
+            "title": "Start Ip",
+            "type": "string"
+          },
+          "subnet_network": {
+            "title": "Subnet Network",
+            "type": "string"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "pool_id",
+          "scope_id",
+          "pool_name",
+          "start_ip",
+          "end_ip",
+          "pool_type",
+          "total",
+          "assigned",
+          "free",
+          "percent",
+          "computed_at",
+          "scope_name",
+          "scope_is_active",
+          "group_id",
+          "group_name"
+        ],
+        "title": "FleetPoolOccupancyRow",
         "type": "object"
       },
       "FortiGateCredentialsInput": {
@@ -16682,6 +18144,127 @@
           }
         },
         "title": "HostUpdate",
+        "type": "object"
+      },
+      "HygieneCounts": {
+        "properties": {
+          "free_but_responding": {
+            "title": "Free But Responding",
+            "type": "integer"
+          },
+          "stale_reservations": {
+            "title": "Stale Reservations",
+            "type": "integer"
+          },
+          "unknown_mac_in_static_range": {
+            "title": "Unknown Mac In Static Range",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "free_but_responding",
+          "stale_reservations",
+          "unknown_mac_in_static_range"
+        ],
+        "title": "HygieneCounts",
+        "type": "object"
+      },
+      "HygieneFinding": {
+        "properties": {
+          "address": {
+            "title": "Address",
+            "type": "string"
+          },
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "ip_id": {
+            "format": "uuid",
+            "title": "Ip Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ip_id",
+          "address",
+          "detail"
+        ],
+        "title": "HygieneFinding",
+        "type": "object"
+      },
+      "HygieneReport": {
+        "description": "Live answers to the three #369 hygiene detections.\n\nThe detections have existed as alert *rules* since #369; this reports them\non demand at a threshold the caller chooses, without requiring a rule to\nhave been configured first (issue #917).",
+        "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/HygieneCounts"
+          },
+          "free_but_responding": {
+            "items": {
+              "$ref": "#/components/schemas/HygieneFinding"
+            },
+            "title": "Free But Responding",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "stale_reservations": {
+            "items": {
+              "$ref": "#/components/schemas/HygieneFinding"
+            },
+            "title": "Stale Reservations",
+            "type": "array"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/HygieneThresholds"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          },
+          "unknown_mac_in_static_range": {
+            "items": {
+              "$ref": "#/components/schemas/HygieneFinding"
+            },
+            "title": "Unknown Mac In Static Range",
+            "type": "array"
+          }
+        },
+        "required": [
+          "free_but_responding",
+          "stale_reservations",
+          "unknown_mac_in_static_range",
+          "counts",
+          "thresholds",
+          "limit",
+          "truncated"
+        ],
+        "title": "HygieneReport",
+        "type": "object"
+      },
+      "HygieneThresholds": {
+        "properties": {
+          "free_responding_days": {
+            "title": "Free Responding Days",
+            "type": "integer"
+          },
+          "squat_days": {
+            "title": "Squat Days",
+            "type": "integer"
+          },
+          "stale_reservation_days": {
+            "title": "Stale Reservation Days",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "free_responding_days",
+          "stale_reservation_days",
+          "squat_days"
+        ],
+        "title": "HygieneThresholds",
         "type": "object"
       },
       "IPAMCrossRef": {
@@ -19345,6 +20928,271 @@
           "records"
         ],
         "title": "ImportedZoneOut",
+        "type": "object"
+      },
+      "InfluxDBTargetBody": {
+        "properties": {
+          "bucket": {
+            "default": "",
+            "title": "Bucket",
+            "type": "string"
+          },
+          "database": {
+            "default": "",
+            "title": "Database",
+            "type": "string"
+          },
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "measurement_prefix": {
+            "default": "spatiumddi_",
+            "maxLength": 64,
+            "title": "Measurement Prefix",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "org": {
+            "default": "",
+            "title": "Org",
+            "type": "string"
+          },
+          "password": {
+            "title": "Password",
+            "type": "string"
+          },
+          "push_dhcp_metrics": {
+            "default": true,
+            "title": "Push Dhcp Metrics",
+            "type": "boolean"
+          },
+          "push_dhcp_scope_leases": {
+            "default": true,
+            "title": "Push Dhcp Scope Leases",
+            "type": "boolean"
+          },
+          "push_dns_metrics": {
+            "default": true,
+            "title": "Push Dns Metrics",
+            "type": "boolean"
+          },
+          "push_interval_seconds": {
+            "default": 60,
+            "maximum": 86400.0,
+            "minimum": 30.0,
+            "title": "Push Interval Seconds",
+            "type": "integer"
+          },
+          "push_subnet_utilization": {
+            "default": true,
+            "title": "Push Subnet Utilization",
+            "type": "boolean"
+          },
+          "timeout_seconds": {
+            "default": 10,
+            "maximum": 120.0,
+            "minimum": 1.0,
+            "title": "Timeout Seconds",
+            "type": "integer"
+          },
+          "token": {
+            "title": "Token",
+            "type": "string"
+          },
+          "url": {
+            "default": "",
+            "title": "Url",
+            "type": "string"
+          },
+          "username": {
+            "default": "",
+            "title": "Username",
+            "type": "string"
+          },
+          "verify_tls": {
+            "default": true,
+            "title": "Verify Tls",
+            "type": "boolean"
+          },
+          "version": {
+            "default": "v2",
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "InfluxDBTargetBody",
+        "type": "object"
+      },
+      "InfluxDBTargetResponse": {
+        "properties": {
+          "bucket": {
+            "title": "Bucket",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "database": {
+            "title": "Database",
+            "type": "string"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "last_dhcp_bucket_at": {
+            "format": "date-time",
+            "title": "Last Dhcp Bucket At",
+            "type": "string"
+          },
+          "last_dns_bucket_at": {
+            "format": "date-time",
+            "title": "Last Dns Bucket At",
+            "type": "string"
+          },
+          "last_push_at": {
+            "format": "date-time",
+            "title": "Last Push At",
+            "type": "string"
+          },
+          "last_push_error": {
+            "title": "Last Push Error",
+            "type": "string"
+          },
+          "last_push_points": {
+            "title": "Last Push Points",
+            "type": "integer"
+          },
+          "measurement_prefix": {
+            "title": "Measurement Prefix",
+            "type": "string"
+          },
+          "modified_at": {
+            "format": "date-time",
+            "title": "Modified At",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "org": {
+            "title": "Org",
+            "type": "string"
+          },
+          "password_set": {
+            "title": "Password Set",
+            "type": "boolean"
+          },
+          "push_dhcp_metrics": {
+            "title": "Push Dhcp Metrics",
+            "type": "boolean"
+          },
+          "push_dhcp_scope_leases": {
+            "title": "Push Dhcp Scope Leases",
+            "type": "boolean"
+          },
+          "push_dns_metrics": {
+            "title": "Push Dns Metrics",
+            "type": "boolean"
+          },
+          "push_interval_seconds": {
+            "title": "Push Interval Seconds",
+            "type": "integer"
+          },
+          "push_subnet_utilization": {
+            "title": "Push Subnet Utilization",
+            "type": "boolean"
+          },
+          "timeout_seconds": {
+            "title": "Timeout Seconds",
+            "type": "integer"
+          },
+          "token_set": {
+            "title": "Token Set",
+            "type": "boolean"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "username": {
+            "title": "Username",
+            "type": "string"
+          },
+          "verify_tls": {
+            "title": "Verify Tls",
+            "type": "boolean"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "enabled",
+          "version",
+          "url",
+          "verify_tls",
+          "timeout_seconds",
+          "database",
+          "username",
+          "password_set",
+          "org",
+          "bucket",
+          "token_set",
+          "measurement_prefix",
+          "push_interval_seconds",
+          "push_dns_metrics",
+          "push_dhcp_metrics",
+          "push_subnet_utilization",
+          "push_dhcp_scope_leases",
+          "last_push_points",
+          "created_at",
+          "modified_at"
+        ],
+        "title": "InfluxDBTargetResponse",
+        "type": "object"
+      },
+      "InfluxDBTestResponse": {
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "points": {
+            "title": "Points",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ok",
+          "message",
+          "points"
+        ],
+        "title": "InfluxDBTestResponse",
         "type": "object"
       },
       "IngestedRecord": {
@@ -23380,6 +25228,91 @@
         "title": "NTPCustomServerUpdate",
         "type": "object"
       },
+      "NameConformanceCategory": {
+        "properties": {
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "examples": {
+            "items": {
+              "$ref": "#/components/schemas/NameConformanceExample"
+            },
+            "title": "Examples",
+            "type": "array"
+          },
+          "scanned_capped": {
+            "title": "Scanned Capped",
+            "type": "boolean"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "category",
+          "total",
+          "scanned_capped",
+          "examples"
+        ],
+        "title": "NameConformanceCategory",
+        "type": "object"
+      },
+      "NameConformanceExample": {
+        "description": "One offending value. ``context`` is present for categories where the\nvalue alone is ambiguous (a record owner needs its zone).",
+        "properties": {
+          "context": {
+            "title": "Context",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "value",
+          "reason"
+        ],
+        "title": "NameConformanceExample",
+        "type": "object"
+      },
+      "NameConformanceReport": {
+        "properties": {
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/NameConformanceCategory"
+            },
+            "title": "Categories",
+            "type": "array"
+          },
+          "examples_per_category": {
+            "title": "Examples Per Category",
+            "type": "integer"
+          },
+          "total_nonconforming": {
+            "title": "Total Nonconforming",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total_nonconforming",
+          "examples_per_category",
+          "categories"
+        ],
+        "title": "NameConformanceReport",
+        "type": "object"
+      },
       "NetToolPollResponse": {
         "description": "Long-poll result for the supervisor's nettool channel.\n\n``request_id`` + ``tool`` are empty when the poll timed out without\na queued command \u2014 the supervisor handles that as \"no work, poll\nagain\". Otherwise the supervisor maps ``tool`` + ``params`` to its\nlocal nettool runner (re-validating every field) and posts the\nresult back via ``/supervisor/nettool/reply/{request_id}``.\n\n``params`` is the server-validated structured request \u2014 NEVER a raw\nshell string or a pre-joined argv. The supervisor rebuilds the argv\nfrom these fields with the same allowlist validators the control\nplane uses.",
         "properties": {
@@ -23802,6 +25735,15 @@
             "title": "Rpki Expiring Count",
             "type": "integer"
           },
+          "rpki_last_checked_at": {
+            "format": "date-time",
+            "title": "Rpki Last Checked At",
+            "type": "string"
+          },
+          "rpki_total_count": {
+            "title": "Rpki Total Count",
+            "type": "integer"
+          },
           "service_orphan_count": {
             "title": "Service Orphan Count",
             "type": "integer"
@@ -23812,6 +25754,7 @@
           "asn_drift_count",
           "rpki_expiring_count",
           "rpki_expired_count",
+          "rpki_total_count",
           "circuit_term_expiring_count",
           "circuit_status_changed_count",
           "service_orphan_count",
@@ -30578,6 +32521,73 @@
         "title": "PoolMemberWrite",
         "type": "object"
       },
+      "PoolOccupancyResponse": {
+        "description": "Live occupancy of one address-range pool.\n\n``assigned`` unions active leases with in-pool static reservations, so\na reserved-but-offline address counts as unavailable (#631) and a\nreserved-and-currently-leased one is not double-counted.",
+        "properties": {
+          "assigned": {
+            "title": "Assigned",
+            "type": "integer"
+          },
+          "computed_at": {
+            "format": "date-time",
+            "title": "Computed At",
+            "type": "string"
+          },
+          "end_ip": {
+            "title": "End Ip",
+            "type": "string"
+          },
+          "free": {
+            "title": "Free",
+            "type": "integer"
+          },
+          "percent": {
+            "title": "Percent",
+            "type": "number"
+          },
+          "pool_id": {
+            "format": "uuid",
+            "title": "Pool Id",
+            "type": "string"
+          },
+          "pool_name": {
+            "title": "Pool Name",
+            "type": "string"
+          },
+          "pool_type": {
+            "title": "Pool Type",
+            "type": "string"
+          },
+          "scope_id": {
+            "format": "uuid",
+            "title": "Scope Id",
+            "type": "string"
+          },
+          "start_ip": {
+            "title": "Start Ip",
+            "type": "string"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "pool_id",
+          "scope_id",
+          "pool_name",
+          "start_ip",
+          "end_ip",
+          "pool_type",
+          "total",
+          "assigned",
+          "free",
+          "percent",
+          "computed_at"
+        ],
+        "title": "PoolOccupancyResponse",
+        "type": "object"
+      },
       "PoolWrite": {
         "properties": {
           "description": {
@@ -31926,6 +33936,57 @@
         "title": "RPZFeedRow",
         "type": "object"
       },
+      "RPZHitRow": {
+        "description": "One individual policy hit \u2014 the raw event, not a rollup.",
+        "properties": {
+          "client_ip": {
+            "title": "Client Ip",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "policy": {
+            "title": "Policy",
+            "type": "string"
+          },
+          "qname": {
+            "title": "Qname",
+            "type": "string"
+          },
+          "raw": {
+            "title": "Raw",
+            "type": "string"
+          },
+          "rpz_zone": {
+            "title": "Rpz Zone",
+            "type": "string"
+          },
+          "server_id": {
+            "title": "Server Id",
+            "type": "string"
+          },
+          "trigger": {
+            "title": "Trigger",
+            "type": "string"
+          },
+          "ts": {
+            "format": "date-time",
+            "title": "Ts",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "ts",
+          "trigger",
+          "policy",
+          "raw"
+        ],
+        "title": "RPZHitRow",
+        "type": "object"
+      },
       "RPZOffender": {
         "properties": {
           "client_ip": {
@@ -32024,6 +34085,133 @@
           "has_data"
         ],
         "title": "RPZSummary",
+        "type": "object"
+      },
+      "ReconciliationCounts": {
+        "properties": {
+          "discovered_not_allocated": {
+            "title": "Discovered Not Allocated",
+            "type": "integer"
+          },
+          "in_ipam_not_seen": {
+            "title": "In Ipam Not Seen",
+            "type": "integer"
+          },
+          "status_mismatch": {
+            "title": "Status Mismatch",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "in_ipam_not_seen",
+          "discovered_not_allocated",
+          "status_mismatch"
+        ],
+        "title": "ReconciliationCounts",
+        "type": "object"
+      },
+      "ReconciliationEntry": {
+        "properties": {
+          "address": {
+            "title": "Address",
+            "type": "string"
+          },
+          "hostname": {
+            "title": "Hostname",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "last_seen_at": {
+            "format": "date-time",
+            "title": "Last Seen At",
+            "type": "string"
+          },
+          "last_seen_method": {
+            "title": "Last Seen Method",
+            "type": "string"
+          },
+          "mac_address": {
+            "title": "Mac Address",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "address",
+          "status"
+        ],
+        "title": "ReconciliationEntry",
+        "type": "object"
+      },
+      "ReconciliationReport": {
+        "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/ReconciliationCounts"
+          },
+          "discovered_not_allocated": {
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationEntry"
+            },
+            "title": "Discovered Not Allocated",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "in_ipam_not_seen": {
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationEntry"
+            },
+            "title": "In Ipam Not Seen",
+            "type": "array"
+          },
+          "last_discovery_at": {
+            "format": "date-time",
+            "title": "Last Discovery At",
+            "type": "string"
+          },
+          "network": {
+            "title": "Network",
+            "type": "string"
+          },
+          "stale_minutes": {
+            "title": "Stale Minutes",
+            "type": "integer"
+          },
+          "status_mismatch": {
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationEntry"
+            },
+            "title": "Status Mismatch",
+            "type": "array"
+          },
+          "subnet_id": {
+            "format": "uuid",
+            "title": "Subnet Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subnet_id",
+          "network",
+          "generated_at",
+          "stale_minutes",
+          "counts",
+          "in_ipam_not_seen",
+          "discovered_not_allocated",
+          "status_mismatch"
+        ],
+        "title": "ReconciliationReport",
         "type": "object"
       },
       "RecordChangeResponse": {
@@ -33029,6 +35217,34 @@
         "title": "ResponderResponse",
         "type": "object"
       },
+      "RestoreConflict": {
+        "properties": {
+          "display": {
+            "title": "Display",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "display",
+          "reason"
+        ],
+        "title": "RestoreConflict",
+        "type": "object"
+      },
       "RestoreDrillResponse": {
         "properties": {
           "archive_bytes": {
@@ -33232,6 +35448,14 @@
           "restored": {
             "title": "Restored",
             "type": "integer"
+          },
+          "skipped": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/RestoreConflict"
+            },
+            "title": "Skipped",
+            "type": "array"
           }
         },
         "required": [
@@ -35517,6 +37741,44 @@
         "title": "SearchTypeInfo",
         "type": "object"
       },
+      "SectionCatalogEntry": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "phrase": {
+            "title": "Phrase",
+            "type": "string"
+          },
+          "table_count": {
+            "title": "Table Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "description",
+          "phrase",
+          "kind",
+          "table_count"
+        ],
+        "title": "SectionCatalogEntry",
+        "type": "object"
+      },
       "SectionPreviewResponse": {
         "properties": {
           "affected_rows": {
@@ -35978,6 +38240,14 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "server_drivers": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Server Drivers",
+            "type": "array"
           }
         },
         "required": [
@@ -36237,6 +38507,10 @@
             "title": "Recursion Enabled",
             "type": "boolean"
           },
+          "response_log_enabled": {
+            "title": "Response Log Enabled",
+            "type": "boolean"
+          },
           "rrl_enabled": {
             "title": "Rrl Enabled",
             "type": "boolean"
@@ -36302,6 +38576,7 @@
           "allow_transfer",
           "blackhole",
           "query_log_enabled",
+          "response_log_enabled",
           "query_log_channel",
           "query_log_file",
           "query_log_severity",
@@ -36541,6 +38816,10 @@
             "title": "Recursion Enabled",
             "type": "boolean"
           },
+          "response_log_enabled": {
+            "title": "Response Log Enabled",
+            "type": "boolean"
+          },
           "rrl_enabled": {
             "title": "Rrl Enabled",
             "type": "boolean"
@@ -36675,6 +38954,33 @@
         "title": "ServerSyncItem",
         "type": "object"
       },
+      "ServerSyncResponse": {
+        "description": "Result of ``POST /servers/{id}/sync``.\n\nTwo shapes behind one route, which is why it needs its own model rather\nthan the shared ``StatusResponse``: an agentless cloud driver reconciles\nscopes inline and reports how many; an agent-based one queues a config op\nand reports the op id + the bundle etag the agent will converge on.\nWhichever branch ran, the fields belonging to the other are ``null``.",
+        "properties": {
+          "etag": {
+            "title": "Etag",
+            "type": "string"
+          },
+          "op_id": {
+            "format": "uuid",
+            "title": "Op Id",
+            "type": "string"
+          },
+          "scopes": {
+            "title": "Scopes",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "ServerSyncResponse",
+        "type": "object"
+      },
       "ServerZoneStateEntry": {
         "properties": {
           "current_serial": {
@@ -36745,6 +39051,34 @@
         "title": "ServerZoneStateResponse",
         "type": "object"
       },
+      "ServiceActionResponse": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "self_targeted": {
+            "title": "Self Targeted",
+            "type": "boolean"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "action",
+          "status",
+          "self_targeted"
+        ],
+        "title": "ServiceActionResponse",
+        "type": "object"
+      },
       "ServiceBulkDelete": {
         "properties": {
           "ids": {
@@ -36761,6 +39095,41 @@
           "ids"
         ],
         "title": "ServiceBulkDelete",
+        "type": "object"
+      },
+      "ServiceCapabilityResponse": {
+        "properties": {
+          "backend": {
+            "title": "Backend",
+            "type": "string"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "flavor": {
+            "title": "Flavor",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "supported_actions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Supported Actions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "backend",
+          "flavor",
+          "enabled",
+          "supported_actions"
+        ],
+        "title": "ServiceCapabilityResponse",
         "type": "object"
       },
       "ServiceCreate": {
@@ -36852,37 +39221,6 @@
           "customer_id"
         ],
         "title": "ServiceCreate",
-        "type": "object"
-      },
-      "ServiceListResponse": {
-        "properties": {
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/ServiceRead"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "limit": {
-            "title": "Limit",
-            "type": "integer"
-          },
-          "offset": {
-            "title": "Offset",
-            "type": "integer"
-          },
-          "total": {
-            "title": "Total",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "items",
-          "total",
-          "limit",
-          "offset"
-        ],
-        "title": "ServiceListResponse",
         "type": "object"
       },
       "ServiceRead": {
@@ -36983,6 +39321,68 @@
           "modified_at"
         ],
         "title": "ServiceRead",
+        "type": "object"
+      },
+      "ServiceRow": {
+        "properties": {
+          "actions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Actions",
+            "type": "array"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "desired": {
+            "title": "Desired",
+            "type": "integer"
+          },
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "image": {
+            "title": "Image",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "last_restarted_at": {
+            "title": "Last Restarted At",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "ready": {
+            "title": "Ready",
+            "type": "integer"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "state",
+          "image",
+          "detail",
+          "actions"
+        ],
+        "title": "ServiceRow",
         "type": "object"
       },
       "ServiceUpdate": {
@@ -38846,6 +41246,20 @@
         "title": "SightingOut",
         "type": "object"
       },
+      "SignatureOut": {
+        "properties": {
+          "option_55": {
+            "title": "Option 55",
+            "type": "string"
+          },
+          "option_60": {
+            "title": "Option 60",
+            "type": "string"
+          }
+        },
+        "title": "SignatureOut",
+        "type": "object"
+      },
       "SimulateRequest": {
         "description": "Hypothetical underlay state for what-if analysis.\n\n``down_circuits`` removes the listed circuits from every site's\npreferred-circuit chain before resolving each policy. The response\nshows the effective resolution per policy + per-site fallback\nchains that survived the simulation.",
         "properties": {
@@ -39549,6 +41963,112 @@
         "title": "StaleIPDeprecateResponse",
         "type": "object"
       },
+      "StaleIPEntry": {
+        "properties": {
+          "address": {
+            "title": "Address",
+            "type": "string"
+          },
+          "days_stale": {
+            "title": "Days Stale",
+            "type": "integer"
+          },
+          "hostname": {
+            "title": "Hostname",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "last_seen_at": {
+            "format": "date-time",
+            "title": "Last Seen At",
+            "type": "string"
+          },
+          "last_seen_method": {
+            "title": "Last Seen Method",
+            "type": "string"
+          },
+          "mac_address": {
+            "title": "Mac Address",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "subnet_id": {
+            "format": "uuid",
+            "title": "Subnet Id",
+            "type": "string"
+          },
+          "subnet_name": {
+            "title": "Subnet Name",
+            "type": "string"
+          },
+          "subnet_network": {
+            "title": "Subnet Network",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "address",
+          "status",
+          "subnet_id"
+        ],
+        "title": "StaleIPEntry",
+        "type": "object"
+      },
+      "StaleIPReport": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/StaleIPEntry"
+            },
+            "title": "Entries",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "include_never_seen": {
+            "title": "Include Never Seen",
+            "type": "boolean"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "stale_days": {
+            "title": "Stale Days",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "generated_at",
+          "stale_days",
+          "include_never_seen",
+          "total",
+          "limit",
+          "offset",
+          "entries"
+        ],
+        "title": "StaleIPReport",
+        "type": "object"
+      },
       "StaticCreate": {
         "properties": {
           "client_id": {
@@ -39728,6 +42248,31 @@
           }
         },
         "title": "StaticUpdate",
+        "type": "object"
+      },
+      "StatusResponse": {
+        "description": "A fire-and-forget acknowledgement.\n\n``status`` is the operative field; ``task_id`` is present on the routes\nthat hand work to Celery and is an empty string when the broker was\nunreachable \u2014 which the callers already relied on, so it stays that way\nrather than becoming ``null`` and breaking them.",
+        "properties": {
+          "detail": {
+            "description": "Optional human-readable note.",
+            "title": "Detail",
+            "type": "string"
+          },
+          "status": {
+            "description": "e.g. 'queued', 'ok', 'broker_unavailable'",
+            "title": "Status",
+            "type": "string"
+          },
+          "task_id": {
+            "description": "Celery task id when the route enqueued work; '' if the broker was down.",
+            "title": "Task Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "StatusResponse",
         "type": "object"
       },
       "SubmitRequestBody": {
@@ -45663,6 +48208,149 @@
         "title": "ValidationResult",
         "type": "object"
       },
+      "VendorCount": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "vendor": {
+            "title": "Vendor",
+            "type": "string"
+          }
+        },
+        "required": [
+          "vendor",
+          "count"
+        ],
+        "title": "VendorCount",
+        "type": "object"
+      },
+      "VendorDevice": {
+        "properties": {
+          "fqdn": {
+            "title": "Fqdn",
+            "type": "string"
+          },
+          "hostname": {
+            "title": "Hostname",
+            "type": "string"
+          },
+          "ip_address": {
+            "title": "Ip Address",
+            "type": "string"
+          },
+          "last_seen_at": {
+            "format": "date-time",
+            "title": "Last Seen At",
+            "type": "string"
+          },
+          "mac_address": {
+            "title": "Mac Address",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "subnet_id": {
+            "format": "uuid",
+            "title": "Subnet Id",
+            "type": "string"
+          },
+          "subnet_name": {
+            "title": "Subnet Name",
+            "type": "string"
+          },
+          "subnet_network": {
+            "title": "Subnet Network",
+            "type": "string"
+          },
+          "vendor": {
+            "title": "Vendor",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "ip_address",
+          "mac_address",
+          "vendor"
+        ],
+        "title": "VendorDevice",
+        "type": "object"
+      },
+      "VendorDeviceList": {
+        "properties": {
+          "error": {
+            "title": "Error",
+            "type": "string"
+          },
+          "matches": {
+            "items": {
+              "$ref": "#/components/schemas/VendorDevice"
+            },
+            "title": "Matches",
+            "type": "array"
+          },
+          "vendor_search": {
+            "title": "Vendor Search",
+            "type": "string"
+          }
+        },
+        "required": [
+          "vendor_search",
+          "matches"
+        ],
+        "title": "VendorDeviceList",
+        "type": "object"
+      },
+      "VendorRollup": {
+        "description": "MAC \u2192 vendor counts across the estate.\n\n``total_macs_seen`` counts every MAC in scope and ``total_with_vendor``\nonly those whose OUI resolved. The gap between the two is how complete the\nOUI table is \u2014 collapsing them would make a stale table look like an empty\nnetwork, and OUI lookup is off by default.",
+        "properties": {
+          "distinct_vendors": {
+            "title": "Distinct Vendors",
+            "type": "integer"
+          },
+          "matching_macs": {
+            "title": "Matching Macs",
+            "type": "integer"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "total_macs_seen": {
+            "title": "Total Macs Seen",
+            "type": "integer"
+          },
+          "total_with_vendor": {
+            "title": "Total With Vendor",
+            "type": "integer"
+          },
+          "vendors": {
+            "items": {
+              "$ref": "#/components/schemas/VendorCount"
+            },
+            "title": "Vendors",
+            "type": "array"
+          }
+        },
+        "required": [
+          "source",
+          "total_macs_seen",
+          "total_with_vendor",
+          "matching_macs",
+          "distinct_vendors",
+          "vendors"
+        ],
+        "title": "VendorRollup",
+        "type": "object"
+      },
       "VersionResponse": {
         "properties": {
           "appliance_hostname": {
@@ -47749,6 +50437,56 @@
         "title": "ZoneCreate",
         "type": "object"
       },
+      "ZoneDNSSECInfo": {
+        "properties": {
+          "dnssec_ds_records": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Dnssec Ds Records",
+            "type": "array"
+          },
+          "dnssec_enabled": {
+            "title": "Dnssec Enabled",
+            "type": "boolean"
+          },
+          "dnssec_policy_id": {
+            "format": "uuid",
+            "title": "Dnssec Policy Id",
+            "type": "string"
+          },
+          "dnssec_synced_at": {
+            "format": "date-time",
+            "title": "Dnssec Synced At",
+            "type": "string"
+          },
+          "keys": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/DNSSECKeyState"
+            },
+            "title": "Keys",
+            "type": "array"
+          },
+          "zone_id": {
+            "format": "uuid",
+            "title": "Zone Id",
+            "type": "string"
+          },
+          "zone_name": {
+            "title": "Zone Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "zone_id",
+          "zone_name",
+          "dnssec_enabled"
+        ],
+        "title": "ZoneDNSSECInfo",
+        "type": "object"
+      },
       "ZoneDriftResponse": {
         "properties": {
           "db_record_count": {
@@ -47786,6 +50524,441 @@
           "servers"
         ],
         "title": "ZoneDriftResponse",
+        "type": "object"
+      },
+      "ZoneMoveCommitRequest": {
+        "properties": {
+          "acknowledgements": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Acknowledgements",
+            "type": "array"
+          },
+          "confirmation_zone_name": {
+            "title": "Confirmation Zone Name",
+            "type": "string"
+          },
+          "target_group_id": {
+            "format": "uuid",
+            "title": "Target Group Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_group_id",
+          "confirmation_zone_name"
+        ],
+        "title": "ZoneMoveCommitRequest",
+        "type": "object"
+      },
+      "ZoneMoveCommitResponse": {
+        "properties": {
+          "acl_keys_lost": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Acl Keys Lost",
+            "type": "array"
+          },
+          "acl_names_lost": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Acl Names Lost",
+            "type": "array"
+          },
+          "acl_names_remapped": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Acl Names Remapped",
+            "type": "array"
+          },
+          "acl_rows_remapped": {
+            "title": "Acl Rows Remapped",
+            "type": "integer"
+          },
+          "acme_accounts": {
+            "title": "Acme Accounts",
+            "type": "integer"
+          },
+          "dnssec_key_count": {
+            "title": "Dnssec Key Count",
+            "type": "integer"
+          },
+          "dnssec_signed": {
+            "title": "Dnssec Signed",
+            "type": "boolean"
+          },
+          "dnssec_unsupported_drivers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Dnssec Unsupported Drivers",
+            "type": "array"
+          },
+          "moved": {
+            "default": true,
+            "title": "Moved",
+            "type": "boolean"
+          },
+          "name_collision": {
+            "title": "Name Collision",
+            "type": "boolean"
+          },
+          "pending_ops": {
+            "title": "Pending Ops",
+            "type": "integer"
+          },
+          "pools_repointed": {
+            "title": "Pools Repointed",
+            "type": "integer"
+          },
+          "records_cleared_inert": {
+            "title": "Records Cleared Inert",
+            "type": "integer"
+          },
+          "records_remapped": {
+            "title": "Records Remapped",
+            "type": "integer"
+          },
+          "records_total": {
+            "title": "Records Total",
+            "type": "integer"
+          },
+          "records_widened": {
+            "title": "Records Widened",
+            "type": "integer"
+          },
+          "records_widened_by_view": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Records Widened By View",
+            "type": "object"
+          },
+          "required_acknowledgements": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Acknowledgements",
+            "type": "array"
+          },
+          "source_drivers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Source Drivers",
+            "type": "array"
+          },
+          "source_group_id": {
+            "format": "uuid",
+            "title": "Source Group Id",
+            "type": "string"
+          },
+          "source_group_name": {
+            "title": "Source Group Name",
+            "type": "string"
+          },
+          "source_has_views": {
+            "title": "Source Has Views",
+            "type": "boolean"
+          },
+          "target_drivers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Target Drivers",
+            "type": "array"
+          },
+          "target_group_id": {
+            "format": "uuid",
+            "title": "Target Group Id",
+            "type": "string"
+          },
+          "target_group_name": {
+            "title": "Target Group Name",
+            "type": "string"
+          },
+          "target_has_views": {
+            "title": "Target Has Views",
+            "type": "boolean"
+          },
+          "target_tsig_key_generated": {
+            "default": false,
+            "title": "Target Tsig Key Generated",
+            "type": "boolean"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          },
+          "zone_id": {
+            "format": "uuid",
+            "title": "Zone Id",
+            "type": "string"
+          },
+          "zone_name": {
+            "title": "Zone Name",
+            "type": "string"
+          },
+          "zone_state_rows": {
+            "title": "Zone State Rows",
+            "type": "integer"
+          },
+          "zone_view_action": {
+            "title": "Zone View Action",
+            "type": "string"
+          },
+          "zone_view_from": {
+            "title": "Zone View From",
+            "type": "string"
+          }
+        },
+        "required": [
+          "zone_id",
+          "zone_name",
+          "source_group_id",
+          "source_group_name",
+          "target_group_id",
+          "target_group_name",
+          "source_has_views",
+          "target_has_views",
+          "zone_view_action",
+          "records_total",
+          "records_remapped",
+          "records_widened",
+          "records_cleared_inert",
+          "records_widened_by_view",
+          "acl_rows_remapped",
+          "acl_keys_lost",
+          "pools_repointed",
+          "zone_state_rows",
+          "pending_ops",
+          "dnssec_signed",
+          "dnssec_key_count",
+          "acme_accounts",
+          "source_drivers",
+          "target_drivers",
+          "name_collision",
+          "dnssec_unsupported_drivers",
+          "acl_names_remapped",
+          "acl_names_lost",
+          "warnings",
+          "required_acknowledgements"
+        ],
+        "title": "ZoneMoveCommitResponse",
+        "type": "object"
+      },
+      "ZoneMovePreviewRequest": {
+        "properties": {
+          "target_group_id": {
+            "format": "uuid",
+            "title": "Target Group Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_group_id"
+        ],
+        "title": "ZoneMovePreviewRequest",
+        "type": "object"
+      },
+      "ZoneMovePreviewResponse": {
+        "properties": {
+          "acl_keys_lost": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Acl Keys Lost",
+            "type": "array"
+          },
+          "acl_names_lost": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Acl Names Lost",
+            "type": "array"
+          },
+          "acl_names_remapped": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Acl Names Remapped",
+            "type": "array"
+          },
+          "acl_rows_remapped": {
+            "title": "Acl Rows Remapped",
+            "type": "integer"
+          },
+          "acme_accounts": {
+            "title": "Acme Accounts",
+            "type": "integer"
+          },
+          "dnssec_key_count": {
+            "title": "Dnssec Key Count",
+            "type": "integer"
+          },
+          "dnssec_signed": {
+            "title": "Dnssec Signed",
+            "type": "boolean"
+          },
+          "dnssec_unsupported_drivers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Dnssec Unsupported Drivers",
+            "type": "array"
+          },
+          "name_collision": {
+            "title": "Name Collision",
+            "type": "boolean"
+          },
+          "pending_ops": {
+            "title": "Pending Ops",
+            "type": "integer"
+          },
+          "pools_repointed": {
+            "title": "Pools Repointed",
+            "type": "integer"
+          },
+          "records_cleared_inert": {
+            "title": "Records Cleared Inert",
+            "type": "integer"
+          },
+          "records_remapped": {
+            "title": "Records Remapped",
+            "type": "integer"
+          },
+          "records_total": {
+            "title": "Records Total",
+            "type": "integer"
+          },
+          "records_widened": {
+            "title": "Records Widened",
+            "type": "integer"
+          },
+          "records_widened_by_view": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Records Widened By View",
+            "type": "object"
+          },
+          "required_acknowledgements": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Acknowledgements",
+            "type": "array"
+          },
+          "source_drivers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Source Drivers",
+            "type": "array"
+          },
+          "source_group_id": {
+            "format": "uuid",
+            "title": "Source Group Id",
+            "type": "string"
+          },
+          "source_group_name": {
+            "title": "Source Group Name",
+            "type": "string"
+          },
+          "source_has_views": {
+            "title": "Source Has Views",
+            "type": "boolean"
+          },
+          "target_drivers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Target Drivers",
+            "type": "array"
+          },
+          "target_group_id": {
+            "format": "uuid",
+            "title": "Target Group Id",
+            "type": "string"
+          },
+          "target_group_name": {
+            "title": "Target Group Name",
+            "type": "string"
+          },
+          "target_has_views": {
+            "title": "Target Has Views",
+            "type": "boolean"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          },
+          "zone_id": {
+            "format": "uuid",
+            "title": "Zone Id",
+            "type": "string"
+          },
+          "zone_name": {
+            "title": "Zone Name",
+            "type": "string"
+          },
+          "zone_state_rows": {
+            "title": "Zone State Rows",
+            "type": "integer"
+          },
+          "zone_view_action": {
+            "title": "Zone View Action",
+            "type": "string"
+          },
+          "zone_view_from": {
+            "title": "Zone View From",
+            "type": "string"
+          }
+        },
+        "required": [
+          "zone_id",
+          "zone_name",
+          "source_group_id",
+          "source_group_name",
+          "target_group_id",
+          "target_group_name",
+          "source_has_views",
+          "target_has_views",
+          "zone_view_action",
+          "records_total",
+          "records_remapped",
+          "records_widened",
+          "records_cleared_inert",
+          "records_widened_by_view",
+          "acl_rows_remapped",
+          "acl_keys_lost",
+          "pools_repointed",
+          "zone_state_rows",
+          "pending_ops",
+          "dnssec_signed",
+          "dnssec_key_count",
+          "acme_accounts",
+          "source_drivers",
+          "target_drivers",
+          "name_collision",
+          "dnssec_unsupported_drivers",
+          "acl_names_remapped",
+          "acl_names_lost",
+          "warnings",
+          "required_acknowledgements"
+        ],
+        "title": "ZoneMovePreviewResponse",
         "type": "object"
       },
       "ZoneResponse": {
@@ -48058,6 +51231,102 @@
           "push_errors"
         ],
         "title": "ZoneSyncItem",
+        "type": "object"
+      },
+      "ZoneTemplate": {
+        "additionalProperties": true,
+        "properties": {
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "parameters": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ZoneTemplateParameter"
+            },
+            "title": "Parameters",
+            "type": "array"
+          },
+          "record_count": {
+            "title": "Record Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "category",
+          "description"
+        ],
+        "title": "ZoneTemplate",
+        "type": "object"
+      },
+      "ZoneTemplateCatalog": {
+        "properties": {
+          "templates": {
+            "items": {
+              "$ref": "#/components/schemas/ZoneTemplate"
+            },
+            "title": "Templates",
+            "type": "array"
+          }
+        },
+        "required": [
+          "templates"
+        ],
+        "title": "ZoneTemplateCatalog",
+        "type": "object"
+      },
+      "ZoneTemplateParameter": {
+        "properties": {
+          "default": {
+            "title": "Default"
+          },
+          "hint": {
+            "title": "Hint",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "placeholder": {
+            "title": "Placeholder",
+            "type": "string"
+          },
+          "required": {
+            "title": "Required",
+            "type": "boolean"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "type",
+          "required"
+        ],
+        "title": "ZoneTemplateParameter",
         "type": "object"
       },
       "ZoneUpdate": {
@@ -48548,6 +51817,30 @@
           "dns_record_count"
         ],
         "title": "_SplitChildResp",
+        "type": "object"
+      },
+      "app__api__v1___common__BulkDeleteResponse": {
+        "description": "Result of a bulk soft-delete.\n\n``not_found`` carries the ids that matched nothing \u2014 a partial success is\nthe normal case when a client deletes from a stale list, and it must be\ndistinguishable from a total one.",
+        "properties": {
+          "deleted": {
+            "description": "How many rows were deleted.",
+            "title": "Deleted",
+            "type": "integer"
+          },
+          "not_found": {
+            "description": "Requested ids that matched no live row.",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Not Found",
+            "type": "array"
+          }
+        },
+        "required": [
+          "deleted"
+        ],
+        "title": "BulkDeleteResponse",
         "type": "object"
       },
       "app__api__v1__ai__proposals__ApplyResponse": {
@@ -51487,12 +54780,21 @@
             "title": "Driver",
             "type": "string"
           },
+          "group_id": {
+            "format": "uuid",
+            "title": "Group Id",
+            "type": "string"
+          },
           "host": {
             "title": "Host",
             "type": "string"
           },
           "is_enabled": {
             "title": "Is Enabled",
+            "type": "boolean"
+          },
+          "is_primary": {
+            "title": "Is Primary",
             "type": "boolean"
           },
           "name": {
@@ -53863,6 +57165,37 @@
         "title": "TestConnectionResponse",
         "type": "object"
       },
+      "app__api__v1__services__router__ServiceListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceRead"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "ServiceListResponse",
+        "type": "object"
+      },
       "app__api__v1__system__factory_reset__PreviewRequest": {
         "properties": {
           "section_keys": {
@@ -53917,6 +57250,30 @@
           "cooldown_blocking"
         ],
         "title": "PreviewResponse",
+        "type": "object"
+      },
+      "app__api__v1__system__services__ServiceListResponse": {
+        "properties": {
+          "capability": {
+            "$ref": "#/components/schemas/ServiceCapabilityResponse"
+          },
+          "error": {
+            "title": "Error",
+            "type": "string"
+          },
+          "services": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceRow"
+            },
+            "title": "Services",
+            "type": "array"
+          }
+        },
+        "required": [
+          "capability",
+          "services"
+        ],
+        "title": "ServiceListResponse",
         "type": "object"
       },
       "app__api__v1__tailscale__router__TestConnectionRequest": {
@@ -54337,7 +57694,7 @@
   "info": {
     "description": "Open-source DDI \u2014 DNS, DHCP, and IP Address Management",
     "title": "SpatiumDDI",
-    "version": "2026.08.22-1"
+    "version": "2026.09.04-1"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -55596,7 +58953,7 @@
     },
     "/api/v1/admin/trash/{type}/{row_id}/restore": {
       "post": {
-        "description": "Restore a soft-deleted row and every sibling in its deletion batch.",
+        "description": "Restore a soft-deleted row and every sibling in its deletion batch.\n\n``skip_conflicts`` restores every sibling that does NOT clash with a live\nrow and reports the ones left behind, instead of refusing the whole batch\n\u2014 for a bulk record delete (#963), where one record re-created by hand\nmust not make the other N unrestorable. It is refused (422) on a cascade\nbatch; see ``_PARTIAL_RESTORE_TYPES``.",
         "operationId": "restore_row_api_v1_admin_trash__type___row_id__restore_post",
         "parameters": [
           {
@@ -55616,6 +58973,16 @@
               "format": "uuid",
               "title": "Row Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip_conflicts",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Skip Conflicts",
+              "type": "boolean"
             }
           }
         ],
@@ -55669,11 +59036,13 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
               }
             },
-            "description": "Successful Response"
+            "description": "Server-sent event stream of the assistant's reply"
           },
           "422": {
             "content": {
@@ -56962,6 +60331,42 @@
             "schema": {
               "format": "uuid",
               "title": "Rule Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Exact subject type, e.g. 'subnet', 'dns_server', 'dhcp_pool'.",
+            "in": "query",
+            "name": "subject_type",
+            "required": false,
+            "schema": {
+              "description": "Exact subject type, e.g. 'subnet', 'dns_server', 'dhcp_pool'.",
+              "maxLength": 64,
+              "title": "Subject Type",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Exact subject id. Usually paired with subject_type.",
+            "in": "query",
+            "name": "subject_id",
+            "required": false,
+            "schema": {
+              "description": "Exact subject id. Usually paired with subject_type.",
+              "maxLength": 255,
+              "title": "Subject Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Exact severity match.",
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "description": "Exact severity match.",
+              "maxLength": 32,
+              "title": "Severity",
               "type": "string"
             }
           },
@@ -58292,11 +61697,13 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
               }
             },
-            "description": "Successful Response"
+            "description": "Pod logs as plain text"
           },
           "422": {
             "content": {
@@ -58435,6 +61842,65 @@
           }
         ],
         "summary": "Rollout-restart a Deployment/DaemonSet on the appliance's k3s",
+        "tags": [
+          "appliance"
+        ]
+      }
+    },
+    "/api/v1/appliance/appliances/{appliance_id}/k8s/workloads": {
+      "get": {
+        "description": "Inventory for the Fleet restart picker (#890).\n\nBefore this the Fleet UI had exactly one restart button and it was\nhardcoded to ``deploy/dns-bind9``, so a node running PowerDNS,\nTechnitium or Kea had no restart at all. Listing the workloads the\nappliance actually runs replaces the guess.\n\nRead-only, and filtered to workloads labelled as ours \u2014 an operator's\nown Deployment in the same namespace is neither listed here nor\nrestartable through the sibling endpoint, which resolves its target\nagainst this same label set.",
+        "operationId": "k8s_list_workloads_api_v1_appliance_appliances__appliance_id__k8s_workloads_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "appliance_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Appliance Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "namespace",
+            "required": false,
+            "schema": {
+              "default": "spatium",
+              "title": "Namespace",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplianceWorkloadsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List restartable Deployments / DaemonSets / StatefulSets on an appliance",
         "tags": [
           "appliance"
         ]
@@ -59009,11 +62475,13 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
               }
             },
-            "description": "Successful Response"
+            "description": "Server-sent event stream of cluster health"
           }
         },
         "security": [
@@ -59297,11 +62765,13 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
+              "application/zip": {
+                "schema": {
+                  "type": "string"
+                }
               }
             },
-            "description": "Successful Response"
+            "description": "Diagnostics archive"
           }
         },
         "security": [
@@ -62413,11 +65883,13 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string"
+                }
               }
             },
-            "description": "Successful Response"
+            "description": "The .raw.xz upgrade image"
           },
           "422": {
             "content": {
@@ -63156,9 +66628,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Bulk Delete Asns Api V1 Asns Bulk Delete Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/app__api__v1___common__BulkDeleteResponse"
                 }
               }
             },
@@ -64191,10 +67661,11 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
-              },
-              "application/pdf": {}
+              "application/pdf": {
+                "schema": {
+                  "type": "string"
+                }
+              }
             },
             "description": "PDF change report"
           },
@@ -65490,11 +68961,13 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
               }
             },
-            "description": "Successful Response"
+            "description": "SAML SP metadata document"
           },
           "422": {
             "content": {
@@ -66118,11 +69591,13 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
+              "application/zip": {
+                "schema": {
+                  "type": "string"
+                }
               }
             },
-            "description": "Successful Response"
+            "description": "Backup archive"
           },
           "422": {
             "content": {
@@ -66229,9 +69704,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Readiness Api V1 Backup Drills Readiness Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/DrillReadinessSummary"
                 }
               }
             },
@@ -66451,9 +69924,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Backup Sections Api V1 Backup Sections Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/BackupSectionCatalog"
                 }
               }
             },
@@ -66554,9 +70025,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Kinds Api V1 Backup Targets Kinds Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/BackupTargetKinds"
                 }
               }
             },
@@ -66789,11 +70258,13 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
+              "application/zip": {
+                "schema": {
+                  "type": "string"
+                }
               }
             },
-            "description": "Successful Response"
+            "description": "Backup archive"
           },
           "422": {
             "content": {
@@ -66957,11 +70428,13 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
+              "application/zip": {
+                "schema": {
+                  "type": "string"
+                }
               }
             },
-            "description": "Successful Response"
+            "description": "Backup archive"
           },
           "422": {
             "content": {
@@ -67577,9 +71050,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Asn Announced Prefixes Api V1 Bgp Asn  Asn  Announced Prefixes Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ASNAnnouncedPrefixes"
                 }
               }
             },
@@ -67627,9 +71098,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Asn Ixps Api V1 Bgp Asn  Asn  Ixps Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ASNIxpPresence"
                 }
               }
             },
@@ -67677,9 +71146,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Asn Network Api V1 Bgp Asn  Asn  Network Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ASNNetwork"
                 }
               }
             },
@@ -67726,9 +71193,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Asn Overview Api V1 Bgp Asn  Asn  Overview Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ASNOverview"
                 }
               }
             },
@@ -69173,9 +72638,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Bulk Delete Circuits Api V1 Circuits Bulk Delete Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/app__api__v1___common__BulkDeleteResponse"
                 }
               }
             },
@@ -69647,11 +73110,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "title": "Response Sync Endpoint Api V1 Cloud Endpoints  Endpoint Id  Sync Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/StatusResponse"
                 }
               }
             },
@@ -69729,10 +73188,11 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
-              },
-              "application/pdf": {}
+              "application/pdf": {
+                "schema": {
+                  "type": "string"
+                }
+              }
             },
             "description": "PDF conformity report"
           },
@@ -70570,9 +74030,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Bulk Delete Customers Api V1 Customers Bulk Delete Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/app__api__v1___common__BulkDeleteResponse"
                 }
               }
             },
@@ -70742,6 +74200,56 @@
           }
         ],
         "summary": "Update Customer",
+        "tags": [
+          "customers",
+          "customers"
+        ]
+      }
+    },
+    "/api/v1/customers/{customer_id}/summary": {
+      "get": {
+        "description": "A customer plus a count of every resource type it owns (#917).",
+        "operationId": "get_customer_summary_route_api_v1_customers__customer_id__summary_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "customer_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Customer Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Customer Summary Route",
         "tags": [
           "customers",
           "customers"
@@ -71619,6 +75127,202 @@
         ]
       }
     },
+    "/api/v1/dhcp/device-policies/{policy_id}": {
+      "delete": {
+        "operationId": "delete_device_policy_api_v1_dhcp_device_policies__policy_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "policy_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Policy Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Device Policy",
+        "tags": [
+          "dhcp",
+          "dhcp"
+        ]
+      },
+      "get": {
+        "operationId": "get_device_policy_api_v1_dhcp_device_policies__policy_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "policy_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Policy Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevicePolicyResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Device Policy",
+        "tags": [
+          "dhcp",
+          "dhcp"
+        ]
+      },
+      "put": {
+        "operationId": "update_device_policy_api_v1_dhcp_device_policies__policy_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "policy_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Policy Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevicePolicyUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevicePolicyResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Device Policy",
+        "tags": [
+          "dhcp",
+          "dhcp"
+        ]
+      }
+    },
+    "/api/v1/dhcp/device-policies/{policy_id}/preview": {
+      "get": {
+        "description": "Show exactly what this policy compiles to, and who it catches.\n\nGenuinely read-only. An earlier cut stamped ``last_compiled_at`` here,\nwhich made a GET authorised by ``read`` perform an unaudited write that\nmaintenance mode does not gate (it only holds POST/PUT/PATCH/DELETE).\nThe column was dropped rather than moved: the only other place a\ncompile happens is the config-bundle build, and stamping there would\nadd a write to every agent long-poll tick. Compilation is stateless and\nalways current, so there was nothing worth recording.",
+        "operationId": "preview_device_policy_api_v1_dhcp_device_policies__policy_id__preview_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "policy_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Policy Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevicePolicyPreviewOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Preview Device Policy",
+        "tags": [
+          "dhcp",
+          "dhcp"
+        ]
+      }
+    },
     "/api/v1/dhcp/groups/{group_id}/responders": {
       "get": {
         "description": "List DHCP responders observed on this group's segments (#370).",
@@ -72058,6 +75762,317 @@
         "summary": "Windows Servers",
         "tags": [
           "dhcp-import"
+        ]
+      }
+    },
+    "/api/v1/dhcp/lease-history": {
+      "get": {
+        "description": "Expired / released leases across every server \u2014 \"has this MAC ever\nhad a lease here?\".\n\nSame filters and row shape as the per-server route, with the server\nrestriction moved from the path to an optional query parameter. The\ndefault window is the trailing 90 days, matching the per-server route (and\nthe retention default it is bounded by).",
+        "operationId": "list_all_lease_history_api_v1_dhcp_lease_history_get",
+        "parameters": [
+          {
+            "description": "ISO 8601 lower bound on expired_at",
+            "in": "query",
+            "name": "since",
+            "required": false,
+            "schema": {
+              "description": "ISO 8601 lower bound on expired_at",
+              "format": "date-time",
+              "title": "Since",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ISO 8601 upper bound on expired_at",
+            "in": "query",
+            "name": "until",
+            "required": false,
+            "schema": {
+              "description": "ISO 8601 upper bound on expired_at",
+              "format": "date-time",
+              "title": "Until",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Substring match on MAC",
+            "in": "query",
+            "name": "mac",
+            "required": false,
+            "schema": {
+              "description": "Substring match on MAC",
+              "title": "Mac",
+              "type": "string"
+            }
+          },
+          {
+            "description": "IP or CIDR \u2014 exact / containment match",
+            "in": "query",
+            "name": "ip",
+            "required": false,
+            "schema": {
+              "description": "IP or CIDR \u2014 exact / containment match",
+              "title": "Ip",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Hostname substring match",
+            "in": "query",
+            "name": "hostname",
+            "required": false,
+            "schema": {
+              "description": "Hostname substring match",
+              "title": "Hostname",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Filter by lease_state",
+            "in": "query",
+            "name": "lease_state",
+            "required": false,
+            "schema": {
+              "description": "Filter by lease_state",
+              "title": "Lease State",
+              "type": "string"
+            }
+          },
+          {
+            "description": "restrict to one DHCP server",
+            "in": "query",
+            "name": "server_id",
+            "required": false,
+            "schema": {
+              "description": "restrict to one DHCP server",
+              "format": "uuid",
+              "title": "Server Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "restrict to one DHCP server group",
+            "in": "query",
+            "name": "group_id",
+            "required": false,
+            "schema": {
+              "description": "restrict to one DHCP server group",
+              "format": "uuid",
+              "title": "Group Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "maximum": 1000000,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Per Page",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaseHistoryPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List All Lease History",
+        "tags": [
+          "dhcp",
+          "dhcp"
+        ]
+      }
+    },
+    "/api/v1/dhcp/leases": {
+      "get": {
+        "description": "Active leases across every DHCP server, newest-seen first.\n\n``search`` is the substring form the UI grid uses; ``mac`` and ``ip`` are\nexact-match filters for the \"look up this device\" flow, where a substring\nmatch on a MAC would also return a different device whose address happens\nto contain the same bytes.\n\nRows carry the same OUI vendor + fingerbank device fields the per-server\nroute returns.",
+        "operationId": "list_all_leases_api_v1_dhcp_leases_get",
+        "parameters": [
+          {
+            "description": "substring over ip / mac / hostname",
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "description": "substring over ip / mac / hostname",
+              "title": "Search",
+              "type": "string"
+            }
+          },
+          {
+            "description": "exact MAC match (any common separator form)",
+            "in": "query",
+            "name": "mac",
+            "required": false,
+            "schema": {
+              "description": "exact MAC match (any common separator form)",
+              "title": "Mac",
+              "type": "string"
+            }
+          },
+          {
+            "description": "exact IP match",
+            "in": "query",
+            "name": "ip",
+            "required": false,
+            "schema": {
+              "description": "exact IP match",
+              "title": "Ip",
+              "type": "string"
+            }
+          },
+          {
+            "description": "exact lease state filter",
+            "in": "query",
+            "name": "state",
+            "required": false,
+            "schema": {
+              "description": "exact lease state filter",
+              "title": "State",
+              "type": "string"
+            }
+          },
+          {
+            "description": "fingerbank device class",
+            "in": "query",
+            "name": "device_class",
+            "required": false,
+            "schema": {
+              "description": "fingerbank device class",
+              "title": "Device Class",
+              "type": "string"
+            }
+          },
+          {
+            "description": "restrict to one DHCP server",
+            "in": "query",
+            "name": "server_id",
+            "required": false,
+            "schema": {
+              "description": "restrict to one DHCP server",
+              "format": "uuid",
+              "title": "Server Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "restrict to one DHCP server group",
+            "in": "query",
+            "name": "group_id",
+            "required": false,
+            "schema": {
+              "description": "restrict to one DHCP server group",
+              "format": "uuid",
+              "title": "Group Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "restrict to one scope",
+            "in": "query",
+            "name": "scope_id",
+            "required": false,
+            "schema": {
+              "description": "restrict to one scope",
+              "format": "uuid",
+              "title": "Scope Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "maximum": 1000000,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_LeaseResponse_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List All Leases",
+        "tags": [
+          "dhcp",
+          "dhcp"
         ]
       }
     },
@@ -72531,6 +76546,58 @@
         ]
       }
     },
+    "/api/v1/dhcp/pools/occupancy": {
+      "get": {
+        "description": "Dynamic pools across every scope, fullest first.\n\nAnswers the DHCP dashboard's headline question \u2014 \"can clients still\nget an address anywhere\" \u2014 in one round trip and a fixed number of\nqueries: the pool fetch, one batched lease + reservation pass, the\nlease count, and name resolution for the returned slice only.\n\nFixed query *count*, not fixed *work*: the batched pass reads every\nactive lease and reservation in the scopes that own a dynamic pool,\nso it scales with the lease table rather than with ``limit``, which\nbounds only the rendered slice. That is deliberate \u2014 it is the same\nscan ``compute_pool_occupancy_batch`` already performs for the\nper-scope endpoint and for the ``dhcp_pool_exhaustion`` evaluator on\nits own tick, and re-deriving occupancy in SQL here would be a\nfourth implementation of the range arithmetic that could disagree\nwith the other three. If this becomes hot, push the range containment\ninto the shared helper so every caller benefits.",
+        "operationId": "fleet_pool_occupancy_api_v1_dhcp_pools_occupancy_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FleetPoolOccupancyResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Fleet Pool Occupancy",
+        "tags": [
+          "dhcp",
+          "dhcp"
+        ]
+      }
+    },
     "/api/v1/dhcp/pools/{pool_id}": {
       "delete": {
         "operationId": "delete_pool_api_v1_dhcp_pools__pool_id__delete",
@@ -72624,6 +76691,56 @@
           }
         ],
         "summary": "Update Pool",
+        "tags": [
+          "dhcp",
+          "dhcp"
+        ]
+      }
+    },
+    "/api/v1/dhcp/pools/{pool_id}/occupancy": {
+      "get": {
+        "description": "Live occupancy of one pool \u2014 assigned / total / free / percent.",
+        "operationId": "pool_occupancy_api_v1_dhcp_pools__pool_id__occupancy_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pool_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Pool Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PoolOccupancyResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Pool Occupancy",
         "tags": [
           "dhcp",
           "dhcp"
@@ -73460,6 +77577,60 @@
         ]
       }
     },
+    "/api/v1/dhcp/scopes/{scope_id}/pools/occupancy": {
+      "get": {
+        "description": "Live occupancy of every dynamic pool in a scope, in one call.\n\nThe scope-level shape is the one that matters operationally: a scope\nwith several pools is exactly where a call-per-pool is wasteful, and\nalso where \"the scope looks fine\" hides one exhausted class-restricted\npool. Non-dynamic pools are omitted rather than reported at a number\nthat is not a fact about them \u2014 see :data:`_OCCUPANCY_POOL_TYPE`.",
+        "operationId": "scope_pool_occupancy_api_v1_dhcp_scopes__scope_id__pools_occupancy_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scope_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Scope Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PoolOccupancyResponse"
+                  },
+                  "title": "Response Scope Pool Occupancy Api V1 Dhcp Scopes  Scope Id  Pools Occupancy Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Scope Pool Occupancy",
+        "tags": [
+          "dhcp",
+          "dhcp"
+        ]
+      }
+    },
     "/api/v1/dhcp/scopes/{scope_id}/statics": {
       "get": {
         "operationId": "list_statics_api_v1_dhcp_scopes__scope_id__statics_get",
@@ -73909,6 +78080,166 @@
           }
         ],
         "summary": "Create Class",
+        "tags": [
+          "dhcp",
+          "dhcp"
+        ]
+      }
+    },
+    "/api/v1/dhcp/server-groups/{group_id}/device-observations": {
+      "get": {
+        "description": "Fingerbank device classes actually observed, with device counts.\n\nFeeds the class picker. Offering a free-text box instead would let an\noperator build a policy against a class string that never appears,\nwhich compiles to an empty expression and renders nothing \u2014 a policy\nthat looks configured and does nothing at all.\n\nThe fingerprint store is not group-scoped (one row per MAC,\nplatform-wide), so these counts are platform-wide too. ``group_id`` is\nvalidated so the endpoint 404s consistently with its siblings rather\nthan answering for a group that does not exist.",
+        "operationId": "list_device_observations_api_v1_dhcp_server_groups__group_id__device_observations_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Group Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceObservationsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Device Observations",
+        "tags": [
+          "dhcp",
+          "dhcp"
+        ]
+      }
+    },
+    "/api/v1/dhcp/server-groups/{group_id}/device-policies": {
+      "get": {
+        "operationId": "list_device_policies_api_v1_dhcp_server_groups__group_id__device_policies_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Group Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DevicePolicyResponse"
+                  },
+                  "title": "Response List Device Policies Api V1 Dhcp Server Groups  Group Id  Device Policies Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Device Policies",
+        "tags": [
+          "dhcp",
+          "dhcp"
+        ]
+      },
+      "post": {
+        "operationId": "create_device_policy_api_v1_dhcp_server_groups__group_id__device_policies_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Group Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevicePolicyCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevicePolicyResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Device Policy",
         "tags": [
           "dhcp",
           "dhcp"
@@ -75565,11 +79896,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "title": "Response Sync Server Api V1 Dhcp Servers  Server Id  Sync Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ServerSyncResponse"
                 }
               }
             },
@@ -76241,9 +80568,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Name Conformance Api V1 Diagnostics Name Conformance Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/NameConformanceReport"
                 }
               }
             },
@@ -77201,6 +81526,102 @@
           }
         ],
         "summary": "Rpz Feeds",
+        "tags": [
+          "dns-threat"
+        ]
+      }
+    },
+    "/api/v1/dns-threat/rpz/hits": {
+      "get": {
+        "description": "The individual blocked lookups, newest first (issue #914).\n\nThe four rollups above answer \"how much\"; this answers \"what\". The\nrows have been stored since #699 and were reachable from no endpoint,\nso \"show me the three lookups this PC made in the last ten minutes\nthat were blocked\" \u2014 the question that actually closes out a user\nreport \u2014 could not be asked.\n\n``include_passthru`` is off by default: a PASSTHRU is an explicit\nALLOW, and listing it among blocks makes a working allowlist look\nlike an infection.",
+        "operationId": "rpz_hits_api_v1_dns_threat_rpz_hits_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "hours",
+            "required": false,
+            "schema": {
+              "default": 24,
+              "maximum": 720,
+              "minimum": 1,
+              "title": "Hours",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "client_ip",
+            "required": false,
+            "schema": {
+              "title": "Client Ip",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "qname_contains",
+            "required": false,
+            "schema": {
+              "maxLength": 255,
+              "title": "Qname Contains",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include_passthru",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Include Passthru",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RPZHitRow"
+                  },
+                  "title": "Response Rpz Hits Api V1 Dns Threat Rpz Hits Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rpz Hits",
         "tags": [
           "dns-threat"
         ]
@@ -81683,11 +86104,13 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
+              "application/zip": {
+                "schema": {
+                  "type": "string"
+                }
               }
             },
-            "description": "Successful Response"
+            "description": "Zone files as a zip archive"
           },
           "422": {
             "content": {
@@ -82048,9 +86471,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Delegation Preview Api V1 Dns Groups  Group Id  Zones  Zone Id  Delegation Preview Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/DelegationPreviewResponse"
                 }
               }
             },
@@ -82109,9 +86530,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Zone Dnssec Info Api V1 Dns Groups  Group Id  Zones  Zone Id  Dnssec Info Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ZoneDNSSECInfo"
                 }
               }
             },
@@ -82425,11 +86844,13 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
+              "text/dns": {
+                "schema": {
+                  "type": "string"
+                }
               }
             },
-            "description": "Successful Response"
+            "description": "Zone file in master-file format"
           },
           "422": {
             "content": {
@@ -82586,6 +87007,143 @@
           }
         ],
         "summary": "Import Zone Preview",
+        "tags": [
+          "dns"
+        ]
+      }
+    },
+    "/api/v1/dns/groups/{group_id}/zones/{zone_id}/move/commit": {
+      "post": {
+        "operationId": "move_zone_commit_api_v1_dns_groups__group_id__zones__zone_id__move_commit_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Group Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "zone_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Zone Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ZoneMoveCommitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZoneMoveCommitResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Move Zone Commit",
+        "tags": [
+          "dns"
+        ]
+      }
+    },
+    "/api/v1/dns/groups/{group_id}/zones/{zone_id}/move/preview": {
+      "post": {
+        "description": "Report exactly what moving this zone to another group would do.\n\nPure read \u2014 nothing is written, so it is safe to call repeatedly while\nthe operator decides. The commit re-derives the same plan inside its\nlock rather than trusting this one.",
+        "operationId": "move_zone_preview_api_v1_dns_groups__group_id__zones__zone_id__move_preview_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Group Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "zone_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Zone Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ZoneMovePreviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZoneMovePreviewResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Move Zone Preview",
         "tags": [
           "dns"
         ]
@@ -82975,7 +87533,7 @@
     },
     "/api/v1/dns/groups/{group_id}/zones/{zone_id}/records/bulk-delete": {
       "post": {
-        "description": "Delete many records from one zone in a single transaction.\n\nAvoids the N-round-trip cost of the UI fanning out N singular\nDELETEs \u2014 groups every op into one ``enqueue_record_ops_batch`` call\nso agentless Windows DNS sees one WinRM round trip for the whole\nbatch instead of one per record. BIND9 still writes N queued rows\n(the agent will batch-ship on its next poll).",
+        "description": "Delete many records from one zone in a single transaction.\n\nAvoids the N-round-trip cost of the UI fanning out N singular\nDELETEs \u2014 groups every op into one ``enqueue_record_ops_batch`` call\nso agentless Windows DNS sees one WinRM round trip for the whole\nbatch instead of one per record. BIND9 still writes N queued rows\n(the agent will batch-ship on its next poll).\n\nSame contract as the singular ``DELETE .../records/{id}`` (#963): the\ndefault is a **soft** delete \u2014 every record stamped with ONE shared\n``deletion_batch_id`` so the whole batch restores from /admin/trash in\none action \u2014 and ``?permanent=true`` is superadmin-only. Before #963\nthis route hard-deleted under a plain ``CurrentUser`` while the\nsingular route soft-deleted, so the same rows had two authorization\nbars and two retention outcomes depending on which button was pressed.\nBoth paths push the wire retraction (#632). A row whose wire delete came\nback ``failed`` stays live \u2014 which only an agentless driver can answer\ninline; an agent-based server queues ``pending`` and a later NACK marks\nthe op ``failed`` after the row is already in the trash (restorable) or\ngone (permanent). Same window the singular route accepts.\n\nNo ``propose_*`` copilot tool for this route (explicit decision per\nnon-negotiable #13): a bulk delete is the broad-blast-radius shape that\nguidance keeps off the chat window.",
         "operationId": "bulk_delete_records_api_v1_dns_groups__group_id__zones__zone_id__records_bulk_delete_post",
         "parameters": [
           {
@@ -82996,6 +87554,16 @@
               "format": "uuid",
               "title": "Zone Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "permanent",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Permanent",
+              "type": "boolean"
             }
           }
         ],
@@ -84955,9 +89523,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Zone Templates Api V1 Dns Zone Templates Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ZoneTemplateCatalog"
                 }
               }
             },
@@ -84994,9 +89560,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Check Now Api V1 Dnsbl Check Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/DNSBLCheckResult"
                 }
               }
             },
@@ -85147,9 +89711,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Listings By Ip Api V1 Dnsbl Listings By Ip  Ip  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/DNSBLListingsByIP"
                 }
               }
             },
@@ -85785,11 +90347,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "title": "Response Sync Host Api V1 Docker Hosts  Host Id  Sync Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/StatusResponse"
                 }
               }
             },
@@ -86916,11 +91474,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "title": "Response Sync Firewall Api V1 Fortinet Firewalls  Firewall Id  Sync Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/StatusResponse"
                 }
               }
             },
@@ -89668,10 +94222,11 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
-              },
-              "application/pdf": {}
+              "application/pdf": {
+                "schema": {
+                  "type": "string"
+                }
+              }
             },
             "description": "PDF IPAM report"
           },
@@ -90931,6 +95486,101 @@
         ]
       }
     },
+    "/api/v1/ipam/reports/hygiene": {
+      "get": {
+        "description": "Address-space hygiene, computed live (issue #917 over the #369 detections).\n\nThree buckets: IPs marked ``available`` that are answering, reservations\nnothing has seen in ``stale_reservation_days``, and static-range IPs\nanswered by a **different MAC** than the one recorded \u2014 a squat.\n\nThese have existed as alert *rules* since #369, which answers \"tell me\nwhen this becomes true\". This answers \"is it true right now, at the\nthreshold I care about\", without requiring a rule to have been configured\nfirst \u2014 and it is the same code path the rules use, so the two cannot\ndisagree about what a detection means.",
+        "operationId": "get_ip_hygiene_report_api_v1_ipam_reports_hygiene_get",
+        "parameters": [
+          {
+            "description": "An 'available' row counts as responding if seen within N days.",
+            "in": "query",
+            "name": "free_responding_days",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "description": "An 'available' row counts as responding if seen within N days.",
+              "maximum": 365,
+              "minimum": 1,
+              "title": "Free Responding Days",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "A reservation counts as stale if nothing has seen it in N days.",
+            "in": "query",
+            "name": "stale_reservation_days",
+            "required": false,
+            "schema": {
+              "default": 90,
+              "description": "A reservation counts as stale if nothing has seen it in N days.",
+              "maximum": 3650,
+              "minimum": 1,
+              "title": "Stale Reservation Days",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "An observed MAC differing from the recorded one counts if seen within N days.",
+            "in": "query",
+            "name": "squat_days",
+            "required": false,
+            "schema": {
+              "default": 7,
+              "description": "An observed MAC differing from the recorded one counts if seen within N days.",
+              "maximum": 365,
+              "minimum": 1,
+              "title": "Squat Days",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Max rows per bucket.",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "description": "Max rows per bucket.",
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HygieneReport"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Ip Hygiene Report",
+        "tags": [
+          "ipam"
+        ]
+      }
+    },
     "/api/v1/ipam/reports/stale-ips": {
       "get": {
         "description": "Allocated IPs nothing has seen in ``stale_days`` days (issue #45).\n\nOptional ``space_id`` / ``block_id`` / ``subnet_id`` scope the report.\n``include_never_seen`` folds in allocated rows that were never seen on\nthe wire (off by default \u2014 those are often in subnets where discovery\nwas never enabled). See docs/features/IPAM.md \u00a79.",
@@ -91017,9 +95667,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Stale Ip Report Api V1 Ipam Reports Stale Ips Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/StaleIPReport"
                 }
               }
             },
@@ -91089,6 +95737,165 @@
           }
         ],
         "summary": "Deprecate Stale Ips",
+        "tags": [
+          "ipam"
+        ]
+      }
+    },
+    "/api/v1/ipam/reports/vendors": {
+      "get": {
+        "description": "Device counts by hardware vendor \u2014 \"how many Apple devices?\" (#917).\n\nRequires OUI lookup to be enabled in Settings \u2192 IPAM. When it is off the\nrollup reports zero matches with an unchanged shape rather than erroring,\nwhich ``total_macs_seen`` makes distinguishable from an empty network.",
+        "operationId": "get_vendor_rollup_api_v1_ipam_reports_vendors_get",
+        "parameters": [
+          {
+            "description": "'ipam' = managed rows, 'dhcp_active' = live leases, 'all' = union by MAC.",
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "default": "ipam",
+              "description": "'ipam' = managed rows, 'dhcp_active' = live leases, 'all' = union by MAC.",
+              "enum": [
+                "ipam",
+                "dhcp_active",
+                "all"
+              ],
+              "title": "Source",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Case-insensitive substring on the OUI vendor name.",
+            "in": "query",
+            "name": "vendor_search",
+            "required": false,
+            "schema": {
+              "description": "Case-insensitive substring on the OUI vendor name.",
+              "maxLength": 255,
+              "title": "Vendor Search",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorRollup"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Vendor Rollup",
+        "tags": [
+          "ipam"
+        ]
+      }
+    },
+    "/api/v1/ipam/reports/vendors/devices": {
+      "get": {
+        "description": "The devices behind a vendor bucket, IPAM rows first.\n\nDeduplicated by normalized MAC, so a device with both a managed row and a\nlive lease is listed once \u2014 as the managed row, which carries the hostname\nand subnet context the lease does not.",
+        "operationId": "get_vendor_devices_api_v1_ipam_reports_vendors_devices_get",
+        "parameters": [
+          {
+            "description": "e.g. 'apple', 'raspberry', 'cisco'.",
+            "in": "query",
+            "name": "vendor_search",
+            "required": true,
+            "schema": {
+              "description": "e.g. 'apple', 'raspberry', 'cisco'.",
+              "maxLength": 255,
+              "minLength": 1,
+              "title": "Vendor Search",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "default": "ipam",
+              "enum": [
+                "ipam",
+                "dhcp_active",
+                "all"
+              ],
+              "title": "Source",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorDeviceList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Vendor Devices",
         "tags": [
           "ipam"
         ]
@@ -93392,9 +98199,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Subnet Reconciliation Api V1 Ipam Subnets  Subnet Id  Reconciliation Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ReconciliationReport"
                 }
               }
             },
@@ -94420,11 +99225,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "title": "Response Sync Cluster Api V1 Kubernetes Clusters  Cluster Id  Sync Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/StatusResponse"
                 }
               }
             },
@@ -96319,11 +101120,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "title": "Response Sync Org Api V1 Meraki Orgs  Org Pk  Sync Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/StatusResponse"
                 }
               }
             },
@@ -98314,9 +103111,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Bulk Delete Groups Api V1 Multicast Groups Bulk Delete Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/app__api__v1___common__BulkDeleteResponse"
                 }
               }
             },
@@ -99093,11 +103888,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "title": "Response Sync Instance Api V1 Netbird Instances  Instance Id  Sync Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/StatusResponse"
                 }
               }
             },
@@ -100693,11 +105484,13 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
               }
             },
-            "description": "Successful Response"
+            "description": "Server-sent event stream of scan progress"
           },
           "422": {
             "content": {
@@ -100959,11 +105752,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "title": "Response Sync Router Api V1 Opnsense Routers  Router Id  Sync Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/StatusResponse"
                 }
               }
             },
@@ -102001,9 +106790,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Bulk Delete Overlays Api V1 Overlays Bulk Delete Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/app__api__v1___common__BulkDeleteResponse"
                 }
               }
             },
@@ -103090,11 +107877,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "title": "Response Sync Firewall Api V1 Paloalto Firewalls  Firewall Id  Sync Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/StatusResponse"
                 }
               }
             },
@@ -103420,11 +108203,13 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
+              "application/vnd.tcpdump.pcap": {
+                "schema": {
+                  "type": "string"
+                }
               }
             },
-            "description": "Successful Response"
+            "description": "The capture file"
           },
           "422": {
             "content": {
@@ -104080,11 +108865,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "title": "Response Sync Node Api V1 Proxmox Nodes  Node Id  Sync Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/StatusResponse"
                 }
               }
             },
@@ -105353,7 +110134,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServiceListResponse"
+                  "$ref": "#/components/schemas/app__api__v1__services__router__ServiceListResponse"
                 }
               }
             },
@@ -105445,9 +110226,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Bulk Delete Services Api V1 Services Bulk Delete Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/app__api__v1___common__BulkDeleteResponse"
                 }
               }
             },
@@ -106446,6 +111225,226 @@
         ]
       }
     },
+    "/api/v1/settings/influxdb-targets": {
+      "get": {
+        "operationId": "list_influxdb_targets_api_v1_settings_influxdb_targets_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/InfluxDBTargetResponse"
+                  },
+                  "title": "Response List Influxdb Targets Api V1 Settings Influxdb Targets Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Influxdb Targets",
+        "tags": [
+          "settings"
+        ]
+      },
+      "post": {
+        "operationId": "create_influxdb_target_api_v1_settings_influxdb_targets_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InfluxDBTargetBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluxDBTargetResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Influxdb Target",
+        "tags": [
+          "settings"
+        ]
+      }
+    },
+    "/api/v1/settings/influxdb-targets/{target_id}": {
+      "delete": {
+        "operationId": "delete_influxdb_target_api_v1_settings_influxdb_targets__target_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "target_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Target Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Influxdb Target",
+        "tags": [
+          "settings"
+        ]
+      },
+      "put": {
+        "operationId": "update_influxdb_target_api_v1_settings_influxdb_targets__target_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "target_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Target Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InfluxDBTargetBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluxDBTargetResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Influxdb Target",
+        "tags": [
+          "settings"
+        ]
+      }
+    },
+    "/api/v1/settings/influxdb-targets/{target_id}/test": {
+      "post": {
+        "description": "Write one synthetic point and report the server's verdict.\n\nDeliberately a *real* write rather than a reachability ping: a\ncorrect URL with the wrong bucket, org or token answers a GET\nperfectly well and then rejects every point. The point lands in the\ntarget's own ``<prefix>export_test`` measurement so it never\ncontaminates a real series, and the watermarks are untouched \u2014 this\nis a probe, not a push.",
+        "operationId": "test_influxdb_target_api_v1_settings_influxdb_targets__target_id__test_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "target_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Target Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfluxDBTestResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Test Influxdb Target",
+        "tags": [
+          "settings"
+        ]
+      }
+    },
     "/api/v1/settings/oui/refresh": {
       "post": {
         "operationId": "trigger_oui_refresh_api_v1_settings_oui_refresh_post",
@@ -107208,9 +112207,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List Sections Api V1 System Factory Reset Sections Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/FactorySectionCatalog"
                 }
               }
             },
@@ -107223,6 +112220,90 @@
           }
         ],
         "summary": "List Sections",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/api/v1/system/services": {
+      "get": {
+        "description": "Which lifecycle backend is live, and what it can act on.",
+        "operationId": "list_services_api_v1_system_services_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/app__api__v1__system__services__ServiceListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Services",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/api/v1/system/services/{service_id}/{action}": {
+      "post": {
+        "description": "Start / stop / restart one service. 202 \u2014 the outcome is async.\n\n``service_id`` is resolved against the live inventory rather than\npassed through, so the set of things this endpoint can touch is\nexactly the set it just listed.",
+        "operationId": "act_on_service_api_v1_system_services__service_id___action__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "service_id",
+            "required": true,
+            "schema": {
+              "title": "Service Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "action",
+            "required": true,
+            "schema": {
+              "title": "Action",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceActionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Act On Service",
         "tags": [
           "system"
         ]
@@ -107245,11 +112326,13 @@
         "responses": {
           "200": {
             "content": {
-              "application/json": {
-                "schema": {}
+              "application/zip": {
+                "schema": {
+                  "type": "string"
+                }
               }
             },
-            "description": "Successful Response"
+            "description": "The support-bundle archive"
           },
           "422": {
             "content": {
@@ -107726,11 +112809,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "title": "Response Sync Tenant Api V1 Tailscale Tenants  Tenant Id  Sync Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/StatusResponse"
                 }
               }
             },
@@ -108113,9 +113192,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Chain Api V1 Tls Certs  Target Id  Chain Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/CertChainResponse"
                 }
               }
             },
@@ -109190,11 +114267,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "title": "Response Sync Controller Api V1 Unifi Controllers  Controller Id  Sync Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/StatusResponse"
                 }
               }
             },

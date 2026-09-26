@@ -52,7 +52,7 @@ struct ServerVersionTests {
 
     @Test("The declared minimum is the release the client was generated from")
     func minimumIsPinnedRelease() {
-        #expect(SupportedServer.minimum.displayName == "2026.08.22-1")
+        #expect(SupportedServer.minimum.displayName == "2026.09.04-1")
         #expect(!SupportedServer.minimum.isDevelopment)
     }
 }
