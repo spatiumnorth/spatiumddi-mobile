@@ -17,6 +17,7 @@ final class SignInFlowUITests: XCTestCase {
         )
     }
 
+    @MainActor
     private func attach(_ app: XCUIApplication, _ name: String) {
         let shot = XCTAttachment(screenshot: app.screenshot())
         shot.name = name
@@ -25,6 +26,7 @@ final class SignInFlowUITests: XCTestCase {
     }
 
     /// Connect, approve the certificate, continue — and land on sign-in.
+    @MainActor
     func testTrustedServerLeadsToSignIn() throws {
         let app = XCUIApplication()
         app.launch()
@@ -62,6 +64,7 @@ final class SignInFlowUITests: XCTestCase {
 
     /// The token field masks by default; pasting a credential blind is exactly
     /// when an operator needs to check it.
+    @MainActor
     func testTokenCanBeRevealedAndHiddenAgain() throws {
         let app = XCUIApplication()
         app.launch()
