@@ -7,11 +7,27 @@ updates:
     commit-message:
       prefix: ci
 
-  # No SPM manifest yet — this starts producing updates once the generated
-  # API client lands and Package.resolved is committed.
+  # Both resolved files. The app's (under /SpatiumDDI) is the one a build
+  # uses; the package's is what `swift test --package-path Packages/SpatiumAPI`
+  # uses. Covering only the first let the second drift four packages behind.
   - package-ecosystem: swift
-    directory: /SpatiumDDI
+    directories:
+      - /SpatiumDDI
+      - /Packages/SpatiumAPI
     schedule:
       interval: weekly
     commit-message:
       prefix: deps
+    groups:
+      # The generator, its runtime and their parsers are released together
+      # and only tested together — one PR, not four that each build alone.
+      openapi-toolchain:
+        patterns:
+          - "*swift-openapi-*"
+          - "*openapikit*"
+          - "*swift-http-types*"
+          - "*yams*"
+      # Everything else the generator pulls in transitively.
+      swift-support:
+        patterns:
+          - "*"
