@@ -112,9 +112,11 @@ nonisolated enum AppSection: String, CaseIterable, Identifiable, Hashable, Senda
     ///
     /// A control plane with the module switched off answers 404 from every one
     /// of that section's endpoints, so the section is hidden rather than
-    /// offered as a screen that can only ever report being unavailable. Core
-    /// DDI — IPAM, DNS, DHCP, alerts, search — is not togglable and so is not
-    /// gated here.
+    /// offered as a screen that can only ever report being unavailable. IPAM,
+    /// alerts and search are not togglable and so are not gated here. DNS and
+    /// DHCP are, from 2026.10.02-1 (`core.dns`, `core.dhcp`) — which is also
+    /// the minimum supported server, so every control plane this build will
+    /// talk to lists both and naming them cannot hide a screen for good.
     var featureModule: String? {
         switch self {
         // Domains deliberately absent: there is no `network.domain` module —
@@ -127,6 +129,10 @@ nonisolated enum AppSection: String, CaseIterable, Identifiable, Hashable, Senda
         // on), so there is no one id to name — and the summary endpoint is
         // ungated and reports each panel's own `enabled`, which the screen
         // filters on. The gate is one layer down, not missing.
+        case .dns, .dnsLog: "core.dns"
+        // Client Lookup reads only `/dhcp/leases` and `/dhcp/lease-history`,
+        // which `core.dhcp` gates with the rest of the DHCP router.
+        case .dhcp, .dhcpLog, .clientLookup: "core.dhcp"
         case .changeRequests: "governance.approvals"
         case .newDevices: "security.new_device_watch"
         case .certificates: "security.tls_certs"

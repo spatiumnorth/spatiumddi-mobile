@@ -38,6 +38,22 @@ struct AppSectionTests {
         #expect(duplicates.isEmpty, "shared by more than one section: \(duplicates.sorted())")
     }
 
+    /// DNS and DHCP became modules in 2026.10.02-1. A screen left ungated
+    /// answers every request with the module's 404 when it is switched off;
+    /// IPAM, alerts and search have no module and must stay ungated, or the
+    /// gate would hide them on every server.
+    @Test("DNS and DHCP screens follow their core module; IPAM does not")
+    func coreDDIModules() {
+        #expect(AppSection.dns.featureModule == "core.dns")
+        #expect(AppSection.dnsLog.featureModule == "core.dns")
+        #expect(AppSection.dhcp.featureModule == "core.dhcp")
+        #expect(AppSection.dhcpLog.featureModule == "core.dhcp")
+        #expect(AppSection.clientLookup.featureModule == "core.dhcp")
+        #expect(AppSection.ipam.featureModule == nil)
+        #expect(AppSection.alerts.featureModule == nil)
+        #expect(AppSection.overview.featureModule == nil)
+    }
+
     /// A section reachable from the sidebar but absent from every group would
     /// exist in the enum and nowhere on screen.
     @Test("Every section appears in exactly one group")
