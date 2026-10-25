@@ -525,6 +525,9 @@ struct DHCPScopeDetailView: View {
 
     @State private var subnet: Components.Schemas.SubnetResponse?
     @State private var pools: LoadState<[Components.Schemas.AppApiV1DhcpPoolsPoolResponse]> = .idle
+    /// Live fill per pool id, for the dynamic pools the server measured.
+    @State private var occupancy: [String: Components.Schemas.PoolOccupancyResponse] = [:]
+    @State private var occupancyFailure: FailureMessage?
     @State private var statics: LoadState<[Components.Schemas.StaticResponse]> = .idle
     @State private var isAddingReservation = false
     @State private var pendingReservationDelete: DeleteReservationModel?
@@ -592,8 +595,35 @@ struct DHCPScopeDetailView: View {
                                     Badge(text: restriction, tint: .purple)
                                 }
                             }
+                            // Only where the server reported one: it omits
+                            // non-dynamic pools rather than give them a number
+                            // that is not a fact about them, and a bar at 0%
+                            // here would be exactly that.
+                            if let fill = occupancy[pool.id] {
+                                UtilisationBar(percent: fill.percent)
+                                Text(
+                                    "\(fill.assigned.formatted()) of \(fill.total.formatted()) assigned · \(fill.free.formatted()) free"
+                                )
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                            }
                         }
                     }
+                }
+                // Occupancy is a second call, and its failure must not take the
+                // pool list with it — the ranges are still worth showing. But a
+                // missing bar has to be explained, or it reads as an empty pool.
+                if let occupancyFailure, hasPool == true {
+                    Label {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Pool occupancy is unavailable.")
+                            Text(occupancyFailure).font(.caption2)
+                        }
+                    } icon: {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.orange)
                 }
             }
 
@@ -682,7 +712,36 @@ struct DHCPScopeDetailView: View {
         async let a: Void = fetchSubnet()
         async let b: Void = fetchPools()
         async let c: Void = fetchStatics()
-        _ = await (a, b, c)
+        async let d: Void = fetchOccupancy()
+        _ = await (a, b, c, d)
+    }
+
+    private func fetchOccupancy() async {
+        let result: LoadState<[String: Components.Schemas.PoolOccupancyResponse]> = await LoadState.fetching {
+            let response = try await session.client
+                .scopePoolOccupancyApiV1DhcpScopesScopeIdPoolsOccupancyGet(path: .init(scopeId: scope.id))
+            switch response {
+            case .ok(let ok):
+                return PoolOccupancy.byPool(try ok.body.json)
+            case .unprocessableContent:
+                throw APIStatusError(status: 422)
+            case .undocumented(let statusCode, let payload):
+                throw await APIStatusError(status: statusCode, payload: payload)
+            }
+        }
+        switch result {
+        case .loaded(let byPool):
+            occupancy = byPool
+            occupancyFailure = nil
+        case .failed(let message):
+            // Dropped rather than left showing the last answer: a stale fill
+            // bar beside a fresh pool list is the plausible-but-wrong figure
+            // this app refuses to show.
+            occupancy = [:]
+            occupancyFailure = message
+        case .idle, .loading:
+            break
+        }
     }
 
     private func fetchSubnet() async {
@@ -726,5 +785,17 @@ struct DHCPScopeDetailView: View {
                 throw await APIStatusError(status: statusCode, payload: payload)
             }
         }
+    }
+}
+
+/// Matching the scope's occupancy rows to the pools they measure.
+nonisolated enum PoolOccupancy {
+    /// Keyed by pool id. Should the server ever repeat a pool, the last row
+    /// wins rather than the dictionary initialiser trapping on a duplicate key
+    /// — a display figure must not be able to crash the app.
+    static func byPool(
+        _ rows: [Components.Schemas.PoolOccupancyResponse]
+    ) -> [String: Components.Schemas.PoolOccupancyResponse] {
+        Dictionary(rows.map { ($0.poolId, $0) }, uniquingKeysWith: { _, last in last })
     }
 }
