@@ -448,6 +448,75 @@ struct UngatedTokenStoreTests {
     }
 }
 
+/// Which way in, decided from what is stored — without touching the Keychain.
+@Suite("Unlock or straight in")
+struct EntryDecisionTests {
+    @Test("Nothing stored means sign-in, whatever the protection says")
+    func nothingStored() {
+        for protection in [nil] + KeychainProtection.allCases.map(Optional.some) {
+            #expect(AppFlowModel.entry(hasToken: false, protection: protection) == .signIn)
+        }
+    }
+
+    @Test(
+        "A gated token goes through the unlock screen", arguments: [KeychainProtection.biometrics, .passcode])
+    func gatedUnlocks(protection: KeychainProtection) {
+        #expect(AppFlowModel.entry(hasToken: true, protection: protection) == .unlock)
+    }
+
+    @Test("An ungated token goes straight in")
+    func ungatedStraightIn() {
+        #expect(AppFlowModel.entry(hasToken: true, protection: .deviceUnlock) == .straightIn)
+    }
+
+    /// A token whose attributes could not be read — a launch while locked —
+    /// is treated as gated. Going "straight in" on a guess would mean a
+    /// silent read of an item that may need a prompt.
+    @Test("An unknown protection is treated as a gate")
+    func unknownIsGated() {
+        #expect(AppFlowModel.entry(hasToken: true, protection: nil) == .unlock)
+    }
+}
+
+/// What the sign-in screen says and allows, for each choice on each device.
+@Suite("Gate choice at sign-in")
+struct GateChoiceTests {
+    private let gated: Result<KeychainProtection, TokenStore.StoreError> = .success(.biometrics)
+    private let passcodeOnly: Result<KeychainProtection, TokenStore.StoreError> = .success(.passcode)
+    private let noPasscode: Result<KeychainProtection, TokenStore.StoreError> = .failure(
+        .deviceUnprotected("no passcode is set"))
+
+    @Test("Off is always allowed — including on a device with no passcode")
+    func offIsAlwaysAllowed() {
+        for available in [gated, passcodeOnly, noPasscode] {
+            #expect(SignInModel.canSignIn(requiringAuthentication: false, available: available))
+        }
+    }
+
+    @Test("On is refused only where there is nothing to gate with")
+    func onNeedsAGate() {
+        #expect(SignInModel.canSignIn(requiringAuthentication: true, available: gated))
+        #expect(SignInModel.canSignIn(requiringAuthentication: true, available: passcodeOnly))
+        #expect(!SignInModel.canSignIn(requiringAuthentication: true, available: noPasscode))
+    }
+
+    @Test("The notice matches the choice and the device")
+    func noticeSelection() {
+        typealias Notice = DeviceProtectionNotice
+        #expect(Notice.kind(requiringAuthentication: false, available: gated) == .ungated)
+        #expect(Notice.kind(requiringAuthentication: false, available: passcodeOnly) == .ungated)
+        // The one that must be loud: ungated on a phone anyone can pick up.
+        #expect(Notice.kind(requiringAuthentication: false, available: noPasscode) == .ungatedWithoutPasscode)
+        #expect(Notice.kind(requiringAuthentication: true, available: gated) == .gated(.biometrics))
+        #expect(Notice.kind(requiringAuthentication: true, available: passcodeOnly) == .gated(.passcode))
+        #expect(
+            Notice.kind(requiringAuthentication: true, available: noPasscode)
+                == .gateUnavailable(
+                    TokenStore.StoreError.deviceUnprotected("no passcode is set").localizedDescription)
+        )
+    }
+}
+
 /// The typed gate in front of a delete (spatiumddi-mobile#8).
 ///
 /// Deleting a DNS record pushes the retraction to every server in the group

@@ -23,7 +23,8 @@ struct AppRootView: View {
                     // certain to answer. A launch that happened while the
                     // device was locked — a prewarm, or a relaunch after a
                     // force-quit — cannot see an item stored
-                    // `WhenPasscodeSetThisDeviceOnly`, and would otherwise
+                    // `WhenPasscodeSetThisDeviceOnly` (or, ungated,
+                    // `WhenUnlockedThisDeviceOnly`), and would otherwise
                     // spend the whole session believing there was no token.
                     flow.reconsiderIfUntouched()
                 }
@@ -95,7 +96,9 @@ struct AppRootView: View {
                     onSignOut: { flow.signOut() },
                     onSwitchServer: { flow.showServers() },
                     onRename: { flow.rename(server, to: $0) },
-                    onSessionRejected: { flow.sessionRejected() }
+                    onSessionRejected: { flow.sessionRejected() },
+                    onChangeGate: { await flow.setRequiringAuthentication($0, for: server) },
+                    onSaveSessionToken: { flow.saveSessionToken(for: server, requiringAuthentication: $0) }
                 )
             } else {
                 // Only reachable if the token was dropped between the state
@@ -120,6 +123,10 @@ struct SignedInView: View {
     let onRename: (String?) -> Void
     /// Called when the server rejects the credential this session was built with.
     let onSessionRejected: () -> Void
+    /// "Require Face ID to open", changed from the Server screen.
+    let onChangeGate: (Bool) async -> AppFlowModel.GateChange
+    /// Puts this session's token back in the Keychain after a lost re-seal.
+    let onSaveSessionToken: (Bool) -> AppFlowModel.GateChange
 
     private var address: ServerAddress { server.address }
 
@@ -317,7 +324,9 @@ struct SignedInView: View {
                 protection: protection,
                 onSignOut: onSignOut,
                 onSwitchServer: onSwitchServer,
-                onRename: onRename
+                onRename: onRename,
+                onChangeGate: onChangeGate,
+                onSaveSessionToken: onSaveSessionToken
             )
         }
     }
@@ -331,10 +340,20 @@ struct ServerDetailView: View {
     let onSignOut: () -> Void
     let onSwitchServer: () -> Void
     let onRename: (String?) -> Void
+    let onChangeGate: (Bool) async -> AppFlowModel.GateChange
+    let onSaveSessionToken: (Bool) -> AppFlowModel.GateChange
 
     private var address: ServerAddress { server.address }
 
     @State private var isRenaming = false
+    /// The gate change waiting on the operator's confirmation, if any.
+    @State private var pendingGate: Bool?
+    /// What the last gate change came to, for the section to report.
+    @State private var gateOutcome: AppFlowModel.GateChange?
+    /// The target of a re-seal that lost the token, so "Save Token Again"
+    /// finishes what the operator asked for rather than undoing it.
+    @State private var targetAfterLoss: Bool?
+    @State private var isChangingGate = false
     @State private var identity: LoadState<Components.Schemas.AppApiV1AuthRouterUserResponse> = .idle
     @State private var permissions: LoadState<Components.Schemas.MyPermissionsResponse> = .idle
 
@@ -354,13 +373,56 @@ struct ServerDetailView: View {
 
             // What is actually holding the token on this device. Stated rather
             // than assumed: a passcode-gated token is a weaker promise than a
-            // biometric one, and the operator is entitled to know which they
-            // have without working it out from their device settings.
+            // biometric one, an ungated one weaker still, and the operator is
+            // entitled to know which they have without working it out from
+            // their device settings — and to change it, here, per server.
             Section {
                 if let protection {
                     LabeledContent("Protected by") {
                         Label(protection.summary, systemImage: protection.symbol)
                             .foregroundStyle(protection == .passcode ? .orange : .primary)
+                    }
+                    Toggle(isOn: gateBinding(current: protection)) {
+                        HStack {
+                            Text("Require \(TokenStore.biometryDescription()) to open")
+                            if isChangingGate { ProgressView() }
+                        }
+                    }
+                    // Turning a gate *on* needs one to exist. Turning it off
+                    // never does, so the switch stays usable for that.
+                    .disabled(isChangingGate || (!protection.isGated && !canGate))
+                    if !protection.isGated && !canGate {
+                        Label(
+                            "This device has no passcode, so anyone who picks it up can open this server. Set a passcode to be able to require one.",
+                            systemImage: "exclamationmark.shield.fill"
+                        )
+                        .font(.footnote)
+                        .foregroundStyle(.orange)
+                    }
+                } else if case .lost(let reason) = gateOutcome, let target = targetAfterLoss {
+                    // The re-seal lost the Keychain copy and the rollback was
+                    // refused too. The session is still live because the token
+                    // is still in memory — so say exactly that, and offer the
+                    // one action that fixes it, rather than letting the next
+                    // launch discover an empty Keychain.
+                    Label {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("The token is no longer saved on this device.")
+                            Text(verbatim: reason).foregroundStyle(.secondary)
+                            Text(
+                                "You're still signed in for now. Save it again, or you'll need to sign in next time."
+                            )
+                            .foregroundStyle(.secondary)
+                        }
+                        .font(.footnote)
+                    } icon: {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                    }
+                    .foregroundStyle(.orange)
+                    Button("Save Token Again") {
+                        let outcome = onSaveSessionToken(target)
+                        gateOutcome = outcome
+                        if case .changed = outcome { targetAfterLoss = nil }
                     }
                 } else {
                     // The in-memory token outlives the Keychain item after a
@@ -371,7 +433,38 @@ struct ServerDetailView: View {
             } header: {
                 Text("This Device")
             } footer: {
-                if let caveat = protection?.caveat { Text(caveat) }
+                VStack(alignment: .leading, spacing: 4) {
+                    if case .unchanged(let reason) = gateOutcome {
+                        // Foundation's or the Keychain's words — verbatim.
+                        Label(.server(reason), systemImage: "xmark.octagon.fill")
+                            .foregroundStyle(.red)
+                    }
+                    if let caveat = protection?.caveat { Text(caveat) }
+                }
+            }
+            // Non-negotiable #6's spirit: changing what guards the token is a
+            // write to this device's security, so it is confirmed, and the
+            // confirmation says what will actually change.
+            .confirmationDialog(
+                pendingGate == true ? gateOnTitle : gateOffTitle,
+                isPresented: .init(
+                    get: { pendingGate != nil },
+                    set: { if !$0 { pendingGate = nil } }
+                ),
+                titleVisibility: .visible,
+                presenting: pendingGate
+            ) { required in
+                // Turning the gate off weakens what protects production DNS,
+                // so it gets the destructive styling; turning it on does not.
+                Button(
+                    required ? gateOnAction : gateOffAction,
+                    role: required ? nil : .destructive
+                ) {
+                    pendingGate = nil
+                    Task { await changeGate(to: required) }
+                }
+            } message: { required in
+                Text(required ? gateOnMessage : gateOffMessage)
             }
 
             MaintenanceSection(
@@ -459,6 +552,75 @@ struct ServerDetailView: View {
             } onCancel: {
                 isRenaming = false
             }
+        }
+    }
+
+    // MARK: - The gate
+
+    /// Whether this device could gate a token at all.
+    private var canGate: Bool {
+        if case .success = TokenStore.availableProtection() { return true }
+        return false
+    }
+
+    /// What the gate would be if turned on now — named in the confirmation,
+    /// because "require Face ID" on a passcode-only phone would be a promise
+    /// the next prompt breaks.
+    private var gateOnName: String {
+        switch TokenStore.availableProtection() {
+        case .success(.biometrics): TokenStore.biometryDescription()
+        default: String(localized: "your passcode")
+        }
+    }
+
+    /// What is gating the token now — named from the item, not the device.
+    private var gateOffName: String {
+        protection == .biometrics ? TokenStore.biometryDescription() : String(localized: "your passcode")
+    }
+
+    /// The switch reads the stored truth, and writing it only *asks*.
+    ///
+    /// The change lands after the confirmation, so until then the switch keeps
+    /// showing what is actually in force — never a state the Keychain does not
+    /// hold.
+    private func gateBinding(current: KeychainProtection) -> Binding<Bool> {
+        Binding(
+            get: { current.isGated },
+            set: { requested in
+                guard requested != current.isGated else { return }
+                gateOutcome = nil
+                pendingGate = requested
+            }
+        )
+    }
+
+    private var gateOnTitle: LocalizedStringResource {
+        "Require \(gateOnName) to open \(server.displayName)?"
+    }
+    private var gateOffTitle: LocalizedStringResource {
+        "Stop requiring \(gateOffName) for \(server.displayName)?"
+    }
+    private var gateOnAction: LocalizedStringResource { "Require \(gateOnName)" }
+    private var gateOffAction: LocalizedStringResource { "Stop Requiring \(gateOffName)" }
+    private var gateOnMessage: LocalizedStringResource {
+        "Opening this server will ask for \(gateOnName) every time the app comes back to the foreground. The token is saved again behind it; nothing on the server changes."
+    }
+    private var gateOffMessage: LocalizedStringResource {
+        "You'll confirm with \(gateOffName) once now. After that, anyone who has this device unlocked can open this server without being asked. The token stays in this device's Keychain; nothing on the server changes."
+    }
+
+    private func changeGate(to required: Bool) async {
+        isChangingGate = true
+        defer { isChangingGate = false }
+        let outcome = await onChangeGate(required)
+        switch outcome {
+        case .changed, .cancelled:
+            gateOutcome = nil
+        case .unchanged:
+            gateOutcome = outcome
+        case .lost:
+            targetAfterLoss = required
+            gateOutcome = outcome
         }
     }
 

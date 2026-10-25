@@ -118,16 +118,22 @@ struct SignInView: View {
                 // about to hand this app a credential for production DNS, and
                 // what will be holding it is not a detail to leave implicit.
                 Section {
-                    DeviceProtectionNotice(protection: model.availableProtection)
+                    TokenGateControls(
+                        requiringAuthentication: $model.requiringAuthentication,
+                        available: model.availableProtection
+                    )
+                    .disabled(model.isBusy)
                 } footer: {
-                    if model.isDeviceUnprotected {
+                    if !model.canSignIn {
                         Text(
-                            "A token is never stored unprotected. Set a device passcode — and biometrics if this device has them — then come back."
+                            "This device has no passcode, so nothing can be required to open the app. Set a device passcode — and biometrics if this device has them — or turn the requirement off."
                         )
+                    } else {
+                        Text("You can change this later from the Server screen.")
                     }
                 }
 
-                if !model.isDeviceUnprotected {
+                if model.canSignIn {
                     Section {
                         Button {
                             Task { await model.signIn() }
@@ -140,9 +146,7 @@ struct SignInView: View {
                         }
                         .disabled(model.tokenInput.isEmpty || model.isBusy)
                     } footer: {
-                        Text(
-                            "The token is stored in the Keychain and unlocked with \(model.biometryDescription). It never leaves this device except as an Authorization header to \(model.address.displayName)."
-                        )
+                        Text(model.storageFooter)
                     }
                 }
 

@@ -116,6 +116,14 @@ final class ConnectionModel {
         scannedToken != nil
     }
 
+    /// "Require Face ID to open", for a token sealed straight from a scan.
+    ///
+    /// The same choice the sign-in form offers, with the same default — off —
+    /// because this button seals a token just as that one does, and the
+    /// operator should not get a different answer depending on which screen
+    /// they finished on.
+    var requiringAuthentication = false
+
     /// Validates the scanned token and seals it, so the operator lands signed
     /// in rather than on a form they have already filled.
     ///
@@ -125,7 +133,9 @@ final class ConnectionModel {
     func finishWithScannedToken(for address: ServerAddress) async -> String? {
         guard let token = scannedToken else { return nil }
         state = .connecting
-        switch await enrolment.enrol(token, for: address, requiringAuthentication: true) {
+        switch await enrolment.enrol(
+            token, for: address, requiringAuthentication: requiringAuthentication
+        ) {
         case .enrolled:
             scannedToken = nil
             state = .connected(address, status: 200)

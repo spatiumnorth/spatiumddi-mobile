@@ -131,7 +131,10 @@ private struct ServerRow: View {
                     if hasToken, let protection {
                         // Says which gate, not just that there is one — a
                         // passcode-protected token is a different promise from
-                        // a biometric one, and the operator chose it.
+                        // a biometric one, and "Device unlock only" a weaker
+                        // one again; the operator chose it, and this is where
+                        // they next see that choice. Changed from the Server
+                        // screen once signed in.
                         Label(protection.summary, systemImage: protection.symbol)
                             .font(.caption2)
                             .foregroundStyle(protection == .passcode ? .orange : .secondary)

@@ -287,6 +287,121 @@ struct AppFlowModelTests {
     }
 }
 
+/// The ungated default, through the flow: no unlock screen on the way in, the
+/// same teardown on the way out, and a gate that can be asked for later.
+@MainActor
+struct UngatedFlowTests {
+    @MainActor
+    private struct Fixture {
+        let tokens: TokenStore
+        let registry: ServerRegistry
+        let trust: TrustStore
+        let server = StoredServer(address: ServerAddress(host: "ddi.internal.example", port: 8443))
+
+        func flow() -> AppFlowModel { AppFlowModel(tokens: tokens, trust: trust, registry: registry) }
+    }
+
+    /// A configured server with an ungated token already stored — the state
+    /// every default sign-in leaves behind.
+    private func fixture() throws -> Fixture {
+        let suite = "io.spatiumddi.tests.\(UUID().uuidString)"
+        let fixture = Fixture(
+            tokens: TokenStore(service: suite),
+            registry: ServerRegistry(defaults: UserDefaults(suiteName: suite)!),
+            trust: TrustStore(keychain: KeychainStore(service: suite))
+        )
+        fixture.registry.save([fixture.server])
+        fixture.registry.setCurrentID(fixture.server.id)
+        try fixture.tokens.save("sddi_ungated", for: fixture.server.address, requiringAuthentication: false)
+        return fixture
+    }
+
+    @Test("Launching with an ungated token goes straight in")
+    func launchGoesStraightIn() throws {
+        let fixture = try fixture()
+        defer { try? fixture.tokens.delete(for: fixture.server.address) }
+
+        let flow = fixture.flow()
+
+        #expect(flow.stage == .signedIn(fixture.server))
+        #expect(flow.token == "sddi_ungated")
+    }
+
+    @Test("Selecting a server with an ungated token goes straight in")
+    func selectGoesStraightIn() throws {
+        let fixture = try fixture()
+        defer { try? fixture.tokens.delete(for: fixture.server.address) }
+        let flow = fixture.flow()
+        flow.showServers()
+
+        flow.select(fixture.server)
+
+        #expect(flow.stage == .signedIn(fixture.server))
+        #expect(flow.token == "sddi_ungated")
+    }
+
+    /// The gate going away is not the teardown going away. Non-negotiable #3
+    /// still holds: backgrounding drops the token and the session, and coming
+    /// back reads it again — silently.
+    @Test("Backgrounding still drops the token; coming back needs no prompt")
+    func backgroundStillTearsDown() async throws {
+        let fixture = try fixture()
+        defer { try? fixture.tokens.delete(for: fixture.server.address) }
+        let flow = fixture.flow()
+
+        flow.lockForBackground()
+        #expect(flow.token == nil)
+        #expect(flow.stage == .locked(fixture.server, message: nil))
+
+        await flow.unlock()
+        #expect(flow.stage == .signedIn(fixture.server))
+        #expect(flow.token == "sddi_ungated")
+    }
+
+    @Test("Asking for the gate already in force changes nothing")
+    func noOpChange() async throws {
+        let fixture = try fixture()
+        defer { try? fixture.tokens.delete(for: fixture.server.address) }
+        let flow = fixture.flow()
+
+        #expect(await flow.setRequiringAuthentication(false, for: fixture.server) == .changed(.deviceUnlock))
+        #expect(fixture.tokens.storedProtection(for: fixture.server.address) == .deviceUnlock)
+    }
+
+    @Test("Turning the gate on where the device has none says so and keeps the token")
+    func gateRefusedKeepsToken() async throws {
+        guard case .failure = TokenStore.availableProtection() else { return }
+        let fixture = try fixture()
+        defer { try? fixture.tokens.delete(for: fixture.server.address) }
+        let flow = fixture.flow()
+
+        let outcome = await flow.setRequiringAuthentication(true, for: fixture.server)
+
+        guard case .unchanged = outcome else {
+            Issue.record("expected an honest refusal, got \(outcome)")
+            return
+        }
+        #expect(fixture.tokens.storedProtection(for: fixture.server.address) == .deviceUnlock)
+        #expect(try fixture.tokens.ungatedToken(for: fixture.server.address) == "sddi_ungated")
+        #expect(flow.stage == .signedIn(fixture.server), "a refused change never signs anyone out")
+    }
+
+    @Test("A session token can be saved back after a lost re-seal")
+    func saveSessionTokenRestores() throws {
+        let fixture = try fixture()
+        defer { try? fixture.tokens.delete(for: fixture.server.address) }
+        let flow = fixture.flow()
+        // Simulate the lost state: Keychain empty, session still holding it.
+        try fixture.tokens.delete(for: fixture.server.address)
+        #expect(flow.protection(for: fixture.server) == nil)
+
+        #expect(
+            flow.saveSessionToken(for: fixture.server, requiringAuthentication: false)
+                == .changed(.deviceUnlock))
+        #expect(try fixture.tokens.ungatedToken(for: fixture.server.address) == "sddi_ungated")
+    }
+}
+
 /// Storage for the configured servers, including the upgrade from the
 /// single-server layout every existing install is on.
 @MainActor
