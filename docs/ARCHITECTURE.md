@@ -40,9 +40,9 @@ That document is **the release asset from a pinned platform release**, committed
 byte-for-byte so anyone can verify it against what upstream published:
 
 ```bash
-gh release download 2026.09.04-1 --repo spatiumnorth/spatiumddi --pattern openapi.json
+gh release download 2026.10.02-1 --repo spatiumnorth/spatiumddi --pattern openapi.json
 shasum -a 256 openapi.json
-# dc07aca3b4bb765297993a73b0b141d2ef7727d074724e789d4528ce3f0ae4d8
+# ff5e8d74e9200d922b1001727bcf72a0ccb773bb4555880a5d8f5380ef7f9351
 ```
 
 A live control plane serves the same document at `/api/openapi.json`, which is

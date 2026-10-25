@@ -243,7 +243,7 @@ not committed to now.
 
 - **iOS / iPadOS 18** or later
 - **Xcode 26** or later (Swift 6 language mode, default main-actor isolation); CI builds with Xcode 27
-- A **SpatiumDDI control plane** at `2026.09.04-1` or newer, reachable over HTTPS
+- A **SpatiumDDI control plane** at `2026.10.02-1` or newer, reachable over HTTPS
 
 The minimum server version is not arbitrary: it is the release the API client was
 generated from, and therefore the only contract this build has actually been
@@ -329,11 +329,13 @@ from the server within one release, and the drift is silent.
 
 The test is simple: **could the app ship this without a server change?** If yes,
 it belongs here. Push notifications
-([spatiumddi#912](https://github.com/spatiumnorth/spatiumddi/issues/912)), pool
-occupancy ([#913](https://github.com/spatiumnorth/spatiumddi/issues/913)) and the
-DNS query log's missing `rcode`
-([#914](https://github.com/spatiumnorth/spatiumddi/issues/914)) are upstream
-because each needs the control plane to grow something first.
+([spatiumddi#912](https://github.com/spatiumnorth/spatiumddi/issues/912)) are
+upstream because the control plane has to grow a device registry and an alert
+channel first. Pool occupancy
+([#913](https://github.com/spatiumnorth/spatiumddi/issues/913)) and the DNS query
+log's `rcode` ([#914](https://github.com/spatiumnorth/spatiumddi/issues/914))
+were upstream for the same reason; both have since landed, so building on them
+is app work and is tracked here.
 
 Splitting a roadmap across two trackers is how items get lost — so the split is
 by *who does the work*, not by whether something is a bug.

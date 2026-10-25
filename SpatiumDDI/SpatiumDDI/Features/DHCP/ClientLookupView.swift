@@ -78,7 +78,8 @@ struct ClientLookupView: View {
                                 Spacer()
                                 Badge(text: lease.state, tint: .green)
                             }
-                            Text(lease.macAddress).font(.caption.monospaced()).foregroundStyle(.secondary)
+                            LeaseClientText(mac: lease.macAddress, duid: lease.duid)
+                                .font(.caption.monospaced()).foregroundStyle(.secondary)
                             if let hostname = lease.hostname, !hostname.isEmpty {
                                 Text(hostname).font(.caption).foregroundStyle(.secondary)
                             }
@@ -302,6 +303,64 @@ nonisolated enum ClientIdentifier {
     }
 }
 
+/// What a lease's client can be named by.
+///
+/// A DHCPv4 lease is keyed by MAC. A DHCPv6 lease usually has no MAC at all —
+/// 2026.10.02-1 stopped promising `mac_address` for exactly that reason — and
+/// is keyed by DUID instead. A DUID standing in for a MAC is always labelled as
+/// one, so nobody reads it as a long MAC or types it into a MAC field.
+nonisolated enum LeaseClient: Equatable, Sendable {
+    case mac(String)
+    case duid(String)
+    /// Neither was reported. Said as such rather than shown as a blank line.
+    case unknown
+
+    init(mac: String?, duid: String?) {
+        if let mac, !mac.isEmpty {
+            self = .mac(mac)
+        } else if let duid, !duid.isEmpty {
+            self = .duid(duid)
+        } else {
+            self = .unknown
+        }
+    }
+
+    /// The identifier as plain text, for a caption assembled from other server
+    /// values. "DUID" is the protocol's own term, like "MAC", not app wording.
+    var plainText: String? {
+        switch self {
+        case .mac(let mac): mac
+        case .duid(let duid): "DUID \(duid)"
+        case .unknown: nil
+        }
+    }
+
+    /// Whether a filter typed into a lease list matches this client.
+    func matches(_ query: String) -> Bool {
+        switch self {
+        case .mac(let value), .duid(let value): value.localizedCaseInsensitiveContains(query)
+        case .unknown: false
+        }
+    }
+}
+
+/// A lease's client identifier, as a caption line. Callers set the font.
+struct LeaseClientText: View {
+    let client: LeaseClient
+
+    init(mac: String?, duid: String?) {
+        client = LeaseClient(mac: mac, duid: duid)
+    }
+
+    var body: some View {
+        switch client {
+        case .mac(let mac): Text(verbatim: mac)
+        case .duid(let duid): Text("DUID \(Text(verbatim: duid))")
+        case .unknown: Text("No MAC or DUID reported")
+        }
+    }
+}
+
 private struct LeaseHistoryRow: View {
     let result: ClientLookupView.Result
 
@@ -314,7 +373,8 @@ private struct LeaseHistoryRow: View {
                 Spacer()
                 Badge(text: row.leaseState, tint: tint(for: row.leaseState))
             }
-            Text(row.macAddress).font(.caption.monospaced()).foregroundStyle(.secondary)
+            LeaseClientText(mac: row.macAddress, duid: row.duid)
+                .font(.caption.monospaced()).foregroundStyle(.secondary)
             if let hostname = row.hostname, !hostname.isEmpty {
                 Text(hostname).font(.caption).foregroundStyle(.secondary)
             }

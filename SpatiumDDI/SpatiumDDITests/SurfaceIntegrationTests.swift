@@ -142,7 +142,11 @@ struct SurfaceIntegrationTests {
             )
             .ok.body.json
         #expect(leases.total >= leases.items.count)
-        #expect(leases.items.allSatisfy { !$0.ipAddress.isEmpty && !$0.macAddress.isEmpty })
+        // A DHCPv6 lease carries a DUID instead of a MAC; every lease has one or the other.
+        #expect(
+            leases.items.allSatisfy {
+                !$0.ipAddress.isEmpty && LeaseClient(mac: $0.macAddress, duid: $0.duid) != .unknown
+            })
 
         let groups = try await session.client.listGroupsApiV1DhcpServerGroupsGet().ok.body.json
         #expect(!groups.isEmpty)
@@ -397,12 +401,18 @@ struct SurfaceIntegrationTests {
         let leases = try await session.client
             .listAllLeasesApiV1DhcpLeasesGet(query: .init(page: 1, pageSize: 50)).ok.body.json
         #expect(leases.total >= leases.items.count)
-        #expect(leases.items.allSatisfy { !$0.macAddress.isEmpty && !$0.ipAddress.isEmpty })
+        #expect(
+            leases.items.allSatisfy {
+                LeaseClient(mac: $0.macAddress, duid: $0.duid) != .unknown && !$0.ipAddress.isEmpty
+            })
 
         let history = try await session.client
             .listAllLeaseHistoryApiV1DhcpLeaseHistoryGet(query: .init(page: 1, perPage: 50)).ok.body.json
         #expect(history.total >= history.items.count)
-        #expect(history.items.allSatisfy { !$0.macAddress.isEmpty && !$0.leaseState.isEmpty })
+        #expect(
+            history.items.allSatisfy {
+                LeaseClient(mac: $0.macAddress, duid: $0.duid) != .unknown && !$0.leaseState.isEmpty
+            })
 
         try store.removePin(for: #require(LiveServer.address))
     }
