@@ -177,6 +177,11 @@ An address becomes an `orphan` row that can be re-allocated, but its DNS record
 is released either way. A record is restorable from Trash, but stops resolving
 now. Neither offers permanent removal from a phone.
 
+A superadmin can **restore** from Trash, though. The confirmation names what
+comes back and how much: a restore returns the whole deletion batch, so a
+zone brings its records with it. If any of it clashes with something created
+since, the server restores none of it, and the app lists each clash.
+
 ### Phase 3 — push notifications 🔗 [spatiumddi#912](https://github.com/spatiumnorth/spatiumddi/issues/912)
 
 **This is the feature that makes the rest of the app worth having.** An alert list

@@ -208,6 +208,9 @@ filter:
     - /api/v1/api-tokens/{token_id}
     - /api/v1/audit
     - /api/v1/admin/trash
+    # Restore, beside the list it restores from. It brings back the whole
+    # deletion batch, not only the row that was tapped.
+    - /api/v1/admin/trash/{type}/{row_id}/restore
 
     # Which optional modules this control plane has switched on. The rule
     # against feature-probing needs somewhere to ask instead, and this is it.

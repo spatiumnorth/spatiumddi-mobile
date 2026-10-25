@@ -3,6 +3,7 @@
 //  SpatiumDDI
 //
 
+import OpenAPIRuntime
 import SpatiumAPI
 import SwiftUI
 
@@ -609,13 +610,36 @@ struct AuditLogView: View {
 }
 
 /// Soft-deleted rows, still restorable.
+///
+/// Restore is the one write here. Permanent removal stays off the phone: it is
+/// the delete that cannot be walked back, and nothing about it is urgent.
 struct TrashView: View {
     let session: ControlPlaneSession
 
+    @Environment(Permissions.self) private var permissions
+
     @State private var state: LoadState<[Components.Schemas.TrashEntry]> = .idle
+    /// The entry waiting on its confirmation.
+    @State private var pendingRestore: Components.Schemas.TrashEntry?
+    @State private var restoring: String?
+    @State private var outcome: RestoreOutcome?
+
+    /// The list and restore routes both depend on `SuperAdmin`.
+    private var mayRestore: Bool { permissions.maySuperadmin }
 
     var body: some View {
         List {
+            if let restoring {
+                Section {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                        Text("Restoring \(restoring)…")
+                    }
+                }
+            } else if let outcome {
+                outcomeSection(outcome)
+            }
+
             LoadStateView(
                 state: state, emptyMessage: "Trash is empty.", retry: { Task { await fetch() } }
             ) { entries in
@@ -638,12 +662,122 @@ struct TrashView: View {
                         }
                         .font(.caption2).foregroundStyle(.tertiary)
                     }
+                    .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                        if mayRestore {
+                            Button {
+                                outcome = nil
+                                pendingRestore = entry
+                            } label: {
+                                Label("Restore", systemImage: "arrow.uturn.backward")
+                            }
+                            .tint(.green)
+                            .disabled(restoring != nil)
+                        }
+                    }
                 }
             }
         }
         .navigationTitle("Trash")
         .refreshable { await fetch() }
         .task { if case .idle = state { await fetch() } }
+        .alert(
+            "Restore \(pendingRestore?.nameOrCidr ?? "")?",
+            isPresented: Binding(
+                get: { pendingRestore != nil },
+                set: { if !$0 { pendingRestore = nil } }
+            ),
+            presenting: pendingRestore
+        ) { entry in
+            Button("Cancel", role: .cancel) {}
+            Button("Restore") { Task { await restore(entry) } }
+        } message: { entry in
+            Text(
+                verbatim: TrashRestore.subject(type: entry._type, name: entry.nameOrCidr) + "\n\n"
+                    + TrashRestore.consequence(type: entry._type, batchSize: entry.batchSize)
+            )
+        }
+    }
+
+    @ViewBuilder
+    private func outcomeSection(_ outcome: RestoreOutcome) -> some View {
+        switch outcome {
+        case .restored(let name, let count):
+            Section {
+                Label {
+                    if count > 1 {
+                        Text("Restored \(name), with ^[\(count - 1) other row](inflect: true).")
+                    } else {
+                        Text("Restored \(name).")
+                    }
+                } icon: {
+                    Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+                }
+            }
+        case .failed(let name, let message):
+            Section {
+                Label(message, systemImage: "xmark.octagon.fill").foregroundStyle(.red)
+            } header: {
+                Text("\(name) not restored")
+            }
+        case .refused(let name, let refusal):
+            Section {
+                Label {
+                    if let message = refusal.message {
+                        Text(verbatim: message)
+                    } else {
+                        Text("It would clash with something live.")
+                    }
+                } icon: {
+                    Image(systemName: "xmark.octagon.fill")
+                }
+                .foregroundStyle(.red)
+                ForEach(Array(refusal.lines.enumerated()), id: \.offset) { _, line in
+                    Text(verbatim: line).font(.footnote)
+                }
+            } header: {
+                Text("\(name) not restored")
+            } footer: {
+                Text(
+                    "Nothing in this deletion was restored. Rename or remove what it clashes with, then try again."
+                )
+            }
+        }
+    }
+
+    private func restore(_ entry: Components.Schemas.TrashEntry) async {
+        let name = entry.nameOrCidr
+        restoring = name
+        outcome = nil
+        defer { restoring = nil }
+        do {
+            let response = try await session.client.restoreRowApiV1AdminTrashTypeRowIdRestorePost(
+                path: .init(_type: entry._type, rowId: entry.id)
+            )
+            switch response {
+            case .ok(let ok):
+                let result = try ok.body.json
+                outcome = .restored(name: name, count: result.restored)
+                await fetch()
+            case .unprocessableContent: throw APIStatusError(status: 422)
+            case .undocumented(let statusCode, let payload):
+                // A clash is the expected refusal and the most useful one to
+                // read in full, so its body is parsed before the generic path.
+                if statusCode == 409, let body = payload.body,
+                    let data = try? await Data(collecting: body, upTo: 64 * 1024)
+                {
+                    if let refusal = TrashRestoreRefusal.parse(data) {
+                        outcome = .refused(name: name, refusal)
+                        return
+                    }
+                    throw await APIStatusError(status: statusCode, body: HTTPBody(data))
+                }
+                throw await APIStatusError(status: statusCode, payload: payload)
+            }
+        } catch {
+            if case .failed(let message) = await WriteFailure.classify(error, forced: true) {
+                outcome = .failed(name: name, message)
+            }
+        }
     }
 
     private func fetch() async {
@@ -659,4 +793,11 @@ struct TrashView: View {
             }
         }
     }
+}
+
+/// How the last restore went. Held in memory for the screen's life only.
+private enum RestoreOutcome {
+    case restored(name: String, count: Int)
+    case refused(name: String, TrashRestoreRefusal)
+    case failed(name: String, FailureMessage)
 }
