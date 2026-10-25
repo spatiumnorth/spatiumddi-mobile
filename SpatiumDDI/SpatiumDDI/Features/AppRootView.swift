@@ -258,7 +258,7 @@ struct SignedInView: View {
     private func detail(for section: AppSection, session: ControlPlaneSession) -> some View {
         switch section {
         case .overview:
-            OverviewView(session: session)
+            OverviewView(session: session, onSelfRevoked: onSessionRejected)
         case .alerts:
             AlertsView(session: session)
         case .changeRequests:

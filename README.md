@@ -69,7 +69,7 @@ platform, the API and the roadmap all live in
 
 | Surface | What you get |
 |---|---|
-| **Overview** | Platform health per component, maintenance/demo banners, server version and update check, unresolved alerts by severity, estate counts, and a size-weighted utilisation figure with the busiest subnets |
+| **Overview** | Platform health per component, maintenance/demo banners, server version and update check, unresolved alerts by severity, estate counts, and a size-weighted utilisation figure with the busiest subnets. New-device, network (ASN drift, ROA expiry, circuits) and security (failed logins, expiring tokens, MFA gaps) tiles, each opening the screen behind it |
 | **Alerts** | Every alert event, most-severe first, filterable by severity and unresolved-only. **Resolve** one from the list — swipe, read what it says, confirm |
 | **Approvals** | Change requests with the change they'd make, who asked, and why the platform decided it needed approving. **Approve, reject or withdraw** — a decision you can make from a train, which is the point |
 | **New devices** | First-seen MACs with vendor, subnet and randomisation, and **acknowledge** for the ones that turn out to be fine |
