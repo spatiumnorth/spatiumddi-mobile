@@ -140,8 +140,11 @@ struct DHCPServerDetailView: View {
     @State private var pendingLeaseDelete: DeleteLeaseModel?
     @Environment(Permissions.self) private var permissions
 
+    /// Superadmin only, in every platform release: `delete_lease` depends on
+    /// `SuperAdmin`, and no `dhcp_server` or `dhcp_scope` grant reaches it.
+    /// Offering it on write access only led to a 403.
     private var mayDeleteLeases: Bool {
-        permissions.canWrite("dhcp_server", "dhcp_scope", id: server.id)
+        permissions.canDoSuperadminOnly
     }
     @State private var query = ""
 
