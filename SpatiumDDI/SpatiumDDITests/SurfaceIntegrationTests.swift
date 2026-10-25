@@ -71,7 +71,10 @@ struct SurfaceIntegrationTests {
 
     // MARK: - DNS
 
-    @Test("DNS groups, zones and records decode down the whole chain")
+    @Test(
+        "DNS groups, zones and records decode down the whole chain",
+        .enabled("core.dns is switched off") { await LiveServer.modulesEnabled("core.dns") }
+    )
     func dnsChainDecodes() async throws {
         let (session, store) = try await LiveServer.pinnedSession()
         defer { session.invalidate() }
@@ -116,7 +119,10 @@ struct SurfaceIntegrationTests {
 
     // MARK: - DHCP
 
-    @Test("DHCP servers, stats, groups and scopes decode")
+    @Test(
+        "DHCP servers, stats, groups and scopes decode",
+        .enabled("core.dhcp is switched off") { await LiveServer.modulesEnabled("core.dhcp") }
+    )
     func dhcpChainDecodes() async throws {
         let (session, store) = try await LiveServer.pinnedSession()
         defer { session.invalidate() }
@@ -250,7 +256,12 @@ struct SurfaceIntegrationTests {
         try store.removePin(for: #require(LiveServer.address))
     }
 
-    @Test("Network modelling surfaces decode")
+    @Test(
+        "Network modelling surfaces decode",
+        .enabled("a network module is switched off") {
+            await LiveServer.modulesEnabled("network.vrf", "network.vlan", "network.circuit", "network.asn")
+        }
+    )
     func networkSurfacesDecode() async throws {
         let (session, store) = try await LiveServer.pinnedSession()
         defer { session.invalidate() }
@@ -279,7 +290,12 @@ struct SurfaceIntegrationTests {
         try store.removePin(for: #require(LiveServer.address))
     }
 
-    @Test("Ownership entities decode")
+    @Test(
+        "Ownership entities decode",
+        .enabled("an ownership module is switched off") {
+            await LiveServer.modulesEnabled("network.customer", "network.site", "network.provider")
+        }
+    )
     func ownershipDecodes() async throws {
         let (session, store) = try await LiveServer.pinnedSession()
         defer { session.invalidate() }
@@ -332,7 +348,12 @@ struct SurfaceIntegrationTests {
         try store.removePin(for: #require(LiveServer.address))
     }
 
-    @Test("Change requests and new-device sightings decode")
+    @Test(
+        "Change requests and new-device sightings decode",
+        .enabled("approvals or new-device watch is switched off") {
+            await LiveServer.modulesEnabled("governance.approvals", "security.new_device_watch")
+        }
+    )
     func operationsSurfacesDecode() async throws {
         let (session, store) = try await LiveServer.pinnedSession()
         defer { session.invalidate() }
@@ -393,7 +414,10 @@ struct SurfaceIntegrationTests {
         try store.removePin(for: #require(LiveServer.address))
     }
 
-    @Test("Fleet-wide leases and lease history decode")
+    @Test(
+        "Fleet-wide leases and lease history decode",
+        .enabled("core.dhcp is switched off") { await LiveServer.modulesEnabled("core.dhcp") }
+    )
     func fleetLeasesDecode() async throws {
         let (session, store) = try await LiveServer.pinnedSession()
         defer { session.invalidate() }
@@ -442,9 +466,12 @@ struct SurfaceIntegrationTests {
         #expect(vendors.totalWithVendor <= vendors.totalMacsSeen)
         #expect(vendors.vendors.allSatisfy { !$0.vendor.isEmpty && $0.count > 0 })
 
-        let customers = try await session.client
-            .listCustomersApiV1CustomersGet(query: .init(limit: 1)).ok.body.json
-        if let customer = customers.items.first {
+        // The rollup is always on; customers are `network.customer`.
+        let customers =
+            await LiveServer.modulesEnabled("network.customer")
+            ? try await session.client
+                .listCustomersApiV1CustomersGet(query: .init(limit: 1)).ok.body.json.items : []
+        if let customer = customers.first {
             let summary = try await session.client
                 .getCustomerSummaryRouteApiV1CustomersCustomerIdSummaryGet(
                     path: .init(customerId: customer.id)
