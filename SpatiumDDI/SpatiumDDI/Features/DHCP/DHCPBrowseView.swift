@@ -129,12 +129,14 @@ private struct DHCPServerRow: View {
     }
 }
 
-/// One DHCP server: health, the last hour of traffic, and its leases.
+/// One DHCP server: health, the last hour of traffic, what was done to it, and
+/// its leases.
 struct DHCPServerDetailView: View {
     let session: ControlPlaneSession
     let server: Components.Schemas.AppApiV1DhcpServersServerResponse
 
     @State private var stats: LoadState<Components.Schemas.DHCPServerStatsResponse> = .idle
+    @State private var events: LoadState<[Components.Schemas.DHCPServerEventEntry]> = .idle
     @State private var leases: LoadState<[Components.Schemas.LeaseResponse]> = .idle
     @State private var leaseTotal = 0
     @State private var pendingLeaseDelete: DeleteLeaseModel?
@@ -208,6 +210,33 @@ struct DHCPServerDetailView: View {
                 }
             }
 
+            // Audit rows about the server — who restarted it, who changed its
+            // config — not the daemon's own log, which is DHCP Log. Above the
+            // leases so it isn't buried under three hundred of them.
+            Section("Recent events") {
+                LoadStateView(
+                    state: events,
+                    emptyMessage: "Nothing has been recorded for this server.",
+                    retry: { Task { await fetchEvents() } }
+                ) { rows in
+                    ForEach(rows.prefix(20), id: \.id) { event in
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack {
+                                Text(verbatim: event.action).font(.subheadline)
+                                Spacer()
+                                Badge(
+                                    text: event.result,
+                                    tint: event.result.lowercased() == "success" ? .green : .red
+                                )
+                            }
+                            Text(event.timestamp.formatted(.relative(presentation: .named)))
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                }
+            }
+
             Section {
                 LoadStateView(
                     state: leases,
@@ -274,7 +303,24 @@ struct DHCPServerDetailView: View {
     private func refresh() async {
         async let a: Void = fetchStats()
         async let b: Void = fetchLeases()
-        _ = await (a, b)
+        async let c: Void = fetchEvents()
+        _ = await (a, b, c)
+    }
+
+    private func fetchEvents() async {
+        events = .loading
+        events = await LoadState.fetching {
+            let response = try await session.client
+                .getServerRecentEventsApiV1DhcpServersServerIdRecentEventsGet(
+                    path: .init(serverId: server.id)
+                )
+            switch response {
+            case .ok(let ok): return try ok.body.json.items
+            case .unprocessableContent: throw APIStatusError(status: 422)
+            case .undocumented(let statusCode, let payload):
+                throw await APIStatusError(status: statusCode, payload: payload)
+            }
+        }
     }
 
     private func fetchStats() async {
