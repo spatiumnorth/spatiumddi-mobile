@@ -502,7 +502,7 @@ struct DHCPScopeDetailView: View {
     /// against.
     private var mayEditReservations: Bool {
         permissions.canWrite("dhcp_static", "dhcp_scope", "dhcp_server", id: scope.id)
-            && permissions.maySuperadmin
+            && permissions.canDoSuperadminOnly
     }
 
     var body: some View {

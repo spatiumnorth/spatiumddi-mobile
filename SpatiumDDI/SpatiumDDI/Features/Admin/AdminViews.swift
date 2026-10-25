@@ -628,7 +628,7 @@ struct TrashView: View {
     @State private var outcome: RestoreOutcome?
 
     /// The list and restore routes both depend on `SuperAdmin`.
-    private var mayRestore: Bool { permissions.maySuperadmin }
+    private var mayRestore: Bool { permissions.canDoSuperadminOnly }
 
     var body: some View {
         List {
