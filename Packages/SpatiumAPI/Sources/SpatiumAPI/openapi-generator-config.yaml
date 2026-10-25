@@ -104,7 +104,7 @@ filter:
     - /api/v1/dhcp/scopes/{scope_id}/statics
     # The rack-side write: this MAC gets this IP, with the MAC on a label in
     # front of you (spatiumddi-mobile#18). POST is on the collection above;
-    # the item path carries the delete.
+    # the item path carries the edit and the delete.
     - /api/v1/dhcp/statics/{static_id}
     # Fleet-wide, not per server (spatiumddi-mobile#20): "does this MAC hold a
     # lease anywhere right now, and has it ever" in one call each, instead of

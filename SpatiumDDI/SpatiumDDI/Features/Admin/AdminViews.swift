@@ -621,6 +621,9 @@ struct TrashView: View {
     @State private var state: LoadState<[Components.Schemas.TrashEntry]> = .idle
     /// The entry waiting on its confirmation.
     @State private var pendingRestore: Components.Schemas.TrashEntry?
+    /// The alert's title, kept apart from `pendingRestore` so it doesn't read
+    /// "Restore ?" while the alert animates away after that is cleared.
+    @State private var restoreSubject = ""
     @State private var restoring: String?
     @State private var outcome: RestoreOutcome?
 
@@ -666,6 +669,7 @@ struct TrashView: View {
                         if mayRestore {
                             Button {
                                 outcome = nil
+                                restoreSubject = entry.nameOrCidr
                                 pendingRestore = entry
                             } label: {
                                 Label("Restore", systemImage: "arrow.uturn.backward")
@@ -681,7 +685,7 @@ struct TrashView: View {
         .refreshable { await fetch() }
         .task { if case .idle = state { await fetch() } }
         .alert(
-            "Restore \(pendingRestore?.nameOrCidr ?? "")?",
+            "Restore \(restoreSubject)?",
             isPresented: Binding(
                 get: { pendingRestore != nil },
                 set: { if !$0 { pendingRestore = nil } }

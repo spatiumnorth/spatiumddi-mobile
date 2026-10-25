@@ -495,14 +495,14 @@ struct DHCPScopeDetailView: View {
         return !pools.isEmpty
     }
 
+    /// Create, update and delete all depend on `SuperAdmin` in the pinned
+    /// release, so a `dhcp_static` write grant alone gets a 403 from each.
+    /// 1.0.0 drops that to the resource grant (#1861): relax this at that
+    /// re-pin, not before — the pin is the contract this build was checked
+    /// against.
     private var mayEditReservations: Bool {
         permissions.canWrite("dhcp_static", "dhcp_scope", "dhcp_server", id: scope.id)
-    }
-
-    /// Narrower than `mayEditReservations`: the update handler depends on
-    /// `SuperAdmin`, so a `dhcp_static` write grant alone gets a 403 from it.
-    private var mayUpdateReservations: Bool {
-        mayEditReservations && permissions.maySuperadmin
+            && permissions.maySuperadmin
     }
 
     var body: some View {
@@ -585,7 +585,7 @@ struct DHCPScopeDetailView: View {
                                     Label("Delete", systemImage: "trash")
                                 }
                             }
-                            if mayUpdateReservations {
+                            if mayEditReservations {
                                 Button {
                                     pendingReservationEdit = PendingReservationEdit(entry: entry)
                                 } label: {
