@@ -32,40 +32,72 @@ silent — a renamed field simply decodes as absent, and the screen renders as
 though the data were empty. For an app whose job is reporting the truth about a
 production network, silently wrong is worse than broken.
 
-### 2. Tokens live in the Keychain, behind the operator
+### 2. Tokens live in the Keychain, on this device only
 
-Never `UserDefaults`, never a plist, never a log line. Keychain items always use
-`kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly`, so an item cannot exist on a
-device with no passcode at all.
+Never `UserDefaults`, never a plist, never a log line. Every token item is
+`ThisDeviceOnly`: it is never in a backup and never migrates to another phone.
 
-The access control on top of that is the strongest the device can offer:
+Whether opening the app **also** asks for the device owner is the operator's
+choice, per server, and it is **off by default**:
 
-| Device state | Access control | What it means |
-|---|---|---|
-| Biometrics enrolled | `.biometryCurrentSet` | Preferred. Enrolling a new face or finger **invalidates** the item, so a coerced enrolment change cannot inherit access to production DNS |
-| Passcode only | `.devicePasscode` | Allowed, and said out loud. Weaker: typed in public, shoulder-surfable, often shared, and it does not self-invalidate |
-| Neither | — | Refused |
+| Choice | Device state | Keychain class + access control | What it means |
+|---|---|---|---|
+| **Off** (default) | any | `WhenUnlockedThisDeviceOnly`, no access control | Readable by this app, without a prompt, whenever the device is unlocked. Unreadable while it is locked |
+| Off | **no passcode at all** | same | Allowed, with an amber warning on the sign-in and Server screens: anyone who picks the device up can open the app and use the token |
+| **On** | biometrics enrolled | `WhenPasscodeSetThisDeviceOnly` + `.biometryCurrentSet` | Enrolling a new face or finger **invalidates** the item, so a coerced enrolment change cannot inherit access to production DNS |
+| On | passcode only | `WhenPasscodeSetThisDeviceOnly` + `.devicePasscode` | Allowed, and said out loud. Weaker: typed in public, shoulder-surfable, often shared, and it does not self-invalidate |
+| On | neither | — | Refused. The operator asked for a gate; storing without one would give them less than they chose |
 
-The original rule said *biometrics*. The requirement underneath it is that a
-token is never left unprotected, and a passcode-gated Keychain item is not
-unprotected — but it is second-best, so the app names which one is in force
-rather than letting an operator assume Face ID is involved when it is not. The
-choice is shown on the sign-in screen **before** the token is stored, and on the
-Server screen for as long as it is.
+**The trade-off, plainly.** With the gate off, the thing standing between a
+token and someone else is the device's own lock screen. A phone left unlocked
+on a desk, or handed over unlocked, opens straight into a session that can
+change production DNS and DHCP. What the default does *not* give up: the token
+is still never on disk outside the Keychain, never in a backup, never on another
+device, never readable while the phone is locked, and the session, token and
+every fetched row still leave memory the moment the app backgrounds. The gate
+was made optional because forcing it made the app close to untestable — on the
+simulator above all — and because the right answer for a phone that never leaves
+a locked comms room differs from the right answer for one carried on a train.
+Operators for whom it is the latter should turn it on.
 
-Which gate an item was sealed behind is recorded as a Keychain **attribute**
+The choice is shown on the sign-in screen (and on the connect screen, when a
+scanned code is about to seal a token) **before** the token is stored, and on the
+Server screen for as long as it is. It is changed later from the Server screen,
+per server, and both directions are confirmed:
+
+- **Turning it on** reads the token — no prompt, it is ungated — and re-seals it
+  behind the strongest gate the device offers. A device with none is told so and
+  left as it is.
+- **Turning it off** first reads the token through its *current* gate, which
+  prompts: holding the phone unlocked is not enough to remove the thing that was
+  protecting against someone holding the phone unlocked. A cancelled or failed
+  prompt changes nothing.
+
+An access control cannot be changed in place (`SecItemUpdate` refuses), and
+service + account is the item's identity, so a re-seal must delete and re-add.
+Everything that can fail is checked before the delete — capability, and both the
+new and the rollback attribute sets — the delete itself is checked, a failed add
+is rolled back to the previous protection, and if even the rollback is refused
+the operator is told, still signed in on the token held in memory, and offered
+**Save Token Again**. Nothing signs them out silently.
+
+Which protection an item was sealed with is recorded as a Keychain **attribute**
 beside it (`kSecAttrGeneric`), not in a defaults file that could disagree with
-reality — and it is what decides which `LAPolicy` is evaluated when the token is
-read back. A passcode-satisfied context does not unseal a `.biometryCurrentSet`
-item, so evaluating the wrong policy would fail for no reason the operator could
-act on. Items written before the app understood passcode protection carry no
-attribute; those are biometric by construction, which is the fallback.
+reality — and it is what decides how the token is read back: silently for an
+ungated item, or by evaluating the matching `LAPolicy`. A passcode-satisfied
+context does not unseal a `.biometryCurrentSet` item, so evaluating the wrong
+policy would fail for no reason the operator could act on. Items written before
+the app understood passcode protection carry no attribute; those are biometric by
+construction, which is the fallback — and an unreadable marker resolves the same
+way, never to "ungated", so a gated item is never read as if it had no gate.
+Items stored behind a gate before it became optional **keep it** until the
+operator turns it off; nothing migrates a token to weaker protection.
 
-The gate is enforced **in the token store, not at its call sites**.
-`SecAccessControlCreateWithFlags` will mint a `.biometryCurrentSet` policy on a
-device with no enrolment — the simulator does exactly this — and the write then
-succeeds, storing a token nothing would ever be asked to unlock. The store
-therefore chooses the policy itself and refuses outright when neither is
+When a gate is asked for, it is enforced **in the token store, not at its call
+sites**. `SecAccessControlCreateWithFlags` will mint a `.biometryCurrentSet`
+policy on a device with no enrolment — the simulator does exactly this — and the
+write then succeeds, storing a token nothing would ever be asked to unlock. The
+store therefore chooses the policy itself and refuses outright when neither is
 available.
 
 A biometric **lockout** — too many failed attempts — is deliberately still
@@ -100,8 +132,9 @@ readable only while the device is unlocked.
 Two things this entitlement is *not*:
 
 * It does **not** protect the API token. That is a Keychain item under
-  `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly` plus a `SecAccessControl`,
-  which is stronger and governed by the Keychain rather than by file protection.
+  `kSecAttrAccessibleWhenUnlockedThisDeviceOnly` — or, when the operator asks
+  for a gate, `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly` plus a
+  `SecAccessControl` — governed by the Keychain rather than by file protection.
   Nothing about the token changes with this entitlement present or absent.
 * It is **not** free for future background work. Files at this class cannot be
   read while the device is locked, so the Phase 3 push work — a notification

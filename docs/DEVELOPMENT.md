@@ -145,11 +145,30 @@ export TEST_RUNNER_SPATIUM_SHOT_DIR='/tmp/shots'
 xcodebuild test … -only-testing:SpatiumDDIUITests/ScreenshotUITests
 ```
 
-The simulator needs **either** a biometric enrolment (**Features → Face ID →
-Enrolled**) or a device passcode set. With neither, the token store refuses to
-save — which is the security rule working, not a bug. With only a passcode the
-app runs, and says so: `KeychainProtection` falls back to `.devicePasscode` and
-the sign-in screen names the weaker gate before the token is stored.
+Any simulator works as it comes. "Require Face ID to open" is off by default, so
+the walk signs in with an ungated token (`KeychainProtection.deviceUnlock`) and
+needs no biometric enrolment and no passcode. The sign-in screen shows an amber
+"this device has no passcode" warning on a stock simulator; that is the copy
+working, not a failure.
+
+**Testing the gated path** still needs the simulator to have something to gate
+with:
+
+- **Biometrics:** **Features → Face ID → Enrolled**, then turn the switch on at
+  sign-in (or from the Server screen). Answer the prompts with **Features → Face
+  ID → Matching Face / Non-matching Face**.
+- **Passcode only:** a simulator with a passcode set and no enrolment exercises
+  `.devicePasscode`, and the sign-in screen names the weaker gate before the
+  token is stored.
+- **Neither:** the switch is disabled with the reason beside it; the store
+  refuses a gated write if one is attempted anyway — the security rule working,
+  not a bug.
+- **Re-sealing:** from the Server screen, turn the switch on (no prompt — the
+  token is ungated) and off (prompts through the current gate; cancelling must
+  leave it on).
+
+The unit tests cover the ungated store end to end on any simulator, and the
+gated branches only where the device can provide them.
 
 > **Known flake:** the XCUITest runner app intermittently fails to launch
 > (`Simulator device failed to launch …xctrunner`). It is a runner-bootstrap

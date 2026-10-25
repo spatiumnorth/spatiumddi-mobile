@@ -5,10 +5,14 @@
 	<!--
 	  Data Protection, at the strictest class.
 
-	  This does NOT touch the API token: that lives in the Keychain under
-	  kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly plus a SecAccessControl,
-	  which is already the strongest protection iOS offers and is governed by
-	  the Keychain, not by this entitlement.
+	  This does NOT touch the API token: that lives in the Keychain, governed
+	  by the Keychain and not by this entitlement. By default it is
+	  kSecAttrAccessibleWhenUnlockedThisDeviceOnly with no access control -
+	  unreadable while locked, never backed up, but readable without a prompt
+	  whenever the device is unlocked. When the operator turns on "Require
+	  Face ID to open" for a server, it is
+	  kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly plus a SecAccessControl
+	  (biometrics, or the passcode), the strongest protection iOS offers.
 
 	  What it does cover is every file the app container holds — in practice the
 	  UserDefaults plist carrying the configured servers: internal host names,
