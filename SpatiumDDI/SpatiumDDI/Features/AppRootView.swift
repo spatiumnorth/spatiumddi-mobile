@@ -267,6 +267,8 @@ struct SignedInView: View {
             ClientLookupView(session: session)
         case .dhcpLog:
             DHCPActivityView(session: session)
+        case .dnsLog:
+            DNSQueryLogView(session: session)
         case .newDevices:
             NewDevicesView(session: session)
         case .ipam:
