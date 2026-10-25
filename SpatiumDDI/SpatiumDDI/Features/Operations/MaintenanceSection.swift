@@ -228,20 +228,22 @@ struct MaintenanceSection: View {
             case .undocumented(let statusCode, let payload):
                 throw await APIStatusError(status: statusCode, payload: payload)
             }
-        } catch where Self.landed(error) {
-            // Fall through to the re-read.
         } catch {
-            // Nothing here is soft-conflictable, so it is never offered as
-            // re-sendable with force.
-            if case .failed(let message) = await WriteFailure.classify(error, forced: true) {
-                failure = message
+            // A landed write falls through to the re-read. Nothing here is
+            // soft-conflictable, so a failure is never offered as re-sendable
+            // with force.
+            guard Self.landed(error) else {
+                if case .failed(let message) = await WriteFailure.classify(error, forced: true) {
+                    failure = message
+                }
+                return
             }
-            return
         }
 
         await fetch()
         if case .loaded(let maintenance) = state, maintenance.isOn != isOn {
-            failure = isOn
+            failure =
+                isOn
                 ? .app("The server accepted the change but still reports writes open.")
                 : .app("The server accepted the change but still reports a change window.")
         }

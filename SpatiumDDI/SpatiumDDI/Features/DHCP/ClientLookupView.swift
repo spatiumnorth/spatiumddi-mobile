@@ -353,7 +353,8 @@ nonisolated enum ClientIdentifier {
     /// caller checks for one first.
     static func canonicalDUID(_ text: String) -> String? {
         let lowered = text.lowercased()
-        guard !lowered.isEmpty, lowered.allSatisfy({ $0.isHexDigit || ":-.".contains($0) }) else { return nil }
+        guard !lowered.isEmpty, lowered.allSatisfy({ $0.isHexDigit || ":-.".contains($0) })
+        else { return nil }
         let digits = lowered.filter(\.isHexDigit)
         guard digits.count.isMultiple(of: 2) else { return nil }
         let octets = digits.count / 2
