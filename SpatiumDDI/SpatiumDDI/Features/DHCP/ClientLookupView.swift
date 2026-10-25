@@ -3,13 +3,14 @@
 //  SpatiumDDI
 //
 
+import Darwin
 import SpatiumAPI
 import SwiftUI
 
 /// "Why isn't this machine getting an address?"
 ///
 /// The screen for a technician stood next to the machine in question. One field,
-/// a MAC or an IP or a hostname, and the answer to the three questions that
+/// a MAC, an IP, a hostname or a DHCPv6 DUID, and the answer to the three questions that
 /// follow: did it ever get a lease, what did it get, and has that lapsed.
 ///
 /// Every other DHCP screen here starts from the server and works down. This one
@@ -32,6 +33,10 @@ struct ClientLookupView: View {
         let history: [Result]
         let historyTotal: Int
         let active: [Components.Schemas.LeaseResponse]
+        /// The history couldn't be asked at all: it filters on MAC, IP or
+        /// hostname, and a DUID is none of those. An empty history here means
+        /// "not searchable", not "never seen".
+        var historyUnsearchable = false
     }
 
     @State private var query = ""
@@ -44,7 +49,7 @@ struct ClientLookupView: View {
     var body: some View {
         List {
             Section {
-                TextField("Filter by IP, hostname or MAC", text: $query)
+                TextField("IP, hostname, MAC or DUID", text: $query)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                     .submitLabel(.search)
@@ -65,7 +70,7 @@ struct ClientLookupView: View {
                 // Says what the match actually is, so nobody reads a blank
                 // result as "this machine has never been on the network".
                 Text(
-                    "Searches lease history across every DHCP server you can read. A MAC can be entered with or without colons."
+                    "Searches lease history across every DHCP server you can read. A MAC or DUID can be entered with or without colons."
                 )
             }
 
@@ -114,7 +119,20 @@ struct ClientLookupView: View {
                 }
             }
 
-            if !searched.isEmpty {
+            if case .loaded(let answer) = state, answer.historyUnsearchable {
+                Section {
+                    Label(
+                        answer.active.isEmpty
+                            ? "No DHCP server holds a lease for this DUID right now. Lease history can't be searched by DUID, so a client that has since left won't show here — search its IPv6 address or hostname instead."
+                            : "Lease history can't be searched by DUID. Search the address above to see who else has held it.",
+                        systemImage: "info.circle"
+                    )
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                } header: {
+                    Text("Lease history")
+                }
+            } else if !searched.isEmpty {
                 Section {
                     LoadStateView(
                         state: historyState,
@@ -178,7 +196,8 @@ struct ClientLookupView: View {
         }
 
         let mac = ClientIdentifier.canonicalMAC(trimmed)
-        let ip = ClientIdentifier.isIPv4Like(trimmed) ? trimmed : nil
+        let ip = ClientIdentifier.isIPv4Like(trimmed) || ClientIdentifier.isIPv6Like(trimmed) ? trimmed : nil
+        let duid = (mac == nil && ip == nil) ? ClientIdentifier.canonicalDUID(trimmed) : nil
 
         state = await LoadState.fetching { [session] in
             // Fleet-wide, one call each (spatiumddi#917). This used to be one
@@ -186,18 +205,24 @@ struct ClientLookupView: View {
             // server's failure: a server this account cannot read looked
             // exactly like one with no history. Now a refusal is the answer
             // the operator sees, not an absence.
-            async let history = Self.history(session, mac: mac, ip: ip, term: trimmed)
-            async let active = Self.active(session, mac: mac, ip: ip, term: trimmed)
+            //
+            // A DUID skips the history call: sent as a hostname it would match
+            // nothing and read as "never seen", which is a worse answer than
+            // saying the history can't be asked.
+            async let history: Components.Schemas.LeaseHistoryPage? =
+                duid == nil ? Self.history(session, mac: mac, ip: ip, term: trimmed) : nil
+            async let active = Self.active(session, mac: mac, ip: ip, term: duid ?? trimmed)
             async let names = Self.serverNames(session)
             let (page, leases, serverNames) = try await (history, active, names)
             return Answer(
                 // Most recent first. A row with no start date sorts last
                 // rather than to the top — an unknown time is not a recent one.
-                history: page.items
+                history: (page?.items ?? [])
                     .map { Result(row: $0, serverName: serverNames[$0.serverId]) }
                     .sorted { ($0.row.startedAt ?? .distantPast) > ($1.row.startedAt ?? .distantPast) },
-                historyTotal: page.total,
-                active: leases
+                historyTotal: page?.total ?? 0,
+                active: leases,
+                historyUnsearchable: page == nil
             )
         }
     }
@@ -226,6 +251,10 @@ struct ClientLookupView: View {
     /// A history row says what happened; an active lease says what is true now.
     /// Exact MAC and IP matches where the input is one — `search` is a
     /// substring, and "10.0.0.1" would also match 10.0.0.10 through .19.
+    ///
+    /// A DUID goes in `search`, canonicalised to the colon form the platform
+    /// stores: `search` matches `duid` as a substring, so `000100…` typed off
+    /// a Windows `ipconfig /all` would otherwise match nothing.
     private static func active(
         _ session: ControlPlaneSession, mac: String?, ip: String?, term: String
     ) async throws -> [Components.Schemas.LeaseResponse] {
@@ -300,6 +329,48 @@ nonisolated enum ClientIdentifier {
     static func isIPv4Like(_ text: String) -> Bool {
         let parts = text.split(separator: ".", omittingEmptySubsequences: false)
         return parts.count == 4 && parts.allSatisfy { !$0.isEmpty && $0.allSatisfy(\.isNumber) }
+    }
+
+    /// An IPv6 address, which both lease filters take as an exact `ip`.
+    ///
+    /// Groups of exactly two digits are left to `canonicalDUID`: that is how a
+    /// DUID is written, and nobody writes `20:01:0d:b8:…` for an address.
+    static func isIPv6Like(_ text: String) -> Bool {
+        guard text.contains(":"), !hasOnlyOctetGroups(text) else { return false }
+        var address = in6_addr()
+        return inet_pton(AF_INET6, text, &address) == 1
+    }
+
+    /// A DHCPv6 DUID in the form the platform stores: lowercase hex octets
+    /// joined by colons.
+    ///
+    /// Mirrors the platform's `canonical_duid` — hex digits with `:`, `-` or
+    /// `.` separators, a whole number of octets — with two narrowings so a
+    /// lookup isn't misread. Separated input must be in two-digit groups, and
+    /// bare hex must be at least ten octets, the shortest DUID a real client
+    /// sends (DUID-LL over Ethernet). Otherwise `cafe` or `deadbeef` would be
+    /// taken for a DUID instead of a hostname. Six octets is a MAC, and the
+    /// caller checks for one first.
+    static func canonicalDUID(_ text: String) -> String? {
+        let lowered = text.lowercased()
+        guard !lowered.isEmpty, lowered.allSatisfy({ $0.isHexDigit || ":-.".contains($0) }) else { return nil }
+        let digits = lowered.filter(\.isHexDigit)
+        guard digits.count.isMultiple(of: 2) else { return nil }
+        let octets = digits.count / 2
+        let separated = digits.count != lowered.count
+        guard separated ? (hasOnlyOctetGroups(lowered) && octets > 6) : octets >= 10, octets <= 130
+        else { return nil }
+        return stride(from: 0, to: digits.count, by: 2)
+            .map { offset -> String in
+                let start = digits.index(digits.startIndex, offsetBy: offset)
+                return String(digits[start..<digits.index(start, offsetBy: 2)])
+            }
+            .joined(separator: ":")
+    }
+
+    private static func hasOnlyOctetGroups(_ text: String) -> Bool {
+        text.split(omittingEmptySubsequences: false, whereSeparator: { ":-.".contains($0) })
+            .allSatisfy { $0.count == 2 }
     }
 }
 
