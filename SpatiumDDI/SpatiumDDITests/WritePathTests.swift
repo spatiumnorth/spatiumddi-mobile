@@ -259,8 +259,8 @@ struct PermissionsTests {
     /// Updating a reservation and restoring from Trash depend on `SuperAdmin`,
     /// not on a grant — so even `admin` on the resource type is not enough,
     /// and offering the button would only ever produce a 403.
-    @Test("A superadmin-only route is offered to a superadmin, or when unknown")
-    func superadminOnly() {
+    @Test("Admin on the resource type does not reach a superadmin-only route")
+    func superadminOnlyOverResourceAdmin() {
         #expect(Permissions().canDoSuperadminOnly)
         #expect(Permissions(isSuperadmin: true, grants: []).canDoSuperadminOnly)
         let granted = Permissions(isSuperadmin: false, grants: [grant("admin", "dhcp_static")])
