@@ -278,9 +278,13 @@ reading 404 as "not supported."** Gate on `GET /api/v1/version` instead.
 
 ## Version gating
 
-`ServerVersion` parses the platform's CalVer (`2026.08.22-1`) into comparable
-parts, and treats anything else — `dev`, `latest`, a branch name — as a
-`.development` case rather than as a parse failure sorted to the bottom.
+`ServerVersion` parses the platform's releases — CalVer (`2026.08.22-1`) before
+1.0.0, SemVer (`1.0.0-beta.1`, `1.0.0`) from then on — into one order in which
+every SemVer release follows every CalVer one, and pre-releases follow SemVer
+precedence. The ordering is a port of the platform's own
+(`backend/app/core/versions.py`); the two have to agree. Anything else — `dev`,
+`latest`, a nightly (`0.0.0-nightly-…`), a `0.x` placeholder, a branch name — is
+a development build rather than a parse failure sorted to the bottom.
 
 A development build **passes** the minimum check, because a build from `main` is
 by definition newer than any release and refusing it would lock the app out of

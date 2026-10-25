@@ -46,10 +46,10 @@ struct SurfaceIntegrationTests {
         let version = try await session.client.getVersionApiV1VersionGet().ok.body.json
         #expect(!version.version.isEmpty)
 
-        // Either it is CalVer or it is a development build; both are handled,
-        // and neither may crash the gate.
+        // CalVer, SemVer or a development build; all are handled, none may
+        // crash the gate, and the name shown is the one the server sent.
         let parsed = ServerVersion(version.version)
-        #expect(parsed.displayName == version.version || !parsed.isDevelopment)
+        #expect(parsed.displayName == version.version.trimmingCharacters(in: .whitespacesAndNewlines))
 
         try store.removePin(for: #require(LiveServer.address))
     }

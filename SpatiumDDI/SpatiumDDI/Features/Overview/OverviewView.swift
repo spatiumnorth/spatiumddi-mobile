@@ -116,12 +116,13 @@ private struct VersionRow: View {
             let running = ServerVersion(version.version)
             LabeledContent("Server version", value: running.displayName)
 
-            // A development build cannot be compared against a CalVer minimum.
+            // A development or nightly build has no place in the release order,
+            // CalVer or SemVer, so it cannot be compared against the minimum.
             // Saying so is the honest report — the alternative is a green tick
             // that was never actually checked.
             if running.isDevelopment {
                 Label(
-                    "This is a development build, so it can't be checked against the minimum supported release (\(SupportedServer.minimum.displayName)).",
+                    "This is a development or nightly build, so it can't be checked against the minimum supported release (\(SupportedServer.minimum.displayName)).",
                     systemImage: "hammer.fill"
                 )
                 .font(.caption)
