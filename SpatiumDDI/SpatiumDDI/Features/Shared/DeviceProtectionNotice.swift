@@ -45,6 +45,16 @@ struct DeviceProtectionNotice: View {
             }
             .foregroundStyle(.orange)
 
+        case .success(.deviceUnlock):
+            // `availableProtection` only ever offers a real gate; listed so
+            // the switch stays exhaustive and still says something true.
+            Label(
+                "Opening the app won't ask for \(TokenStore.biometryDescription()).",
+                systemImage: "lock.open"
+            )
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+
         case .failure(let error):
             // `.server` rather than `.app`: this text is Foundation's own
             // localised `LAError` description, not this app's wording, so it
@@ -70,11 +80,12 @@ struct DeviceProtectionNotice: View {
 }
 
 extension KeychainProtection {
-    /// What is guarding the token, for the Server screen.
+    /// What is guarding the token, for the Server screen and the server list.
     var summary: LocalizedStringResource {
         switch self {
         case .biometrics: "\(TokenStore.biometryDescription())"
         case .passcode: "Device passcode"
+        case .deviceUnlock: "Device unlock only"
         }
     }
 
@@ -87,6 +98,8 @@ extension KeychainProtection {
         case .biometrics: nil
         case .passcode:
             "A passcode is weaker than biometrics here, and unlike a biometric enrolment it doesn't invalidate the stored token when it changes. Sign in again after setting up biometrics to upgrade this."
+        case .deviceUnlock:
+            "Opening this server asks for nothing beyond unlocking the device, so anyone holding it unlocked can use the token. The token itself never leaves this device's Keychain."
         }
     }
 
@@ -94,6 +107,7 @@ extension KeychainProtection {
         switch self {
         case .biometrics: "faceid"
         case .passcode: "lock.fill"
+        case .deviceUnlock: "lock.open"
         }
     }
 }

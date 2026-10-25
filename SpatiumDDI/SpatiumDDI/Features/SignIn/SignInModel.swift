@@ -129,7 +129,7 @@ final class SignInModel {
         guard !token.isEmpty else { return }
 
         state = .validating
-        switch await enrolment.enrol(token, for: address) {
+        switch await enrolment.enrol(token, for: address, requiringAuthentication: true) {
         case .enrolled:
             tokenInput = ""
             state = .idle

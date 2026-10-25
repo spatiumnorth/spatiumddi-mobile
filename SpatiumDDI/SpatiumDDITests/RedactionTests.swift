@@ -81,10 +81,11 @@ struct TokenStoreAvailabilityTests {
     }
 
     /// The rule that survived widening the gate to include a passcode
-    /// (spatiumddi-mobile#5): a device that can protect a token with *neither*
-    /// still refuses to store one, rather than writing a credential nothing
-    /// would ever be asked to unlock.
-    @Test("Saving on an unprotected device fails rather than storing unprotected")
+    /// (spatiumddi-mobile#5), and survives the gate becoming optional: when the
+    /// operator *asks* for a gate, a device that can provide neither refuses
+    /// to store the token, rather than writing it with less protection than
+    /// they chose.
+    @Test("A gate asked for on an unprotected device is refused, not quietly dropped")
     func refusesToStoreUnprotected() throws {
         guard case .failure = TokenStore.availableProtection() else {
             // Something can protect a token here; the flow itself covers that path.
@@ -94,7 +95,7 @@ struct TokenStoreAvailabilityTests {
         let address = ServerAddress(host: "ddi.internal.example", port: 8443)
 
         #expect(throws: TokenStore.StoreError.self) {
-            try store.save("sddi_should_not_persist", for: address)
+            try store.save("sddi_should_not_persist", for: address, requiringAuthentication: true)
         }
         #expect(store.hasToken(for: address) == false)
     }

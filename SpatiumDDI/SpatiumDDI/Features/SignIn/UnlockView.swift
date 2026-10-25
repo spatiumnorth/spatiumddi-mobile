@@ -23,6 +23,9 @@ struct UnlockView: View {
         switch protection {
         case .biometrics: TokenStore.biometryDescription()
         case .passcode: String(localized: "your passcode")
+        // Never shown — the ungated layout does not name a gate — but a
+        // name is still owed, and "nothing" is the true one.
+        case .deviceUnlock: String(localized: "no prompt")
         }
     }
 

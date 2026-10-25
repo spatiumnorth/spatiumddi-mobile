@@ -284,15 +284,52 @@ struct IPFamilyTests {
 /// which `LAPolicy` is evaluated when the token is read back.
 @Suite("Keychain protection")
 struct KeychainProtectionTests {
-    @Test("The stored marker round-trips", arguments: [KeychainProtection.biometrics, .passcode])
+    @Test("The stored marker round-trips", arguments: KeychainProtection.allCases)
     func roundTrips(protection: KeychainProtection) {
         #expect(KeychainProtection(marker: protection.marker) == protection)
+        #expect(KeychainProtection.stored(marker: protection.marker) == protection)
+    }
+
+    /// Items already on operators' phones carry these exact bytes. Renaming a
+    /// case would silently re-read every one of them as the fallback.
+    @Test("The original markers keep their spelling")
+    func originalMarkersAreStable() {
+        #expect(KeychainProtection.biometrics.marker == Data("biometrics".utf8))
+        #expect(KeychainProtection.passcode.marker == Data("passcode".utf8))
     }
 
     @Test("An unreadable marker is not silently treated as a known protection")
     func rejectsGarbage() {
         #expect(KeychainProtection(marker: Data([0xff, 0xfe])) == nil)
         #expect(KeychainProtection(marker: Data("something-else".utf8)) == nil)
+    }
+
+    /// The direction of the fallback is the whole point. A missing or garbled
+    /// marker must never read as `.deviceUnlock` — that would skip a prompt the
+    /// item's access control still demands, and turn a gated token into a
+    /// silent read that fails for no reason the operator could see.
+    @Test("No marker, or a garbled one, resolves to the strongest gate")
+    func fallbackIsGated() {
+        #expect(KeychainProtection.stored(marker: nil) == .biometrics)
+        #expect(KeychainProtection.stored(marker: Data([0xff, 0xfe])) == .biometrics)
+        #expect(KeychainProtection.stored(marker: Data("deviceunlock".utf8)) == .biometrics)
+        #expect(KeychainProtection.stored(marker: nil).isGated)
+    }
+
+    @Test("Only the ungated level skips the prompt")
+    func gatedness() {
+        #expect(KeychainProtection.biometrics.isGated)
+        #expect(KeychainProtection.passcode.isGated)
+        #expect(!KeychainProtection.deviceUnlock.isGated)
+    }
+
+    @Test("Asking for no gate never consults the device; asking for one always does")
+    func protectionForChoice() throws {
+        #expect(try TokenStore.protection(requiringAuthentication: false).get() == .deviceUnlock)
+        switch TokenStore.protection(requiringAuthentication: true) {
+        case .success(let protection): #expect(protection.isGated)
+        case .failure: break  // a device with no passcode — refused, which is the rule
+        }
     }
 
     /// An item written before the app understood passcode protection carries no
@@ -310,6 +347,104 @@ struct KeychainProtectionTests {
     func passcodeIsMarkedAsSecondBest() {
         #expect(KeychainProtection.biometrics.caveat == nil)
         #expect(KeychainProtection.passcode.caveat != nil, "the weaker option has to say so")
+        #expect(KeychainProtection.deviceUnlock.caveat != nil, "so does the weakest")
+    }
+}
+
+/// The ungated default, against the real Keychain.
+///
+/// Unlike the gated levels this one needs nothing from the device, which is the
+/// reason it exists — so it can be exercised end to end on any simulator,
+/// passcode or none.
+@Suite("Ungated token storage")
+struct UngatedTokenStoreTests {
+    private func isolated() -> (TokenStore, ServerAddress) {
+        (
+            TokenStore(service: "io.spatiumddi.tests.\(UUID().uuidString)"),
+            ServerAddress(host: "ddi.internal.example", port: 8443)
+        )
+    }
+
+    @Test("An ungated token saves on any device and reads back without a prompt")
+    func savesAndReadsSilently() async throws {
+        let (store, address) = isolated()
+        defer { try? store.delete(for: address) }
+
+        let sealed = try store.save("sddi_ungated", for: address, requiringAuthentication: false)
+
+        #expect(sealed == .deviceUnlock)
+        #expect(store.storedProtection(for: address) == .deviceUnlock, "the marker travels with the item")
+        #expect(store.presence(for: address) == .present, "Fail, not Skip, still sees an ungated item")
+        #expect(try store.ungatedToken(for: address) == "sddi_ungated")
+        // The general read path must take the silent branch too — a test
+        // process has no one to answer a prompt, so reaching LAContext here
+        // would fail rather than hang.
+        #expect(try await store.token(for: address, reason: "test") == "sddi_ungated")
+    }
+
+    @Test("Saving again replaces the token rather than duplicating the item")
+    func saveReplaces() throws {
+        let (store, address) = isolated()
+        defer { try? store.delete(for: address) }
+
+        try store.save("sddi_first", for: address, requiringAuthentication: false)
+        try store.save("sddi_second", for: address, requiringAuthentication: false)
+
+        #expect(try store.ungatedToken(for: address) == "sddi_second")
+    }
+
+    @Test("Re-sealing to the level already in force touches nothing")
+    func resealNoOp() throws {
+        let (store, address) = isolated()
+        defer { try? store.delete(for: address) }
+        try store.save("sddi_same", for: address, requiringAuthentication: false)
+
+        #expect(try store.reseal("sddi_same", for: address, requiringAuthentication: false) == .deviceUnlock)
+        #expect(try store.ungatedToken(for: address) == "sddi_same")
+    }
+
+    @Test("Re-sealing with nothing stored is refused, and says the token was never there")
+    func resealWithoutToken() {
+        let (store, address) = isolated()
+        #expect(throws: TokenStore.ResealFailure(reason: .notFound, tokenRetained: false)) {
+            try store.reseal("sddi_absent", for: address, requiringAuthentication: true)
+        }
+    }
+
+    /// The rule for turning the gate on with nothing to gate with: say so,
+    /// and leave the token exactly as it was — never deleted on the way to a
+    /// refusal.
+    @Test("Requiring a gate the device can't offer leaves the token where it was")
+    func resealRefusedKeepsToken() throws {
+        guard case .failure = TokenStore.availableProtection() else {
+            // This device can gate; re-sealing would succeed, which the
+            // round-trip below covers.
+            return
+        }
+        let (store, address) = isolated()
+        defer { try? store.delete(for: address) }
+        try store.save("sddi_kept", for: address, requiringAuthentication: false)
+
+        do {
+            try store.reseal("sddi_kept", for: address, requiringAuthentication: true)
+            Issue.record("a device with no passcode cannot gate a token")
+        } catch {
+            #expect(error.tokenRetained)
+        }
+        #expect(store.storedProtection(for: address) == .deviceUnlock)
+        #expect(try store.ungatedToken(for: address) == "sddi_kept")
+    }
+
+    @Test("Turning the gate on, where the device has one, moves the token behind it")
+    func resealOnWhereAvailable() throws {
+        guard case .success(let gate) = TokenStore.availableProtection() else { return }
+        let (store, address) = isolated()
+        defer { try? store.delete(for: address) }
+        try store.save("sddi_moved", for: address, requiringAuthentication: false)
+
+        #expect(try store.reseal("sddi_moved", for: address, requiringAuthentication: true) == gate)
+        #expect(store.storedProtection(for: address) == gate)
+        #expect(store.hasToken(for: address))
     }
 }
 

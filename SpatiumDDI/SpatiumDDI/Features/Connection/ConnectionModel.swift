@@ -125,7 +125,7 @@ final class ConnectionModel {
     func finishWithScannedToken(for address: ServerAddress) async -> String? {
         guard let token = scannedToken else { return nil }
         state = .connecting
-        switch await enrolment.enrol(token, for: address) {
+        switch await enrolment.enrol(token, for: address, requiringAuthentication: true) {
         case .enrolled:
             scannedToken = nil
             state = .connected(address, status: 200)
