@@ -196,6 +196,319 @@ nonisolated enum MACAddress {
         let digits = text.filter { !":-. ".contains($0) }
         return digits.count == 12 && digits.allSatisfy(\.isHexDigit)
     }
+
+    /// Whether two spellings name the same MAC.
+    ///
+    /// The server canonicalises what it is sent to `aa:bb:cc:dd:ee:ff`, so a
+    /// MAC retyped as `AA-BB-CC-DD-EE-FF` is not a change — and offering to
+    /// "save" it would put a no-op in front of the operator dressed as an edit.
+    static func same(_ lhs: String, _ rhs: String) -> Bool {
+        guard let left = hexDigits(lhs), let right = hexDigits(rhs) else {
+            return lhs.trimmingCharacters(in: .whitespacesAndNewlines)
+                == rhs.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        return left == right
+    }
+
+    private static func hexDigits(_ text: String) -> String? {
+        guard looksValid(text) else { return nil }
+        return text.filter { !":-. ".contains($0) }.lowercased()
+    }
+}
+
+// MARK: - Editing a reservation
+
+/// An edit to a reservation, as the sheet holds it: what was there, and what is
+/// typed now.
+///
+/// Extracted from the view so the part that decides what reaches the server is
+/// testable. `PUT /dhcp/statics/{id}` is **partial**, not a replace — the
+/// handler applies `model_dump(exclude_none=True)`, so a field left out of the
+/// body keeps its value. That makes the body this builds the whole safety
+/// story: only the fields the operator actually changed are sent, and the
+/// ones this sheet does not show — client id, DUID, option overrides, tags —
+/// are never in it and so can never be wiped by it.
+///
+/// Clearing follows the server's own representation rather than the generic
+/// rule in `FieldChange.clears`. Host name and description are non-nullable
+/// strings whose "absent" value is `""` (it is what create stores when they
+/// are left blank), so sending `""` really does empty them and the
+/// confirmation's "→ empty" is the truth. The MAC and the address cannot be
+/// emptied at all — the reservation would have nothing to match on or nothing
+/// to hand out — so those are refused before the confirmation, with the
+/// reason beside the field.
+nonisolated struct ReservationEdit: Equatable {
+    struct Fields: Equatable {
+        var mac: String
+        var ip: String
+        var hostname: String
+        var description: String
+
+        var trimmed: Fields {
+            Fields(
+                mac: mac.trimmingCharacters(in: .whitespacesAndNewlines),
+                ip: ip.trimmingCharacters(in: .whitespacesAndNewlines),
+                hostname: hostname.trimmingCharacters(in: .whitespacesAndNewlines),
+                description: description.trimmingCharacters(in: .whitespacesAndNewlines)
+            )
+        }
+    }
+
+    /// Why Save is off. A case rather than a string so the view words it and
+    /// the tests check the decision, not the English.
+    enum Blocker: Equatable {
+        case macCleared
+        case macInvalid
+        case ipCleared
+    }
+
+    let original: Fields
+    var edited: Fields
+
+    init(original: Fields, edited: Fields? = nil) {
+        self.original = original
+        self.edited = edited ?? original
+    }
+
+    init(_ entry: Components.Schemas.StaticResponse) {
+        self.init(
+            original: Fields(
+                mac: entry.macAddress,
+                ip: entry.ipAddress,
+                hostname: entry.hostname,
+                description: entry.description
+            ))
+    }
+
+    private var typed: Fields { edited.trimmed }
+
+    var macChanged: Bool { !MACAddress.same(typed.mac, original.mac) }
+    var ipChanged: Bool { typed.ip != original.ip }
+    var hostnameChanged: Bool { typed.hostname != original.hostname }
+    var descriptionChanged: Bool { typed.description != original.description }
+
+    var hasChanges: Bool { macChanged || ipChanged || hostnameChanged || descriptionChanged }
+
+    var blocker: Blocker? {
+        if FieldChange.clears(from: original.mac, to: typed.mac) { return .macCleared }
+        if macChanged, !MACAddress.looksValid(typed.mac) { return .macInvalid }
+        if FieldChange.clears(from: original.ip, to: typed.ip) { return .ipCleared }
+        return nil
+    }
+
+    var canSave: Bool { hasChanges && blocker == nil }
+
+    /// The request: changed fields only, everything else omitted so the
+    /// server leaves it as it was.
+    var body: Components.Schemas.StaticUpdate {
+        Components.Schemas.StaticUpdate(
+            description: descriptionChanged ? typed.description : nil,
+            hostname: hostnameChanged ? typed.hostname : nil,
+            ipAddress: ipChanged ? typed.ip : nil,
+            macAddress: macChanged ? typed.mac : nil
+        )
+    }
+
+    /// `Label: before → after`, one line per changed field, in form order.
+    var summaryLines: [String] {
+        var lines: [String] = []
+        if macChanged {
+            lines.append(FieldChange.line(String(localized: "MAC"), from: original.mac, to: typed.mac))
+        }
+        if ipChanged {
+            lines.append(FieldChange.line(String(localized: "Address"), from: original.ip, to: typed.ip))
+        }
+        if hostnameChanged {
+            lines.append(
+                FieldChange.line(String(localized: "Host name"), from: original.hostname, to: typed.hostname))
+        }
+        if descriptionChanged {
+            lines.append(
+                FieldChange.line(
+                    String(localized: "Description"), from: original.description, to: typed.description))
+        }
+        return lines
+    }
+}
+
+/// Correcting a reservation: a swapped NIC, a renumber, a better name.
+///
+/// Modelled on `CreateReservationView`, and deliberately the same four fields.
+/// The scope is not among them because it cannot change — the server rejects a
+/// body `scope_id`, since a reservation is rendered inside its scope's subnet
+/// stanza; moving one is a delete and a re-create.
+struct EditReservationView: View {
+    let session: ControlPlaneSession
+    let scope: Components.Schemas.ScopeResponse
+    let entry: Components.Schemas.StaticResponse
+    /// The network this scope serves, when it could be resolved.
+    let network: String?
+    let onSaved: (Components.Schemas.StaticResponse) -> Void
+    let onDismiss: () -> Void
+
+    @State private var edit: ReservationEdit
+    @State private var isConfirming = false
+    @State private var isSending = false
+    @State private var failure: FailureMessage?
+
+    init(
+        session: ControlPlaneSession,
+        scope: Components.Schemas.ScopeResponse,
+        entry: Components.Schemas.StaticResponse,
+        network: String?,
+        onSaved: @escaping (Components.Schemas.StaticResponse) -> Void,
+        onDismiss: @escaping () -> Void
+    ) {
+        self.session = session
+        self.scope = scope
+        self.entry = entry
+        self.network = network
+        self.onSaved = onSaved
+        self.onDismiss = onDismiss
+        _edit = State(initialValue: ReservationEdit(entry))
+    }
+
+    private var blockerText: LocalizedStringResource? {
+        switch edit.blocker {
+        case .macCleared:
+            "A reservation needs a MAC address — it's what the reservation matches on."
+        case .macInvalid:
+            "That doesn't look like a MAC address — six pairs of hex digits."
+        case .ipCleared:
+            "A reservation needs an address — it's what the reservation hands out."
+        case nil:
+            nil
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    LabeledContent("Scope", value: scope.name ?? String(localized: "Unnamed scope"))
+                    if let network { LabeledContent("Network", value: network) }
+                } footer: {
+                    Text(
+                        "A reservation can't move to another scope. To move it, delete it here and create it in the other scope."
+                    )
+                }
+
+                Section {
+                    TextField("aa:bb:cc:dd:ee:ff", text: $edit.edited.mac)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .keyboardType(.numbersAndPunctuation)
+                        .font(.body.monospaced())
+                    TextField("10.1.0.50", text: $edit.edited.ip)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .keyboardType(.numbersAndPunctuation)
+                        .font(.body.monospaced())
+                } header: {
+                    Text("Reservation")
+                } footer: {
+                    if let blockerText {
+                        Label(blockerText, systemImage: "exclamationmark.circle")
+                            .font(.footnote)
+                            .foregroundStyle(.orange)
+                    } else if edit.ipChanged, let network {
+                        Text("The address has to be inside \(network) — the server refuses anything else.")
+                    } else {
+                        Text("Whenever that MAC asks, this scope answers with that address.")
+                    }
+                }
+
+                Section {
+                    TextField("Host name (optional)", text: $edit.edited.hostname)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    TextField("Description (optional)", text: $edit.edited.description, axis: .vertical)
+                        .lineLimit(1...3)
+                } header: {
+                    Text("Identity")
+                } footer: {
+                    Text(
+                        "Client ID, DUID, option overrides and tags aren't shown here, and saving leaves them as they are."
+                    )
+                }
+
+                if let failure {
+                    Section("Not saved") {
+                        Label(failure, systemImage: "xmark.octagon.fill").foregroundStyle(.red)
+                    }
+                }
+            }
+            .navigationTitle("Edit Reservation")
+            .navigationBarTitleDisplayMode(.inline)
+            .dismissableKeyboard()
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel", role: .cancel, action: onDismiss)
+                        .disabled(isSending)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    if isSending {
+                        ProgressView()
+                    } else {
+                        Button("Save") { isConfirming = true }
+                            .disabled(!edit.canSave)
+                    }
+                }
+            }
+            .alert("Save changes to \(entry.ipAddress)?", isPresented: $isConfirming) {
+                Button("Cancel", role: .cancel) {}
+                Button("Save") { Task { await save() } }
+            } message: {
+                Text(verbatim: summary)
+            }
+        }
+        .interactiveDismissDisabled(isSending)
+    }
+
+    /// The fields that change, before and after, then what the change does.
+    private var summary: String {
+        var paragraphs = [edit.summaryLines.joined(separator: "\n")]
+        if edit.ipChanged {
+            // The IPAM row moves with the reservation rather than being left
+            // behind as an allocated ghost — worth saying, because the old
+            // address becomes takeable the moment this lands.
+            paragraphs.append(
+                String(localized: "The IPAM entry moves to the new address and the old one is freed."))
+        }
+        paragraphs.append(
+            String(
+                localized:
+                    "Pushed to the DHCP servers in this group. The device picks it up at its next renewal, not immediately."
+            )
+        )
+        return paragraphs.joined(separator: "\n\n")
+    }
+
+    private func save() async {
+        isSending = true
+        failure = nil
+        defer { isSending = false }
+        do {
+            let response = try await session.client.updateStaticApiV1DhcpStaticsStaticIdPut(
+                path: .init(staticId: entry.id),
+                body: .json(edit.body)
+            )
+            switch response {
+            case .ok(let ok):
+                onSaved(try ok.body.json)
+                onDismiss()
+            case .unprocessableContent: throw APIStatusError(status: 422)
+            case .undocumented(let statusCode, let payload):
+                throw await APIStatusError(status: statusCode, payload: payload)
+            }
+        } catch {
+            // `StaticUpdate` carries no `force`: a 409 here (that MAC is
+            // already reserved elsewhere in the group) is final, not waivable.
+            if case .failed(let message) = await WriteFailure.classify(error, forced: true) {
+                failure = message
+            }
+        }
+    }
 }
 
 // MARK: - Removing a reservation

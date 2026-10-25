@@ -482,6 +482,7 @@ struct DHCPScopeDetailView: View {
     @State private var statics: LoadState<[Components.Schemas.StaticResponse]> = .idle
     @State private var isAddingReservation = false
     @State private var pendingReservationDelete: DeleteReservationModel?
+    @State private var pendingReservationEdit: PendingReservationEdit?
     @Environment(Permissions.self) private var permissions
 
     /// Whether this scope hands anything out dynamically.
@@ -496,6 +497,12 @@ struct DHCPScopeDetailView: View {
 
     private var mayEditReservations: Bool {
         permissions.canWrite("dhcp_static", "dhcp_scope", "dhcp_server", id: scope.id)
+    }
+
+    /// Narrower than `mayEditReservations`: the update handler depends on
+    /// `SuperAdmin`, so a `dhcp_static` write grant alone gets a 403 from it.
+    private var mayUpdateReservations: Bool {
+        mayEditReservations && permissions.maySuperadmin
     }
 
     var body: some View {
@@ -578,6 +585,14 @@ struct DHCPScopeDetailView: View {
                                     Label("Delete", systemImage: "trash")
                                 }
                             }
+                            if mayUpdateReservations {
+                                Button {
+                                    pendingReservationEdit = PendingReservationEdit(entry: entry)
+                                } label: {
+                                    Label("Edit", systemImage: "pencil")
+                                }
+                                .tint(.blue)
+                            }
                         }
                     }
                 }
@@ -609,6 +624,18 @@ struct DHCPScopeDetailView: View {
                 // the row the list will show a second later.
                 onCreated: { _ in Task { await fetchStatics() } },
                 onDismiss: { isAddingReservation = false }
+            )
+        }
+        .sheet(item: $pendingReservationEdit) { pending in
+            EditReservationView(
+                session: session,
+                scope: scope,
+                entry: pending.entry,
+                network: subnet?.network,
+                // Refetched for the same reason as create: the IPAM link can
+                // move with the address, so the saved row is not the final one.
+                onSaved: { _ in Task { await fetchStatics() } },
+                onDismiss: { pendingReservationEdit = nil }
             )
         }
         .sheet(item: $pendingReservationDelete) { model in
@@ -681,4 +708,13 @@ struct DHCPScopeDetailView: View {
             }
         }
     }
+}
+
+/// The reservation the edit sheet is open on.
+///
+/// Wrapped because the generated row types are not `Identifiable`, and keyed on
+/// the reservation's own id so a re-render cannot re-present the sheet.
+private struct PendingReservationEdit: Identifiable {
+    let entry: Components.Schemas.StaticResponse
+    var id: String { entry.id }
 }

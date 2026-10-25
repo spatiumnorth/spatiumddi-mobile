@@ -255,6 +255,18 @@ struct PermissionsTests {
         let permissions = Permissions(isSuperadmin: false, grants: [grant("write", "ip_address")])
         #expect(permissions.canWrite("subnet", "ip_address"))
     }
+
+    /// Updating a reservation and restoring from Trash depend on `SuperAdmin`,
+    /// not on a grant — so even `admin` on the resource type is not enough,
+    /// and offering the button would only ever produce a 403.
+    @Test("A superadmin-only route is offered to a superadmin, or when unknown")
+    func superadminOnly() {
+        #expect(Permissions().maySuperadmin)
+        #expect(Permissions(isSuperadmin: true, grants: []).maySuperadmin)
+        let granted = Permissions(isSuperadmin: false, grants: [grant("admin", "dhcp_static")])
+        #expect(granted.canWrite("dhcp_static"))
+        #expect(!granted.maySuperadmin)
+    }
 }
 
 @Suite("Record value families")

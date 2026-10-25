@@ -53,6 +53,132 @@ struct MACAddressTests {
     }
 }
 
+/// A MAC is compared as the server will store it, not as it was typed.
+@Suite("MAC address equivalence")
+struct MACSameTests {
+    @Test("Separators and case don't make a different MAC")
+    func spellings() {
+        #expect(MACAddress.same("aa:bb:cc:dd:ee:ff", "AA-BB-CC-DD-EE-FF"))
+        #expect(MACAddress.same("aabb.ccdd.eeff", "aa:bb:cc:dd:ee:ff"))
+        #expect(!MACAddress.same("aa:bb:cc:dd:ee:ff", "aa:bb:cc:dd:ee:00"))
+    }
+
+    /// Half-typed is not "the same" as anything it happens to prefix.
+    @Test("An invalid spelling only matches itself")
+    func invalid() {
+        #expect(!MACAddress.same("aa:bb:cc", "aa:bb:cc:dd:ee:ff"))
+        #expect(MACAddress.same("aa:bb:cc", " aa:bb:cc "))
+    }
+}
+
+/// What an edit to a reservation sends, and what it refuses to.
+///
+/// The update route is partial (`exclude_none`), so the body *is* the safety
+/// story: a field absent from it is left alone, a field present is written.
+@Suite("Reservation edit")
+struct ReservationEditTests {
+    private let original = ReservationEdit.Fields(
+        mac: "aa:bb:cc:dd:ee:01", ip: "10.1.0.50", hostname: "printer-3f", description: "By the lifts"
+    )
+
+    private func edit(_ change: (inout ReservationEdit.Fields) -> Void) -> ReservationEdit {
+        var fields = original
+        change(&fields)
+        return ReservationEdit(original: original, edited: fields)
+    }
+
+    @Test("An untouched edit has nothing to save")
+    func untouched() {
+        let edit = ReservationEdit(original: original)
+        #expect(!edit.hasChanges)
+        #expect(!edit.canSave)
+        #expect(edit.summaryLines.isEmpty)
+    }
+
+    /// Only what changed is in the body. Anything else — including the fields
+    /// this sheet never shows, like tags and option overrides — is omitted, and
+    /// omitted means the server keeps it.
+    @Test("Only the changed field is sent")
+    func onlyChanged() {
+        let body = edit { $0.ip = "10.1.0.51" }.body
+        #expect(body.ipAddress == "10.1.0.51")
+        #expect(body.macAddress == nil)
+        #expect(body.hostname == nil)
+        #expect(body.description == nil)
+        #expect(body.tags == nil)
+        #expect(body.optionsOverride == nil)
+        #expect(body.clientId == nil)
+        #expect(body.duid == nil)
+        #expect(body.scopeId == nil)
+    }
+
+    @Test("Surrounding whitespace is not a change, and is not sent")
+    func whitespace() {
+        #expect(!edit { $0.hostname = "  printer-3f " }.hasChanges)
+        #expect(edit { $0.hostname = " printer-4f " }.body.hostname == "printer-4f")
+    }
+
+    /// The server canonicalises MACs, so a reformat would be a no-op save.
+    @Test("Retyping the same MAC in another format is not a change")
+    func macReformat() {
+        let reformatted = edit { $0.mac = "AA-BB-CC-DD-EE-01" }
+        #expect(!reformatted.hasChanges)
+        #expect(reformatted.body.macAddress == nil)
+    }
+
+    @Test("A new MAC is sent as typed; the server canonicalises it")
+    func macChange() {
+        let changed = edit { $0.mac = "AA-BB-CC-DD-EE-02" }
+        #expect(changed.canSave)
+        #expect(changed.body.macAddress == "AA-BB-CC-DD-EE-02")
+    }
+
+    /// Host name and description are non-null strings whose absent value is
+    /// `""`, so sending `""` really clears them — unlike a nullable column,
+    /// where the generated client can't express the clear (#1211).
+    @Test("Clearing the host name or description sends an empty string")
+    func clearsOptionalText() {
+        let cleared = edit {
+            $0.hostname = ""
+            $0.description = " "
+        }
+        #expect(cleared.canSave)
+        #expect(cleared.body.hostname == "")
+        #expect(cleared.body.description == "")
+        #expect(
+            cleared.summaryLines == ["Host name: printer-3f → empty", "Description: By the lifts → empty"])
+    }
+
+    @Test("The MAC and the address can't be emptied")
+    func requiredFields() {
+        #expect(edit { $0.mac = "" }.blocker == .macCleared)
+        #expect(edit { $0.ip = "  " }.blocker == .ipCleared)
+        #expect(!edit { $0.ip = "" }.canSave)
+    }
+
+    @Test("A malformed new MAC is refused before the server is asked")
+    func malformedMAC() {
+        let typo = edit { $0.mac = "aa:bb:cc:dd:ee:0" }
+        #expect(typo.blocker == .macInvalid)
+        #expect(!typo.canSave)
+    }
+
+    @Test("The summary names each changed field, before and after, in form order")
+    func summary() {
+        let changed = edit {
+            $0.description = "Second floor"
+            $0.mac = "aa:bb:cc:dd:ee:02"
+            $0.ip = "10.1.0.60"
+        }
+        #expect(
+            changed.summaryLines == [
+                "MAC: aa:bb:cc:dd:ee:01 → aa:bb:cc:dd:ee:02",
+                "Address: 10.1.0.50 → 10.1.0.60",
+                "Description: By the lifts → Second floor",
+            ])
+    }
+}
+
 /// A TTL as typed into a zone.
 @Suite("TTL parsing")
 struct TTLValueTests {

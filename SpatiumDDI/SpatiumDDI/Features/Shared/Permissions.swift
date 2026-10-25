@@ -80,6 +80,21 @@ final class Permissions {
         return allows(action: action, type: resourceType, id: id)
     }
 
+    /// Whether a route the platform gates on **superadmin alone** should be
+    /// offered.
+    ///
+    /// Some handlers depend on `SuperAdmin` rather than on a grant — updating a
+    /// DHCP reservation and restoring from Trash among them — so no `write`
+    /// grant, however broad, gets a non-superadmin past them. Offering the
+    /// action on a grant would put a button in front of somebody that can only
+    /// ever answer 403. `is_superadmin` here is the server's *effective* flag
+    /// (legacy column or a `{*, *}` role), the same check the route makes.
+    ///
+    /// Same fails-open rule as `canWrite`: not knowing is not a no.
+    var maySuperadmin: Bool {
+        !isKnown || isSuperadmin
+    }
+
     private func allows(action: String, type: String, id: String?) -> Bool {
         grants.contains { grant in
             guard grant.resourceType == type else { return false }
