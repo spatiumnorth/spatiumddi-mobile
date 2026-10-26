@@ -76,7 +76,7 @@ platform, the API and the roadmap all live in
 | **New devices** | First-seen MACs with vendor, subnet and randomisation, and **acknowledge** for the ones that turn out to be fine |
 | **IPAM** | The full tree — space → block → subnet → address — with utilisation at every level, and a per-address detail screen covering identity, fingerprinted device, last-seen signal and the DNS/DHCP objects linked to it. **Allocate** an address (next-available or specific, named and published to DNS in the same request), **edit** what it says about itself, **delete** it behind a typed confirmation |
 | **DNS** | Group → zone → record, with SOA facts, DNSSEC state and serial per zone, and record filtering by type or substring. **Add, edit and delete records** — A, AAAA, CNAME, TXT, MX, SRV, NS, PTR, CAA — each stated in zone-file form before it is sent. A **query log** per BIND9/PowerDNS resolver — what a client asked and what it was told, filterable by name, client, type and outcome |
-| **DHCP** | Server health and HA state, a live ACK/NAK traffic chart, the server's recent audit events, leases with fingerprinted device class, and scopes with their pools — each with a live occupancy bar — and reservations |
+| **DHCP** | Server health and HA state, a live ACK/NAK traffic chart, the server's recent audit events, leases with fingerprinted device class, and scopes with their pools — each with a live occupancy bar — and reservations. **Add, edit and delete reservations** — an edit sends only the fields you changed, and its confirmation shows each one before and after |
 | **Network Tools** | Ping, traceroute, MTR, port test, dig, propagation check, TLS certificate, WHOIS, MAC vendor and Wake-on-LAN — all run **from the control plane**, which is the vantage point that makes them worth having |
 | **Search** | Global search across 16 resource types, grouped by kind, ranked server-side |
 | **Connect** | HTTPS-only, with an explicit certificate-trust flow for the private CAs self-hosted installs actually use |
@@ -178,6 +178,11 @@ The two deletes are not the same thing and the app does not pretend they are.
 An address becomes an `orphan` row that can be re-allocated, but its DNS record
 is released either way. A record is restorable from Trash, but stops resolving
 now. Neither offers permanent removal from a phone.
+
+A superadmin can **restore** from Trash, though. The confirmation names what
+comes back and how much: a restore returns the whole deletion batch, so a
+zone brings its records with it. If any of it clashes with something created
+since, the server restores none of it, and the app lists each clash.
 
 ### Phase 3 — push notifications 🔗 [spatiumddi#912](https://github.com/spatiumnorth/spatiumddi/issues/912)
 
