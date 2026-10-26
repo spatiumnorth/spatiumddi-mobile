@@ -134,6 +134,17 @@ struct DNSServerDetailView: View {
                     }
                     .foregroundStyle(.orange)
                 }
+
+                // Only where there is a log to read: any other driver is
+                // answered with a 400, and a link to a guaranteed error is
+                // worse than no link.
+                if DNSQueryLog.shipsQueryLog(driver: server.driver) {
+                    NavigationLink {
+                        DNSQueryLogView(session: session, initialServerID: server.id)
+                    } label: {
+                        Label("Query Log", systemImage: "text.magnifyingglass")
+                    }
+                }
             }
 
             Section {

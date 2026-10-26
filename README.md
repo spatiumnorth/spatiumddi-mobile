@@ -69,13 +69,13 @@ platform, the API and the roadmap all live in
 
 | Surface | What you get |
 |---|---|
-| **Overview** | Platform health per component, maintenance/demo banners, server version and update check, unresolved alerts by severity, estate counts, and a size-weighted utilisation figure with the busiest subnets |
+| **Overview** | Platform health per component, maintenance/demo banners, server version and update check, unresolved alerts by severity, estate counts, and a size-weighted utilisation figure with the busiest subnets. New-device, network (ASN drift, ROA expiry, circuits) and security (failed logins, expiring tokens, MFA gaps) tiles, each opening the screen behind it |
 | **Alerts** | Every alert event, most-severe first, filterable by severity and unresolved-only. **Resolve** one from the list — swipe, read what it says, confirm |
 | **Approvals** | Change requests with the change they'd make, who asked, and why the platform decided it needed approving. **Approve, reject or withdraw** — a decision you can make from a train, which is the point |
 | **New devices** | First-seen MACs with vendor, subnet and randomisation, and **acknowledge** for the ones that turn out to be fine |
 | **IPAM** | The full tree — space → block → subnet → address — with utilisation at every level, and a per-address detail screen covering identity, fingerprinted device, last-seen signal and the DNS/DHCP objects linked to it. **Allocate** an address (next-available or specific, named and published to DNS in the same request), **edit** what it says about itself, **delete** it behind a typed confirmation |
-| **DNS** | Group → zone → record, with SOA facts, DNSSEC state and serial per zone, and record filtering by type or substring. **Add, edit and delete records** — A, AAAA, CNAME, TXT, MX, SRV, NS, PTR, CAA — each stated in zone-file form before it is sent |
-| **DHCP** | Server health and HA state, a live ACK/NAK traffic chart, leases with fingerprinted device class, and scopes with their pools and reservations |
+| **DNS** | Group → zone → record, with SOA facts, DNSSEC state and serial per zone, and record filtering by type or substring. **Add, edit and delete records** — A, AAAA, CNAME, TXT, MX, SRV, NS, PTR, CAA — each stated in zone-file form before it is sent. A **query log** per BIND9/PowerDNS resolver — what a client asked and what it was told, filterable by name, client, type and outcome |
+| **DHCP** | Server health and HA state, a live ACK/NAK traffic chart, the server's recent audit events, leases with fingerprinted device class, and scopes with their pools — each with a live occupancy bar — and reservations |
 | **Network Tools** | Ping, traceroute, MTR, port test, dig, propagation check, TLS certificate, WHOIS, MAC vendor and Wake-on-LAN — all run **from the control plane**, which is the vantage point that makes them worth having |
 | **Search** | Global search across 16 resource types, grouped by kind, ranked server-side |
 | **Connect** | HTTPS-only, with an explicit certificate-trust flow for the private CAs self-hosted installs actually use |

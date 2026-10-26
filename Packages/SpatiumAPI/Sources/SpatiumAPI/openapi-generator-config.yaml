@@ -101,6 +101,11 @@ filter:
     - /api/v1/dhcp/server-groups/{group_id}/scopes
     - /api/v1/dhcp/scopes/{scope_id}
     - /api/v1/dhcp/scopes/{scope_id}/pools
+    # Live fill of every dynamic pool in the scope, in one call. Per scope
+    # rather than per pool: a scope with several pools is where one call per
+    # pool is wasteful, and where an exhausted class-restricted pool hides
+    # behind a scope that looks fine.
+    - /api/v1/dhcp/scopes/{scope_id}/pools/occupancy
     - /api/v1/dhcp/scopes/{scope_id}/statics
     # The rack-side write: this MAC gets this IP, with the MAC on a label in
     # front of you (spatiumddi-mobile#18). POST is on the collection above;
