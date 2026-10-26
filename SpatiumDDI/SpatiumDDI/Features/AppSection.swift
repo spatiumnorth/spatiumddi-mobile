@@ -20,6 +20,7 @@ nonisolated enum AppSection: String, CaseIterable, Identifiable, Hashable, Senda
     case requests
     case clientLookup
     case dhcpLog
+    case dnsLog
     case newDevices
     case ipam
     case dns
@@ -52,6 +53,7 @@ nonisolated enum AppSection: String, CaseIterable, Identifiable, Hashable, Senda
         case .requests: "Requests"
         case .clientLookup: "Client Lookup"
         case .dhcpLog: "DHCP Log"
+        case .dnsLog: "DNS Log"
         case .newDevices: "New Devices"
         case .ipam: "IPAM"
         case .dns: "DNS"
@@ -84,6 +86,7 @@ nonisolated enum AppSection: String, CaseIterable, Identifiable, Hashable, Senda
         case .requests: "tray"
         case .clientLookup: "person.crop.circle.badge.questionmark"
         case .dhcpLog: "doc.text.magnifyingglass"
+        case .dnsLog: "text.magnifyingglass"
         case .newDevices: "sensor.tag.radiowaves.forward"
         case .ipam: "square.grid.3x3"
         case .dns: "globe"
@@ -159,7 +162,7 @@ nonisolated enum AppSection: String, CaseIterable, Identifiable, Hashable, Senda
         var sections: [AppSection] {
             switch self {
             case .monitor: [.overview, .alerts, .clientLookup, .changeRequests, .requests, .newDevices]
-            case .estate: [.ipam, .dns, .dhcp, .dhcpLog, .domains, .certificates]
+            case .estate: [.ipam, .dns, .dhcp, .dhcpLog, .dnsLog, .domains, .certificates]
             case .network: [.devices, .vlans, .vrfs, .circuits, .asns, .lookingGlass]
             case .administration: [.ownership, .access, .integrations, .audit, .trash]
             case .tools: [.networkTools, .search, .server, .about]

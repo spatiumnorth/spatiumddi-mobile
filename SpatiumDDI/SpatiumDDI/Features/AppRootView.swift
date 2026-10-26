@@ -258,7 +258,7 @@ struct SignedInView: View {
     private func detail(for section: AppSection, session: ControlPlaneSession) -> some View {
         switch section {
         case .overview:
-            OverviewView(session: session)
+            OverviewView(session: session, onSelfRevoked: onSessionRejected)
         case .alerts:
             AlertsView(session: session)
         case .changeRequests:
@@ -269,6 +269,8 @@ struct SignedInView: View {
             ClientLookupView(session: session)
         case .dhcpLog:
             DHCPActivityView(session: session)
+        case .dnsLog:
+            DNSQueryLogView(session: session)
         case .newDevices:
             NewDevicesView(session: session)
         case .ipam:

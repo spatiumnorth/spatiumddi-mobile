@@ -18,6 +18,13 @@ updates:
       interval: weekly
     commit-message:
       prefix: deps
+    # OpenAPIKit is the generator's parser, not ours: the generator pins it to
+    # 6.x (`from: "6.1.0"`). A 7.x pin in the app's resolved file can't be
+    # satisfied, so every build silently re-resolves to 6.x and rewrites it.
+    # Take OpenAPIKit majors when the generator does, not before.
+    ignore:
+      - dependency-name: "github.com/mattpolzin/openapikit"
+        update-types: ["version-update:semver-major"]
     groups:
       # The generator, its runtime and their parsers are released together
       # and only tested together — one PR, not four that each build alone.

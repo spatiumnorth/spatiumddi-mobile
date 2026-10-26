@@ -46,10 +46,10 @@ struct SurfaceIntegrationTests {
         let version = try await session.client.getVersionApiV1VersionGet().ok.body.json
         #expect(!version.version.isEmpty)
 
-        // Either it is CalVer or it is a development build; both are handled,
-        // and neither may crash the gate.
+        // CalVer, SemVer or a development build; all are handled, none may
+        // crash the gate, and the name shown is the one the server sent.
         let parsed = ServerVersion(version.version)
-        #expect(parsed.displayName == version.version || !parsed.isDevelopment)
+        #expect(parsed.displayName == version.version.trimmingCharacters(in: .whitespacesAndNewlines))
 
         try store.removePin(for: #require(LiveServer.address))
     }
@@ -71,7 +71,10 @@ struct SurfaceIntegrationTests {
 
     // MARK: - DNS
 
-    @Test("DNS groups, zones and records decode down the whole chain")
+    @Test(
+        "DNS groups, zones and records decode down the whole chain",
+        .enabled("core.dns is switched off") { await LiveServer.modulesEnabled("core.dns") }
+    )
     func dnsChainDecodes() async throws {
         let (session, store) = try await LiveServer.pinnedSession()
         defer { session.invalidate() }
@@ -116,7 +119,10 @@ struct SurfaceIntegrationTests {
 
     // MARK: - DHCP
 
-    @Test("DHCP servers, stats, groups and scopes decode")
+    @Test(
+        "DHCP servers, stats, groups and scopes decode",
+        .enabled("core.dhcp is switched off") { await LiveServer.modulesEnabled("core.dhcp") }
+    )
     func dhcpChainDecodes() async throws {
         let (session, store) = try await LiveServer.pinnedSession()
         defer { session.invalidate() }
@@ -142,7 +148,11 @@ struct SurfaceIntegrationTests {
             )
             .ok.body.json
         #expect(leases.total >= leases.items.count)
-        #expect(leases.items.allSatisfy { !$0.ipAddress.isEmpty && !$0.macAddress.isEmpty })
+        // A DHCPv6 lease carries a DUID instead of a MAC; every lease has one or the other.
+        #expect(
+            leases.items.allSatisfy {
+                !$0.ipAddress.isEmpty && LeaseClient(mac: $0.macAddress, duid: $0.duid) != .unknown
+            })
 
         let groups = try await session.client.listGroupsApiV1DhcpServerGroupsGet().ok.body.json
         #expect(!groups.isEmpty)
@@ -246,7 +256,12 @@ struct SurfaceIntegrationTests {
         try store.removePin(for: #require(LiveServer.address))
     }
 
-    @Test("Network modelling surfaces decode")
+    @Test(
+        "Network modelling surfaces decode",
+        .enabled("a network module is switched off") {
+            await LiveServer.modulesEnabled("network.vrf", "network.vlan", "network.circuit", "network.asn")
+        }
+    )
     func networkSurfacesDecode() async throws {
         let (session, store) = try await LiveServer.pinnedSession()
         defer { session.invalidate() }
@@ -275,7 +290,12 @@ struct SurfaceIntegrationTests {
         try store.removePin(for: #require(LiveServer.address))
     }
 
-    @Test("Ownership entities decode")
+    @Test(
+        "Ownership entities decode",
+        .enabled("an ownership module is switched off") {
+            await LiveServer.modulesEnabled("network.customer", "network.site", "network.provider")
+        }
+    )
     func ownershipDecodes() async throws {
         let (session, store) = try await LiveServer.pinnedSession()
         defer { session.invalidate() }
@@ -328,7 +348,12 @@ struct SurfaceIntegrationTests {
         try store.removePin(for: #require(LiveServer.address))
     }
 
-    @Test("Change requests and new-device sightings decode")
+    @Test(
+        "Change requests and new-device sightings decode",
+        .enabled("approvals or new-device watch is switched off") {
+            await LiveServer.modulesEnabled("governance.approvals", "security.new_device_watch")
+        }
+    )
     func operationsSurfacesDecode() async throws {
         let (session, store) = try await LiveServer.pinnedSession()
         defer { session.invalidate() }
@@ -389,7 +414,10 @@ struct SurfaceIntegrationTests {
         try store.removePin(for: #require(LiveServer.address))
     }
 
-    @Test("Fleet-wide leases and lease history decode")
+    @Test(
+        "Fleet-wide leases and lease history decode",
+        .enabled("core.dhcp is switched off") { await LiveServer.modulesEnabled("core.dhcp") }
+    )
     func fleetLeasesDecode() async throws {
         let (session, store) = try await LiveServer.pinnedSession()
         defer { session.invalidate() }
@@ -397,12 +425,18 @@ struct SurfaceIntegrationTests {
         let leases = try await session.client
             .listAllLeasesApiV1DhcpLeasesGet(query: .init(page: 1, pageSize: 50)).ok.body.json
         #expect(leases.total >= leases.items.count)
-        #expect(leases.items.allSatisfy { !$0.macAddress.isEmpty && !$0.ipAddress.isEmpty })
+        #expect(
+            leases.items.allSatisfy {
+                LeaseClient(mac: $0.macAddress, duid: $0.duid) != .unknown && !$0.ipAddress.isEmpty
+            })
 
         let history = try await session.client
             .listAllLeaseHistoryApiV1DhcpLeaseHistoryGet(query: .init(page: 1, perPage: 50)).ok.body.json
         #expect(history.total >= history.items.count)
-        #expect(history.items.allSatisfy { !$0.macAddress.isEmpty && !$0.leaseState.isEmpty })
+        #expect(
+            history.items.allSatisfy {
+                LeaseClient(mac: $0.macAddress, duid: $0.duid) != .unknown && !$0.leaseState.isEmpty
+            })
 
         try store.removePin(for: #require(LiveServer.address))
     }
@@ -432,9 +466,12 @@ struct SurfaceIntegrationTests {
         #expect(vendors.totalWithVendor <= vendors.totalMacsSeen)
         #expect(vendors.vendors.allSatisfy { !$0.vendor.isEmpty && $0.count > 0 })
 
-        let customers = try await session.client
-            .listCustomersApiV1CustomersGet(query: .init(limit: 1)).ok.body.json
-        if let customer = customers.items.first {
+        // The rollup is always on; customers are `network.customer`.
+        let customers =
+            await LiveServer.modulesEnabled("network.customer")
+            ? try await session.client
+                .listCustomersApiV1CustomersGet(query: .init(limit: 1)).ok.body.json.items : []
+        if let customer = customers.first {
             let summary = try await session.client
                 .getCustomerSummaryRouteApiV1CustomersCustomerIdSummaryGet(
                     path: .init(customerId: customer.id)

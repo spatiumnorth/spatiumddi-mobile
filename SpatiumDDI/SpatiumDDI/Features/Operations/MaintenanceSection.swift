@@ -3,6 +3,8 @@
 //  SpatiumDDI
 //
 
+import HTTPTypes
+import OpenAPIRuntime
 import SpatiumAPI
 import SwiftUI
 
@@ -24,6 +26,14 @@ import SwiftUI
 ///   maintenance mode from inside maintenance mode works. Without that the
 ///   feature would be a trap: an operator could close the estate from a phone
 ///   and then need a laptop to reopen it.
+///
+/// The state is **read from `/health/platform`**, not from `/settings`. The
+/// health rollup carries the same three fields under a shape that has not
+/// changed since maintenance mode shipped. `SettingsResponse` is the whole of
+/// the platform's configuration, and it changes often: the 1.0.0 betas removed
+/// two webhook fields this client's pin still lists as required. Against such a
+/// server, every settings response failed to decode, even after the write had
+/// landed.
 nonisolated struct MaintenanceState: Equatable, Sendable {
     var isOn: Bool
     /// The operator's own words. Never localised, never parsed.
@@ -41,10 +51,8 @@ nonisolated struct MaintenanceState: Equatable, Sendable {
     /// The mapping from what the server sends, which is three independent
     /// optionals rather than one state.
     ///
-    /// Separate from the `SettingsResponse` initialiser below so it can be
-    /// exercised without constructing a 135-property generated struct. The
-    /// whole of the logic is here, and two of its three rules are easy to get
-    /// backwards:
+    /// The whole of the logic is here, and two of its three rules are easy to
+    /// get backwards:
     ///
     /// - **absent means off.** A control plane that has never had a change
     ///   window omits the flag, and reading that as "unknown" would leave the
@@ -58,11 +66,11 @@ nonisolated struct MaintenanceState: Equatable, Sendable {
         self.startedAt = startedAt
     }
 
-    init(_ settings: Components.Schemas.SettingsResponse) {
+    init(_ health: PlatformHealth) {
         self.init(
-            enabled: settings.maintenanceModeEnabled,
-            message: settings.maintenanceMessage,
-            startedAt: settings.maintenanceStartedAt
+            enabled: health.maintenanceMode,
+            message: health.maintenanceMessage,
+            startedAt: health.maintenanceStartedAt
         )
     }
 }
@@ -190,11 +198,19 @@ struct MaintenanceSection: View {
         return MaintenanceState()
     }
 
-    /// Writes only the fields this screen owns.
+    /// Writes only the fields this screen owns, then asks the server what
+    /// actually happened.
     ///
     /// `message` is `nil` when lifting: the platform keeps the last message on
     /// disable, and clearing it would throw away wording the operator will
     /// most likely want again at the next window.
+    ///
+    /// The settings echo is not trusted for the outcome. A 2xx whose body this
+    /// client cannot decode means the window **did** change, and reporting
+    /// that as a failure is the worst wrong answer this screen can give: the
+    /// operator retries, or walks away believing writes are still open. So
+    /// anything that reached the server with a 2xx is followed by a fresh
+    /// read of the health rollup, and that read is what the screen shows.
     private func write(isOn: Bool, message: String?) async {
         isWriting = true
         failure = nil
@@ -205,27 +221,54 @@ struct MaintenanceSection: View {
                 body: .json(.init(maintenanceMessage: message, maintenanceModeEnabled: isOn))
             )
             switch response {
-            case .ok(let ok):
-                state = .loaded(MaintenanceState(try ok.body.json))
+            case .ok:
+                break
             case .unprocessableContent:
                 throw APIStatusError(status: 422)
             case .undocumented(let statusCode, let payload):
                 throw await APIStatusError(status: statusCode, payload: payload)
             }
         } catch {
-            // Nothing here is soft-conflictable, so it is never offered as
-            // re-sendable with force.
-            if case .failed(let message) = await WriteFailure.classify(error, forced: true) {
-                failure = message
+            // A landed write falls through to the re-read. Nothing here is
+            // soft-conflictable, so a failure is never offered as re-sendable
+            // with force.
+            guard Self.landed(error) else {
+                if case .failed(let message) = await WriteFailure.classify(error, forced: true) {
+                    failure = message
+                }
+                return
             }
+        }
+
+        await fetch()
+        if case .loaded(let maintenance) = state, maintenance.isOn != isOn {
+            failure =
+                isOn
+                ? .app("The server accepted the change but still reports writes open.")
+                : .app("The server accepted the change but still reports a change window.")
         }
     }
 
+    /// Whether a thrown error is a 2xx the generated client failed to decode.
+    ///
+    /// The deserialiser runs inside the call, so a body that doesn't match the
+    /// pinned schema throws a `ClientError` that still holds the response.
+    nonisolated static func landed(_ error: any Error) -> Bool {
+        guard let clientError = error as? ClientError,
+            let response = clientError.response
+        else { return false }
+        return response.status.kind == .successful
+    }
+
     private func fetch() async {
-        state = .loading
+        if case .loaded = state {} else { state = .loading }
         state = await LoadState.fetching {
-            switch try await session.client.getSettingsApiV1SettingsGet() {
-            case .ok(let ok): return MaintenanceState(try ok.body.json)
+            switch try await session.client.platformHealthHealthPlatformGet() {
+            case .ok(let ok):
+                guard let health = PlatformHealth(container: try ok.body.json) else {
+                    throw APIStatusError(status: 500)
+                }
+                return MaintenanceState(health)
             case .undocumented(let statusCode, let payload):
                 throw await APIStatusError(status: statusCode, payload: payload)
             }

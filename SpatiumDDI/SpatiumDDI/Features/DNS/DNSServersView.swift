@@ -110,6 +110,13 @@ struct DNSServerDetailView: View {
                 LabeledContent("Last seen", value: Date.relativeOrNever(server.lastSeenAt))
                 LabeledContent("Last sync", value: Date.relativeOrNever(server.lastSyncAt))
 
+                // The agent's own report that the daemon behind it has stopped
+                // answering — a host can be up and heartbeating while it is.
+                // The platform derives the flag; nil means never reported.
+                if server.daemonNotServing == true {
+                    DaemonNotServingLabel(reason: server.daemonReason, since: server.daemonStatusSince)
+                }
+
                 // A configuration the server refused matters more than any of
                 // the above: the control plane's idea of the zone and the
                 // resolver's have diverged, and only one of them is answering
@@ -126,6 +133,17 @@ struct DNSServerDetailView: View {
                         Image(systemName: "exclamationmark.triangle.fill")
                     }
                     .foregroundStyle(.orange)
+                }
+
+                // Only where there is a log to read: any other driver is
+                // answered with a 400, and a link to a guaranteed error is
+                // worse than no link.
+                if DNSQueryLog.shipsQueryLog(driver: server.driver) {
+                    NavigationLink {
+                        DNSQueryLogView(session: session, initialServerID: server.id)
+                    } label: {
+                        Label("Query Log", systemImage: "text.magnifyingglass")
+                    }
                 }
             }
 

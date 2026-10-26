@@ -121,3 +121,29 @@ struct StatusLabel: View {
         .foregroundStyle(tint == .secondary ? Color.secondary : tint)
     }
 }
+
+/// The agent's report that the daemon it fronts is not serving.
+///
+/// Shown only when the platform says so (`daemon_not_serving == true`). The
+/// reason is the agent's own words, shown as sent.
+struct DaemonNotServingLabel: View {
+    let reason: String?
+    let since: Date?
+
+    var body: some View {
+        Label {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("The daemon on this server is not serving.")
+                if let reason, !reason.isEmpty {
+                    Text(verbatim: reason).font(.caption)
+                }
+                if let since {
+                    Text("since \(since.formatted(.relative(presentation: .named)))").font(.caption2)
+                }
+            }
+        } icon: {
+            Image(systemName: "exclamationmark.octagon.fill")
+        }
+        .foregroundStyle(.red)
+    }
+}
