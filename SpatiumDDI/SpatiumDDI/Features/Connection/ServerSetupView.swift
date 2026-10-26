@@ -144,7 +144,10 @@ struct ServerSetupView: View {
                 // scanned token it merely moves to the sign-in screen, which
                 // says the same thing at the moment it becomes true.
                 if model.canFinishWithScannedToken {
-                    DeviceProtectionNotice(protection: TokenStore.availableProtection())
+                    TokenGateControls(
+                        requiringAuthentication: $model.requiringAuthentication,
+                        available: TokenStore.availableProtection()
+                    )
                 }
                 Button(model.canFinishWithScannedToken ? "Sign In" : "Continue") {
                     Task {

@@ -79,7 +79,7 @@ platform, the API and the roadmap all live in
 | **Network Tools** | Ping, traceroute, MTR, port test, dig, propagation check, TLS certificate, WHOIS, MAC vendor and Wake-on-LAN — all run **from the control plane**, which is the vantage point that makes them worth having |
 | **Search** | Global search across 16 resource types, grouped by kind, ranked server-side |
 | **Connect** | HTTPS-only, with an explicit certificate-trust flow for the private CAs self-hosted installs actually use |
-| **Sign in** | Per-device `sddi_` API token, by paste or by scanning the enrolment QR code, stored in the Keychain behind Face ID / Touch ID — or the device passcode, on hardware that has no biometrics, with the trade-off stated rather than silently taken |
+| **Sign in** | Per-device `sddi_` API token, by paste or by scanning the enrolment QR code, stored in the Keychain on this device only. Requiring Face ID / Touch ID — or the device passcode, on hardware without biometrics — to open is opt-in per server, off by default, with the trade-off stated either way rather than silently taken |
 | **Servers** | As many control planes as you run, each with its own name, token and pinned certificate. Switching tears the session down; nothing is shared or aggregated between them |
 
 Navigation is a grouped sidebar — **Monitor / Estate / Network /
@@ -121,7 +121,7 @@ work, and everything the app does belongs here.
 
 Sign-in, dashboard and health, global search, IPAM browse, DNS zone/record view,
 DHCP scope/lease view, alert list. Plus the native niceties: pull-to-refresh,
-biometric unlock, QR enrolment.
+optional biometric unlock, QR enrolment.
 
 ### Phase 2 — a small set of writes 🚧
 
@@ -295,8 +295,10 @@ supported; plaintext HTTP is not.
 The rules this app is built to, in full, are in
 **[SECURITY.md](SECURITY.md)**. The short version:
 
-- **Tokens live in the Keychain**, gated by biometrics, and are redacted from
-  every logging path.
+- **Tokens live in the Keychain**, on this device only, and are redacted from
+  every logging path. Requiring Face ID or the passcode to open is opt-in per
+  server and off by default: off, anyone holding the phone *unlocked* can open
+  the app — turn it on if that matters where you carry it.
 - **Nothing is written to disk.** No offline cache of subnets, leases, zones or
   records — a stale-but-plausible lease table is worse than an error, because you
   cannot tell it is stale, and acting on it changes production networks.

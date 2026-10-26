@@ -6,12 +6,13 @@
 import Foundation
 import Observation
 
-/// Takes an API token, checks the server accepts it, and stores it behind biometry.
+/// Takes an API token, checks the server accepts it, and stores it in the
+/// Keychain — behind Face ID or the passcode too, if the operator asks.
 ///
 /// Minting a per-device token at "sign in on this device" needs `/auth/login`,
 /// which needs the generated client. Until then the operator supplies a token
 /// they created in the web UI. Everything after that point — validation,
-/// storage, the biometric gate — is the real path, not a placeholder.
+/// storage, the optional gate — is the real path, not a placeholder.
 @Observable
 final class SignInModel {
     enum State: Equatable {
@@ -26,6 +27,16 @@ final class SignInModel {
     /// Presented after a scan, so the operator sees what the code contained.
     var scanNotice: String?
     var isScanning = false
+
+    /// "Require Face ID to open" — the operator's choice, made here.
+    ///
+    /// **Off by default.** The token is in the Keychain, this device only,
+    /// either way; this decides whether opening the app also asks for the
+    /// device owner. A forced prompt made the app close to untestable and is
+    /// a poor fit for a phone that never leaves a locked comms room, so the
+    /// stronger option is one switch away rather than imposed. It can be
+    /// changed later, per server, from the Server screen.
+    var requiringAuthentication = false
 
     /// The control plane, with whatever the operator named it.
     let server: StoredServer
@@ -113,23 +124,58 @@ final class SignInModel {
 
     var biometryDescription: String { TokenStore.biometryDescription() }
 
-    /// What will hold the token once it is sealed, or why nothing could.
+    /// What gate this device could put in front of the token, or why none.
     ///
-    /// Read before signing in, not after: a passcode-only device is a trade-off
-    /// the operator is accepting, and it has to be on screen while they still
-    /// have the choice.
+    /// Read before signing in, not after: a passcode-only device, or one with
+    /// no passcode at all, is a trade-off the operator is accepting, and it has
+    /// to be on screen while they still have the choice.
     var availableProtection: Result<KeychainProtection, TokenStore.StoreError> {
         enrolment.availableProtection
     }
 
-    var isDeviceUnprotected: Bool { enrolment.unprotectedReason != nil }
+    /// Whether signing in is possible with the choice as it stands.
+    ///
+    /// Only one combination is refused: a gate asked for on a device that has
+    /// nothing to gate with. The switch is disabled in that state, so this is
+    /// reached only if the passcode is removed while the form is open — and
+    /// then the honest answer is still "no", not a quietly ungated token.
+    var canSignIn: Bool {
+        Self.canSignIn(requiringAuthentication: requiringAuthentication, available: availableProtection)
+    }
+
+    nonisolated static func canSignIn(
+        requiringAuthentication: Bool,
+        available: Result<KeychainProtection, TokenStore.StoreError>
+    ) -> Bool {
+        guard requiringAuthentication else { return true }
+        if case .success = available { return true }
+        return false
+    }
+
+    /// What the footer under the Sign In button promises.
+    ///
+    /// It sits directly under the button on purpose — CLAUDE.md's onboarding
+    /// exception — because it is what the operator is agreeing to by pressing
+    /// it. So it has to be true for the choice actually on screen: the old
+    /// copy said "unlocked with Face ID" unconditionally, which is now false
+    /// by default.
+    var storageFooter: LocalizedStringResource {
+        if requiringAuthentication {
+            return
+                "The token is stored in this device's Keychain and unlocked with \(biometryDescription). It never leaves this device except as an Authorization header to \(address.displayName)."
+        }
+        return
+            "The token is stored in this device's Keychain and opens without a prompt while the device is unlocked. It never leaves this device except as an Authorization header to \(address.displayName)."
+    }
 
     func signIn() async {
         let token = tokenInput.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !token.isEmpty else { return }
 
         state = .validating
-        switch await enrolment.enrol(token, for: address) {
+        switch await enrolment.enrol(
+            token, for: address, requiringAuthentication: requiringAuthentication
+        ) {
         case .enrolled:
             tokenInput = ""
             state = .idle

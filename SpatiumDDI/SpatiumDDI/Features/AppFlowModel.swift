@@ -16,6 +16,11 @@ final class AppFlowModel {
         case addServer
         case signIn(StoredServer)
         /// A token exists for this server and needs unsealing.
+        ///
+        /// Also where an **ungated** token waits on its way back in from the
+        /// background — `UnlockView` shows progress rather than a prompt then,
+        /// and reads it silently — and where it lands if that silent read is
+        /// refused, so the reason has somewhere honest to be shown.
         case locked(StoredServer, message: String?)
         case signedIn(StoredServer)
     }
@@ -114,12 +119,64 @@ final class AppFlowModel {
         if let current = servers.first(where: { $0.id == registry.currentID() }),
             tokens.hasToken(for: current.address)
         {
-            stage = .locked(current, message: nil)
+            open(current)
         } else {
             if let current = servers.first(where: { $0.id == registry.currentID() }) {
                 noteAbsence(for: current)
             }
             stage = .servers
+        }
+    }
+
+    // MARK: - Unlock, or straight in
+
+    /// What reaching a server should do, given what is stored for it.
+    nonisolated enum Entry: Equatable {
+        /// Nothing stored: the sign-in form.
+        case signIn
+        /// A gated token: the unlock screen, which prompts.
+        case unlock
+        /// An ungated token: read it silently and go straight to signed in.
+        case straightIn
+    }
+
+    /// The decision, with the Keychain taken out of it so it can be tested.
+    ///
+    /// `protection` is `nil` when the item's attributes could not be read —
+    /// a launch while the device is locked, typically — even though
+    /// `hasToken` says there is something there. That resolves to `.unlock`,
+    /// not `.straightIn`: an unknown gate is treated as a gate, the same rule
+    /// `KeychainProtection.stored(marker:)` applies to an unreadable marker.
+    /// `UnlockView`'s own retry reads the marker again once it can.
+    nonisolated static func entry(hasToken: Bool, protection: KeychainProtection?) -> Entry {
+        guard hasToken else { return .signIn }
+        return protection == .deviceUnlock ? .straightIn : .unlock
+    }
+
+    /// Takes a server that has a stored token as far in as it can go without
+    /// asking anyone anything.
+    ///
+    /// For an ungated token that is all the way: no unlock screen, not even
+    /// for a frame. A refused silent read lands on the lock screen with the
+    /// reason, rather than on sign-in — the token is very likely still there
+    /// (a locked device answers the same way), and sending the operator to
+    /// enrol again over a momentary refusal is the mistake `hasToken` exists
+    /// to avoid.
+    private func open(_ server: StoredServer) {
+        switch Self.entry(hasToken: true, protection: tokens.storedProtection(for: server.address)) {
+        case .signIn, .unlock:
+            stage = .locked(server, message: nil)
+        case .straightIn:
+            do {
+                token = try tokens.ungatedToken(for: server.address)
+                stage = .signedIn(server)
+            } catch .deviceLocked {
+                // Not worth a message: `UnlockView` retries the moment the
+                // scene is active, which is the moment this stops being true.
+                stage = .locked(server, message: nil)
+            } catch {
+                stage = .locked(server, message: error.localizedDescription)
+            }
         }
     }
 
@@ -138,13 +195,22 @@ final class AppFlowModel {
 
     // MARK: - Which gate is holding the token
 
+    /// Bumped whenever a token's protection changes under a live view.
+    ///
+    /// The protection itself is read from the Keychain, which Observation
+    /// cannot see — so after a re-seal the Server screen would go on showing
+    /// the old gate until something else happened to redraw it. Reading this
+    /// in `protection(for:)` makes every caller depend on it.
+    private var protectionRevision = 0
+
     /// What is guarding the current server's stored token, if there is one.
     var currentProtection: KeychainProtection? {
-        currentServer.flatMap { tokens.storedProtection(for: $0.address) }
+        currentServer.flatMap { protection(for: $0) }
     }
 
     func protection(for server: StoredServer) -> KeychainProtection? {
-        tokens.storedProtection(for: server.address)
+        _ = protectionRevision
+        return tokens.storedProtection(for: server.address)
     }
 
     func hasToken(for server: StoredServer) -> Bool { tokens.hasToken(for: server.address) }
@@ -183,9 +249,11 @@ final class AppFlowModel {
         token = nil
         self.pendingToken = pendingToken
         let resolved = servers.first(where: { $0.id == server.id }) ?? server
-        stage =
-            tokens.hasToken(for: resolved.address)
-            ? .locked(resolved, message: nil) : .signIn(resolved)
+        if tokens.hasToken(for: resolved.address) {
+            open(resolved)
+        } else {
+            stage = .signIn(resolved)
+        }
     }
 
     func signedIn(with token: String, to server: StoredServer) {
@@ -195,6 +263,11 @@ final class AppFlowModel {
         stage = .signedIn(server)
     }
 
+    /// Unseals the stored token — with a prompt if it is gated, silently if not.
+    ///
+    /// `TokenStore.token(for:reason:)` makes that choice from the item's own
+    /// marker, so this one path serves both: the unlock button for a gated
+    /// token, and the return from the background for an ungated one.
     func unlock() async {
         guard case .locked(let server, _) = stage else { return }
         // Unlocking is the operator acting, so whatever launch concluded is no
@@ -246,6 +319,11 @@ final class AppFlowModel {
     ///
     /// This app changes production DNS and DHCP from a phone that gets left on
     /// desks. Re-unlocking costs one glance.
+    ///
+    /// Unchanged for an ungated token, deliberately. What goes is the prompt
+    /// on the way back, not the teardown on the way out: the token, the
+    /// session and every fetched row still leave memory when the app does —
+    /// non-negotiable #3 is about the data, and it does not depend on the gate.
     func lockForBackground() {
         guard case .signedIn(let server) = stage else { return }
         token = nil
@@ -274,6 +352,105 @@ final class AppFlowModel {
         // certificate are not the credential, and making the operator re-enter
         // all three to sign back in would be a punishment, not a safeguard.
         stage = server.map { .signIn($0) } ?? .servers
+    }
+
+    // MARK: - Changing the gate later
+
+    /// What came of asking to change a server's gate.
+    enum GateChange: Equatable {
+        /// Done; the token is now behind this.
+        case changed(KeychainProtection)
+        /// The operator dismissed the prompt. Nothing changed, and nothing
+        /// needs saying.
+        case cancelled
+        /// Refused, and the token is exactly where it was.
+        case unchanged(String)
+        /// The Keychain refused both the new item and the rollback. The token
+        /// survives only in memory, for this session — said, never hidden.
+        case lost(String)
+    }
+
+    /// Turns "Require Face ID to open" on or off for a stored token.
+    ///
+    /// The two directions are not symmetric, and should not be:
+    ///
+    /// - **On** strengthens. The token is read back without a prompt — it is
+    ///   ungated, that is the point — and re-sealed behind the best gate the
+    ///   device offers. A device that has none is told so and left as it is.
+    /// - **Off** weakens, so it must be earned: the token is read through its
+    ///   *current* gate first, which prompts. Holding the phone unlocked must
+    ///   not be enough to remove the thing that was protecting against
+    ///   someone holding the phone unlocked. A cancelled or failed prompt
+    ///   changes nothing.
+    ///
+    /// Either way the token re-sealed is the one read back from the Keychain,
+    /// not the one in memory — they should match, but the stored one is the
+    /// one being moved, and reading it is what proves the gate was passed.
+    func setRequiringAuthentication(_ required: Bool, for server: StoredServer) async -> GateChange {
+        guard let current = tokens.storedProtection(for: server.address) else {
+            return .unchanged(String(localized: "No token is stored on this device for this server."))
+        }
+        guard current.isGated != required else { return .changed(current) }
+
+        // Checked before reading anything, so a device that cannot gate is
+        // told so without first being asked for nothing. `reseal` checks
+        // again; this is for the message, that is for the guarantee.
+        if required, case .failure(let refusal) = TokenStore.availableProtection() {
+            return .unchanged(refusal.localizedDescription)
+        }
+
+        // Named from the item's own gate, as `UnlockView` does: a token sealed
+        // behind the passcode stays passcode-gated after Face ID is enrolled.
+        let gateName =
+            current == .biometrics ? TokenStore.biometryDescription() : String(localized: "your passcode")
+
+        let stored: String
+        do {
+            // Prompts only when `current` is gated — that is, only when
+            // turning the gate off, which is exactly when it should.
+            stored = try await tokens.token(
+                for: server.address,
+                reason: String(
+                    localized: "Confirm it's you to stop requiring \(gateName) for \(server.displayName)"
+                )
+            )
+        } catch TokenStore.StoreError.cancelled {
+            return .cancelled
+        } catch {
+            return .unchanged(error.localizedDescription)
+        }
+
+        defer { protectionRevision += 1 }
+        do {
+            return .changed(
+                try tokens.reseal(stored, for: server.address, requiringAuthentication: required)
+            )
+        } catch {
+            return error.tokenRetained
+                ? .unchanged(error.reason.localizedDescription)
+                : .lost(error.reason.localizedDescription)
+        }
+    }
+
+    /// Writes this session's token back after a re-seal lost it.
+    ///
+    /// Only meaningful for the server that is signed in — that is the only
+    /// place an in-memory token exists — and only after `.lost`. It is the
+    /// "retry" half of reporting honestly: the operator is told the Keychain
+    /// copy is gone *and* given the way to put it back without signing in
+    /// again.
+    func saveSessionToken(for server: StoredServer, requiringAuthentication: Bool) -> GateChange {
+        guard case .signedIn(let shown) = stage, shown.id == server.id, let token else {
+            return .unchanged(String(localized: "There is no signed-in session to save a token from."))
+        }
+        defer { protectionRevision += 1 }
+        do {
+            return .changed(
+                try tokens.save(token, for: server.address, requiringAuthentication: requiringAuthentication)
+            )
+        } catch {
+            return .lost(error.localizedDescription)
+        }
     }
 
     // MARK: - Several control planes
@@ -307,7 +484,7 @@ final class AppFlowModel {
         pendingToken = nil
         registry.setCurrentID(server.id)
         if tokens.hasToken(for: server.address) {
-            stage = .locked(server, message: nil)
+            open(server)
         } else {
             noteAbsence(for: server)
             stage = .signIn(server)

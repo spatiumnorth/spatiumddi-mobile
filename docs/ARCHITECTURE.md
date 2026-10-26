@@ -11,7 +11,7 @@ build, test and work on it, see [DEVELOPMENT.md](DEVELOPMENT.md).
 SpatiumDDI/SpatiumDDI/
 ├── SpatiumDDIApp.swift        the entry point
 ├── Networking/                reaching a control plane, safely
-├── Security/                  Keychain, biometrics, redaction
+├── Security/                  Keychain, optional biometric gate, redaction
 └── Features/                  one folder per surface
     ├── AppFlowModel.swift     the session state machine
     ├── AppRootView.swift      the shell, and the tabs
@@ -137,25 +137,49 @@ work when they land.
 
 ### `TokenStore`
 
-Tokens go in the Keychain with `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly`
-and the strongest access control the device offers: `.biometryCurrentSet` where
-biometrics are enrolled — so the entry is invalidated if the enrolment changes —
-and `.devicePasscode` where they are not. Neither available means no write at
-all. `KeychainProtection` is that choice, and it is stored as a Keychain
-attribute beside the item so it can be read back without a prompt and cannot
-drift from the item it describes.
+Tokens go in the Keychain, `ThisDeviceOnly`, always. What sits on top is the
+operator's choice per server — "Require Face ID to open", **off by default** —
+and `KeychainProtection` records which of three levels an item was sealed with:
 
-The gate is enforced **in the store, not at the call sites**.
+| Level | Class | Access control | Read back |
+|---|---|---|---|
+| `.deviceUnlock` (default) | `WhenUnlockedThisDeviceOnly` | none | silently, whenever the device is unlocked |
+| `.biometrics` | `WhenPasscodeSetThisDeviceOnly` | `.biometryCurrentSet` — invalidated if the enrolment changes | after a biometric prompt |
+| `.passcode` | `WhenPasscodeSetThisDeviceOnly` | `.devicePasscode` | after a passcode prompt |
+
+With the gate on, the store picks the strongest of the two gated levels the
+device offers, and refuses when it offers neither. With it off, nothing is asked
+of the device — which is what lets a passcode-less simulator, or a lab iPad, run
+the app at all; the sign-in and Server screens say plainly what that costs. See
+SECURITY.md for the trade-off in full.
+
+The level is stored as a Keychain attribute (`kSecAttrGeneric`) beside the item,
+so it can be read back without a prompt and cannot drift from the item it
+describes. A missing marker (items from before passcode support) or an
+unreadable one resolves to `.biometrics`, never to `.deviceUnlock`: mistaking a
+gated item for an ungated one is the failure that matters.
+
+A requested gate is enforced **in the store, not at the call sites**.
 `SecAccessControlCreateWithFlags` will happily mint a `.biometryCurrentSet` policy
 on a device with no enrolment (the simulator does exactly this), and `SecItemAdd`
 then succeeds — storing a token that nothing would ever be asked to unlock. So
 the store picks the policy itself and refuses when there is nothing to pick.
 That property belongs to the store; a caller cannot forget it.
 
-Reading back evaluates the policy matching the **item's** protection, not the
-device's current capability: a passcode-satisfied `LAContext` does not unseal a
-`.biometryCurrentSet` item, and a device that gained Face ID after a
-passcode-only sign-in still holds a passcode-gated item until the next sign-in.
+Reading back follows the **item's** level, not the device's current capability:
+an ungated item is read without touching `LAContext` (and with
+`kSecUseAuthenticationUIFail`, so a mislabelled item errors rather than raising
+an unexplained system sheet); a passcode-satisfied `LAContext` does not unseal a
+`.biometryCurrentSet` item; and a device that gained Face ID after a
+passcode-only sign-in still holds a passcode-gated item until it is re-sealed.
+
+`reseal` moves an existing token between levels, for the Server screen's switch.
+It cannot update in place — an access control is immutable and service + account
+is the item's identity — so it builds every attribute set it might need before
+deleting anything, checks the delete, rolls a failed add back to the previous
+level, and reports `tokenRetained: false` only when even that is refused.
+`AppFlowModel` then keeps the session alive on the in-memory token and offers to
+save it again.
 
 ### `ServerRegistry`
 
@@ -205,6 +229,11 @@ servers ◀──▶ addServer ──connected──▶ signIn ──signedIn─
 - The unlock prompt is keyed on scene phase rather than on-appear, because
   locking fires the instant the app stops being active; a plain on-appear prompt
   is raised while backgrounded, cancelled by the system, and never comes back.
+- An **ungated** token skips the unlock screen: `AppFlowModel.entry` sends it
+  straight in, reading the token silently. Backgrounding still drops it and tears
+  the session down — the gate is optional, the teardown is not — and the return
+  re-reads it through the same scene-phase task, showing progress rather than a
+  prompt.
 
 ---
 

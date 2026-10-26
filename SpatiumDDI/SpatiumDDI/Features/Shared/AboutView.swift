@@ -103,8 +103,10 @@ struct AboutView: View {
                     systemImage: "externaldrive.badge.xmark"
                 )
                 .font(.callout)
+                // Says what is always true, and that the gate is a choice —
+                // not "behind biometrics", which is now false by default.
                 Label(
-                    "Your token is held in the Keychain behind biometrics.",
+                    "Your token is held in this device's Keychain and never leaves it. Requiring Face ID or your passcode to open is your choice, per server.",
                     systemImage: "lock.shield"
                 )
                 .font(.callout)

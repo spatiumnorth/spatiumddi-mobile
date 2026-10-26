@@ -19,9 +19,11 @@ import XCTest
 ///   TEST_RUNNER_SPATIUM_SHOT_DIR=/tmp/shots \
 ///     xcodebuild test -only-testing:SpatiumDDIUITests/ScreenshotUITests …
 ///
-/// The simulator must have a biometric enrolment or a passcode, or the token
-/// store refuses to save — which is non-negotiable #2 working as intended, not
-/// a bug.
+/// Any simulator works: "Require Face ID to open" is off by default, so the
+/// walk signs in with an ungated token and needs neither a biometric enrolment
+/// nor a passcode. The switch is left alone here — turning it on would put a
+/// prompt between every relaunch and the menu, and on a simulator with nothing
+/// to gate with the store would rightly refuse to save at all.
 ///
 /// The walk mirrors how the app is actually navigated: sign in, land on the
 /// sidebar menu, open each section from it, and drill where a second call
@@ -265,7 +267,16 @@ final class ScreenshotUITests: XCTestCase {
         field.tap()
         field.typeText(token)
 
-        app.buttons["Sign In"].tap()
+        // The gate switch and its notice sit between the field and the
+        // button, so on a small phone the button can be below the fold — and a
+        // Form is lazy, so a row nobody scrolled to is not in the tree at all.
+        // Put the keyboard away and scroll before looking for it. The switch
+        // itself is left at its default (off); see the type comment.
+        if app.buttons["Hide keyboard"].exists { app.buttons["Hide keyboard"].tap() }
+        let signIn = app.buttons["Sign In"]
+        if !(signIn.exists && signIn.isHittable) { app.swipeUp() }
+        XCTAssertTrue(signIn.waitForExistence(timeout: 5), "No Sign In button")
+        signIn.tap()
 
         // Signing in lands on the sidebar menu, deliberately — see
         // SignedInView. That, not a pushed screen, is the signed-in state.

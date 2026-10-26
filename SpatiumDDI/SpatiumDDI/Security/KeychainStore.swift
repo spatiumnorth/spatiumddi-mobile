@@ -10,8 +10,10 @@ import Security
 ///
 /// Trust decisions live here rather than in `UserDefaults` because a pin is a
 /// security assertion — an attacker who can rewrite it can silently redirect the
-/// app to a server the operator never approved. The API token will use this same
-/// store, with biometric access control added on top.
+/// app to a server the operator never approved. The API token has its own
+/// store, `TokenStore`, because it needs what this one never does: a
+/// this-device-only class that is unreadable while locked, and an optional
+/// biometric or passcode access control on top.
 nonisolated struct KeychainStore: Sendable {
     let service: String
 

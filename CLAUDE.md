@@ -91,8 +91,12 @@ parity.
 ## Non-Negotiables
 
 1. **Generated API client only.** No hand-written request/response models.
-2. **Tokens live in the Keychain, gated by biometrics.** Never `UserDefaults`, never a
-   plist, never a log line. Redact `Authorization` in every logging path.
+2. **Tokens live in the Keychain, on this device only.** Never `UserDefaults`, never a
+   plist, never a log line, never a backup. Requiring Face ID or the passcode to open
+   is **opt-in per server, and off by default** — the operator's choice, made at
+   sign-in and changeable from the Server screen; when it is on, a device that cannot
+   provide a gate is refused, never quietly given less. Redact `Authorization` in
+   every logging path.
 3. **Never persist API response data to disk.** No offline cache of subnets, leases,
    zones or records. A stale-but-plausible lease table is worse than an error state,
    because an operator cannot tell it is stale — and acting on it changes production
@@ -135,7 +139,7 @@ Per [#884](https://github.com/spatiumnorth/spatiumddi/issues/884). Do not pull s
 
 - **Phase 1 — read-mostly.** Sign-in, dashboard KPIs + health, global search, IPAM browse
   (space → block → subnet → IP), DNS zone/record view, DHCP scope/lease view, alert list.
-  Native niceties: pull-to-refresh, biometric unlock.
+  Native niceties: pull-to-refresh, optional biometric unlock.
 - **Phase 2 — a small set of writes.** Acknowledge/resolve alerts, approve change requests,
   allocate next IP, toggle maintenance mode. Approvals-on-the-go is the best mobile write
   story; the rest of the platform's surface stays desktop work.
@@ -160,8 +164,9 @@ tried on a phone and got in the way.
   on the left (`.cancellationAction`).
   The onboarding screens — Connect, Sign In — deliberately keep a bottom button:
   each is the end of a linear sequence, and the footer directly under it carries
-  what the operator is agreeing to ("stored in the Keychain and unlocked with
-  Face ID"). In the bar that text would be orphaned from its button.
+  what the operator is agreeing to — where the token is stored, and whether
+  opening the app will ask for Face ID, which follows their choice of gate. In
+  the bar that text would be orphaned from its button.
 - **Saving still confirms.** Non-negotiable #6 is unchanged: Save opens the
   confirmation, and the confirmation names the actual thing being written — the
   address and the subnet, the record in zone-file form — never "Are you sure?".
