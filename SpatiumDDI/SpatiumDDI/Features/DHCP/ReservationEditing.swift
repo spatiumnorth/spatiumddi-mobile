@@ -319,7 +319,11 @@ final class DeleteLeaseModel: Identifiable {
     }
 
     var caution: FailureMessage? {
-        var parts: [String] = [lease.macAddress]
+        // A DHCPv6 lease names its client by DUID, not MAC.
+        var parts: [String] = []
+        if let client = LeaseClient(mac: lease.macAddress, duid: lease.duid).plainText {
+            parts.append(client)
+        }
         if let hostname = lease.hostname, !hostname.isEmpty { parts.append(hostname) }
         return .server(parts.joined(separator: " · "))
     }

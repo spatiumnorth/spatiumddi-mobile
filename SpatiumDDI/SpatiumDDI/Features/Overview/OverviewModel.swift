@@ -25,6 +25,8 @@ nonisolated struct PlatformHealth: Sendable, Equatable {
     var demoMode: Bool
     var maintenanceMode: Bool
     var maintenanceMessage: String?
+    /// When the change window opened, or `nil` with none running.
+    var maintenanceStartedAt: Date?
     var components: [Component]
 
     init?(container: OpenAPIValueContainer) {
@@ -34,6 +36,10 @@ nonisolated struct PlatformHealth: Sendable, Equatable {
         maintenanceMode = root["maintenance_mode"] as? Bool ?? false
         let message = root["maintenance_message"] as? String
         maintenanceMessage = (message?.isEmpty ?? true) ? nil : message
+        // Python's `isoformat()`, microseconds and all — the same parse the
+        // generated client uses for every typed timestamp.
+        maintenanceStartedAt = (root["maintenance_started_at"] as? String)
+            .flatMap { try? LenientDateTranscoder().decode($0) }
         components = (root["components"] as? [any Sendable] ?? []).compactMap { entry in
             guard let entry = entry as? [String: any Sendable],
                 let name = entry["name"] as? String

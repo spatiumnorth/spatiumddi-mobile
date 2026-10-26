@@ -110,6 +110,13 @@ struct DNSServerDetailView: View {
                 LabeledContent("Last seen", value: Date.relativeOrNever(server.lastSeenAt))
                 LabeledContent("Last sync", value: Date.relativeOrNever(server.lastSyncAt))
 
+                // The agent's own report that the daemon behind it has stopped
+                // answering — a host can be up and heartbeating while it is.
+                // The platform derives the flag; nil means never reported.
+                if server.daemonNotServing == true {
+                    DaemonNotServingLabel(reason: server.daemonReason, since: server.daemonStatusSince)
+                }
+
                 // A configuration the server refused matters more than any of
                 // the above: the control plane's idea of the zone and the
                 // resolver's have diverged, and only one of them is answering

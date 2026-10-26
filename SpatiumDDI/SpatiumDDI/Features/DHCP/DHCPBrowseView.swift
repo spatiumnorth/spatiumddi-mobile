@@ -140,8 +140,11 @@ struct DHCPServerDetailView: View {
     @State private var pendingLeaseDelete: DeleteLeaseModel?
     @Environment(Permissions.self) private var permissions
 
+    /// Superadmin only, in every platform release: `delete_lease` depends on
+    /// `SuperAdmin`, and no `dhcp_server` or `dhcp_scope` grant reaches it.
+    /// Offering it on write access only led to a 403.
     private var mayDeleteLeases: Bool {
-        permissions.canWrite("dhcp_server", "dhcp_scope", id: server.id)
+        permissions.canDoSuperadminOnly
     }
     @State private var query = ""
 
@@ -150,7 +153,7 @@ struct DHCPServerDetailView: View {
         guard !query.isEmpty else { return leases }
         return leases.filter {
             $0.ipAddress.localizedCaseInsensitiveContains(query)
-                || $0.macAddress.localizedCaseInsensitiveContains(query)
+                || LeaseClient(mac: $0.macAddress, duid: $0.duid).matches(query)
                 || ($0.hostname ?? "").localizedCaseInsensitiveContains(query)
         }
     }
@@ -159,6 +162,10 @@ struct DHCPServerDetailView: View {
         List {
             Section("Server") {
                 LabeledContent("Status") { StatusLabel(status: server.status) }
+                // See the DNS server detail: up and heartbeating is not serving.
+                if server.daemonNotServing == true {
+                    DaemonNotServingLabel(reason: server.daemonReason, since: server.daemonStatusSince)
+                }
                 LabeledContent("Endpoint", value: "\(server.host):\(server.port)")
                 LabeledContent("Driver", value: server.driver)
                 if !server.roles.isEmpty {
@@ -217,7 +224,7 @@ struct DHCPServerDetailView: View {
                     if visibleLeases.isEmpty {
                         NoMatchesView(
                             query: query,
-                            filterDescription: "No lease matches that address, MAC or hostname."
+                            filterDescription: "No lease matches that address, MAC, DUID or hostname."
                         )
                     } else {
                         ForEach(visibleLeases, id: \.id) { lease in
@@ -246,7 +253,7 @@ struct DHCPServerDetailView: View {
         }
         .navigationTitle(server.name)
         .navigationBarTitleDisplayMode(.inline)
-        .searchable(text: $query, prompt: "Filter by IP, hostname or MAC")
+        .searchable(text: $query, prompt: "Filter by IP, hostname, MAC or DUID")
         .dismissableKeyboard()
         .refreshable { await refresh() }
         .task { if case .idle = stats { await refresh() } }
@@ -382,7 +389,8 @@ private struct LeaseRow: View {
                 Spacer()
                 Badge(text: lease.state, tint: lease.state.lowercased() == "active" ? .green : .secondary)
             }
-            Text(lease.macAddress).font(.caption.monospaced()).foregroundStyle(.secondary)
+            LeaseClientText(mac: lease.macAddress, duid: lease.duid)
+                .font(.caption.monospaced()).foregroundStyle(.secondary)
             if let hostname = lease.hostname, !hostname.isEmpty {
                 Text(hostname).font(.caption).foregroundStyle(.secondary)
             }

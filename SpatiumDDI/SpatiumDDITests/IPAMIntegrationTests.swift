@@ -61,6 +61,33 @@ enum LiveServer {
         }
         return (ControlPlaneSession(address: address, token: token, trustStore: store), store)
     }
+
+    /// Whether every one of these feature modules is switched on in the lab.
+    ///
+    /// For a test's `.enabled` trait. A switched-off module 404s its whole
+    /// router, and a lab that runs without DHCP or approvals is a legitimate
+    /// estate, not a broken one, so its tests are skipped rather than failed.
+    ///
+    /// Fails open: if the module list can't be read, the test runs and says
+    /// why itself, the same rule the app's own gate follows.
+    static func modulesEnabled(_ ids: String...) async -> Bool {
+        guard isConfigured, let enabled = await enabledModules() else { return true }
+        return ids.allSatisfy(enabled.contains)
+    }
+
+    @MainActor
+    private static func enabledModules() async -> Set<String>? {
+        guard let (session, store) = try? await pinnedSession() else { return nil }
+        defer {
+            session.invalidate()
+            if let address { try? store.removePin(for: address) }
+        }
+        guard
+            let modules = try? await session.client
+                .listFeatureModulesApiV1AdminFeatureModulesGet().ok.body.json
+        else { return nil }
+        return Set(modules.filter(\.enabled).map(\.id))
+    }
 }
 
 /// Exercises the app's own path to a real control plane: the trust delegate, the
