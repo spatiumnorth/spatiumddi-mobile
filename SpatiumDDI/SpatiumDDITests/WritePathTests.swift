@@ -267,6 +267,70 @@ struct PermissionsTests {
         #expect(granted.canWrite("dhcp_static"))
         #expect(!granted.canDoSuperadminOnly)
     }
+
+    // The platform's two-person rule: `approve` is not in what `admin`
+    // implies, so admin on change requests cannot decide one. Offering the
+    // button anyway would end in a 403 after the operator had decided.
+    @Test("admin does not imply approve; only the grant itself or * does")
+    func adminIsNotApprove() {
+        let admin = Permissions(isSuperadmin: false, grants: [grant("admin", "change_request")])
+        #expect(!admin.can("approve", on: "change_request"))
+        #expect(admin.can("read", on: "change_request"))
+        #expect(admin.can("delete", on: "change_request"))
+
+        let approver = Permissions(isSuperadmin: false, grants: [grant("approve", "change_request")])
+        #expect(approver.can("approve", on: "change_request"))
+        #expect(!approver.can("read", on: "change_request"))
+
+        let wildcard = Permissions(isSuperadmin: false, grants: [grant("*", "change_request")])
+        #expect(wildcard.can("approve", on: "change_request"))
+    }
+
+    @Test("admin implies read, write and delete, and no other action")
+    func adminImplications() {
+        let admin = Permissions(isSuperadmin: false, grants: [grant("admin", "dhcp_scope")])
+        #expect(admin.can("read", on: "dhcp_scope"))
+        #expect(admin.canWrite("dhcp_scope"))
+        #expect(admin.can("delete", on: "dhcp_scope"))
+        #expect(admin.can("admin", on: "dhcp_scope"))
+        #expect(!admin.can("approve", on: "dhcp_scope"))
+        #expect(!admin.canWrite("dhcp_server"))
+    }
+
+    @Test("A * resource type covers every type")
+    func wildcardType() {
+        let permissions = Permissions(isSuperadmin: false, grants: [grant("write", "*")])
+        #expect(permissions.canWrite("subnet"))
+        #expect(permissions.canWrite("dns_zone", id: "zone-a"))
+        #expect(!permissions.can("delete", on: "subnet"))
+    }
+
+    @Test("A * or empty resource id covers every instance")
+    func wildcardInstance() {
+        for id in ["*", ""] {
+            let permissions = Permissions(isSuperadmin: false, grants: [grant("write", "subnet", id: id)])
+            #expect(permissions.canWrite("subnet", id: "subnet-a"))
+            #expect(permissions.canWrite("subnet"))
+        }
+    }
+
+    // As the platform has it: a grant on one row does not answer a question
+    // about the type as a whole.
+    @Test("A scoped grant doesn't satisfy an unscoped check")
+    func scopedGrantUnscopedCheck() {
+        let permissions = Permissions(isSuperadmin: false, grants: [grant("write", "subnet", id: "subnet-a")])
+        #expect(!permissions.canWrite("subnet"))
+    }
+
+    // `delete_lease` is SuperAdmin-only on the platform; no grant reaches it.
+    @Test("A superadmin-only action is offered to a superadmin, or when unknown")
+    func superadminOnly() {
+        #expect(Permissions().canDoSuperadminOnly)
+        #expect(Permissions(isSuperadmin: true, grants: []).canDoSuperadminOnly)
+        let writer = Permissions(
+            isSuperadmin: false, grants: [grant("admin", "dhcp_server"), grant("admin", "dhcp_scope")])
+        #expect(!writer.canDoSuperadminOnly)
+    }
 }
 
 @Suite("Record value families")

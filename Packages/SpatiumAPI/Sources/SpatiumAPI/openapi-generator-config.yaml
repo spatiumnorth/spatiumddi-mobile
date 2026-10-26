@@ -1,11 +1,11 @@
 # Generated API client configuration.
 #
-# openapi.json is the release asset from spatiumddi 2026.09.04-1, committed
+# openapi.json is the release asset from spatiumddi 2026.10.02-1, committed
 # byte-for-byte so it can be verified against the published artefact:
 #
-#   gh release download 2026.09.04-1 --repo spatiumnorth/spatiumddi --pattern openapi.json
+#   gh release download 2026.10.02-1 --repo spatiumnorth/spatiumddi --pattern openapi.json
 #   shasum -a 256 openapi.json
-#   # dc07aca3b4bb765297993a73b0b141d2ef7727d074724e789d4528ce3f0ae4d8
+#   # ff5e8d74e9200d922b1001727bcf72a0ccb773bb4555880a5d8f5380ef7f9351
 #
 # Re-pinning moves SupportedServer.minimum with it (ServerVersion.swift): the
 # minimum is the release the client was compiled against, never a guess.
@@ -101,6 +101,11 @@ filter:
     - /api/v1/dhcp/server-groups/{group_id}/scopes
     - /api/v1/dhcp/scopes/{scope_id}
     - /api/v1/dhcp/scopes/{scope_id}/pools
+    # Live fill of every dynamic pool in the scope, in one call. Per scope
+    # rather than per pool: a scope with several pools is where one call per
+    # pool is wasteful, and where an exhausted class-restricted pool hides
+    # behind a scope that looks fine.
+    - /api/v1/dhcp/scopes/{scope_id}/pools/occupancy
     - /api/v1/dhcp/scopes/{scope_id}/statics
     # The rack-side write: this MAC gets this IP, with the MAC on a label in
     # front of you (spatiumddi-mobile#18). POST is on the collection above;
@@ -158,8 +163,9 @@ filter:
 
     # ── The read-only remainder, ranked by mobile fit (#17) ───────────────
     # Four of that issue's five strong-fit surfaces. Platform Insights is the
-    # fifth and is **not here**: the 2026.09.04-1 document still has no endpoint for
-    # it, so it stays unbuilt rather than guessed at.
+    # fifth and is **not here** yet: the document does describe it
+    # (/api/v1/admin/postgres/overview and its siblings), but no screen is
+    # built on it, and generating paths nothing calls is dead weight.
 
     # What rotted, and one bulk action to mark it. Typed as `StaleIPReport`
     # since 2026.09.04-1; before that it was a bare `object`, and this was the

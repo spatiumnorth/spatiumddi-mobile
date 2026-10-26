@@ -14,8 +14,13 @@ import SwiftUI
 /// every tile earns its place against that question.
 struct OverviewView: View {
     let session: ControlPlaneSession
+    /// Handed on to Access, which a security tile opens. Revoking this
+    /// device's own token there is a sign-out, and needs the real one.
+    var onSelfRevoked: () -> Void = {}
 
     @State private var model: OverviewModel?
+    /// Where a tapped tile goes.
+    @State private var destination: OverviewDestination?
 
     var body: some View {
         List {
@@ -25,6 +30,12 @@ struct OverviewView: View {
                 IPAMSummarySection(model: model)
                 DNSSummarySection(model: model)
                 DHCPSummarySection(model: model)
+                // After the DDI counts: these are signals about the estate
+                // around DDI, and each is gated on whether this control plane
+                // has the thing at all.
+                NewDevicesSummarySection(model: model, open: { destination = $0 })
+                NetworkSummarySection(model: model, open: { destination = $0 })
+                SecuritySummarySection(model: model, open: { destination = $0 })
                 // Below the estate counts on purpose: the counts answer "how
                 // big is this", which is a glance, and the charts answer "what
                 // is it doing", which is a scroll.
@@ -33,6 +44,18 @@ struct OverviewView: View {
             }
         }
         .navigationTitle("Overview")
+        // On the list, not on a tile: a destination declared inside a lazy
+        // container is ignored. One row holds several tiles, so each tile is
+        // its own button rather than the row being one link.
+        .navigationDestination(item: $destination) { destination in
+            switch destination {
+            case .newDevices: NewDevicesView(session: session)
+            case .asns: ASNsView(session: session)
+            case .circuits: CircuitsView(session: session)
+            case .access: AccessView(session: session, onSelfRevoked: onSelfRevoked)
+            case .audit: AuditLogView(session: session)
+            }
+        }
         .refreshable { await model?.refresh() }
         // Rebuilt when the session is, not merely built once. A session is
         // invalidated and replaced when the token changes, and a model still
@@ -116,12 +139,13 @@ private struct VersionRow: View {
             let running = ServerVersion(version.version)
             LabeledContent("Server version", value: running.displayName)
 
-            // A development build cannot be compared against a CalVer minimum.
+            // A development or nightly build has no place in the release order,
+            // CalVer or SemVer, so it cannot be compared against the minimum.
             // Saying so is the honest report — the alternative is a green tick
             // that was never actually checked.
             if running.isDevelopment {
                 Label(
-                    "This is a development build, so it can't be checked against the minimum supported release (\(SupportedServer.minimum.displayName)).",
+                    "This is a development or nightly build, so it can't be checked against the minimum supported release (\(SupportedServer.minimum.displayName)).",
                     systemImage: "hammer.fill"
                 )
                 .font(.caption)
@@ -321,4 +345,213 @@ private struct DHCPSummarySection: View {
     }
 }
 
+// MARK: - New devices
+
+private struct NewDevicesSummarySection: View {
+    let model: OverviewModel
+    let open: (OverviewDestination) -> Void
+
+    @Environment(FeatureModules.self) private var features
+
+    var body: some View {
+        // The same gate as the sidebar's New Devices section. The module is
+        // off by default, and its endpoints answer 404 when it is.
+        if features.isAvailable(AppSection.newDevices.featureModule) {
+            Section("New devices") {
+                LoadStateView(
+                    state: model.newDevices,
+                    emptyMessage: "No new-device figures.",
+                    retry: { Task { await model.loadNewDevices() } }
+                ) { summary in
+                    HStack(spacing: 10) {
+                        LinkedCountTile(
+                            value: summary.newLast24h,
+                            label: "Last 24h",
+                            tint: SignalTint.of(summary.newLast24h),
+                            action: { open(.newDevices) }
+                        )
+                        LinkedCountTile(
+                            value: summary.newCount,
+                            label: "To review",
+                            tint: SignalTint.of(summary.newCount),
+                            action: { open(.newDevices) }
+                        )
+                        LinkedCountTile(
+                            value: summary.acknowledgedCount,
+                            label: "Acknowledged",
+                            tint: .secondary,
+                            action: { open(.newDevices) }
+                        )
+                    }
+                    .listRowInsets(.init(top: 8, leading: 12, bottom: 8, trailing: 12))
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Network
+
+private struct NetworkSummarySection: View {
+    let model: OverviewModel
+    let open: (OverviewDestination) -> Void
+
+    @Environment(FeatureModules.self) private var features
+
+    /// Each tile follows the module of the screen it opens. The rollup itself
+    /// is ungated, but a count of drifting ASNs on a control plane that does
+    /// not track ASNs is a zero that means nothing, behind a tap that goes
+    /// nowhere.
+    private var showsASNs: Bool { features.isAvailable(AppSection.asns.featureModule) }
+    private var showsCircuits: Bool { features.isAvailable(AppSection.circuits.featureModule) }
+
+    var body: some View {
+        if showsASNs || showsCircuits {
+            Section("Network") {
+                LoadStateView(
+                    state: model.network,
+                    emptyMessage: "No network figures.",
+                    retry: { Task { await model.loadNetwork() } }
+                ) { signals in
+                    HStack(spacing: 10) {
+                        if showsASNs {
+                            LinkedCountTile(
+                                value: signals.asnDrift,
+                                label: "ASN drift",
+                                tint: SignalTint.of(signals.asnDrift),
+                                action: { open(.asns) }
+                            )
+                            LinkedCountTile(
+                                value: signals.roasExpiring,
+                                label: "ROAs expiring",
+                                tint: SignalTint.of(signals.roasExpiring),
+                                action: { open(.asns) }
+                            )
+                        }
+                        if showsCircuits {
+                            LinkedCountTile(
+                                value: signals.circuitAlerts,
+                                label: "Circuit alerts",
+                                tint: SignalTint.of(signals.circuitAlerts),
+                                action: { open(.circuits) }
+                            )
+                        }
+                    }
+                    .listRowInsets(.init(top: 8, leading: 12, bottom: 8, trailing: 12))
+
+                    // An expired ROA is already invalidating routes, which is
+                    // worse than any count above — so it is said in words, in
+                    // red, rather than as a fourth tile.
+                    if showsASNs, signals.roasExpired > 0 {
+                        Label(
+                            "^[\(signals.roasExpired) ROA](inflect: true) already expired.",
+                            systemImage: "exclamationmark.triangle.fill"
+                        )
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                    }
+                    if showsCircuits, signals.circuitAlerts > 0 {
+                        Text(
+                            "^[\(signals.circuitTermsEnding) term](inflect: true) ending · ^[\(signals.circuitStatusChanged) status change](inflect: true)"
+                        )
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Security
+
+/// Shown to everyone, as the web console's Security tab is: the server hands
+/// every caller the headline counts and strips the per-user detail from those
+/// without audit or user access. The screens the tiles open may still refuse
+/// such a caller, and say so themselves.
+private struct SecuritySummarySection: View {
+    let model: OverviewModel
+    let open: (OverviewDestination) -> Void
+
+    var body: some View {
+        Section("Security") {
+            LoadStateView(
+                state: model.security,
+                emptyMessage: "No security figures.",
+                retry: { Task { await model.loadSecurity() } }
+            ) { signals in
+                HStack(spacing: 10) {
+                    LinkedCountTile(
+                        value: signals.failedLogins,
+                        label: "Failed logins",
+                        tint: SignalTint.of(signals.failedLogins),
+                        action: { open(.audit) }
+                    )
+                    LinkedCountTile(
+                        value: signals.tokensExpiring,
+                        label: "Tokens expiring",
+                        tint: SignalTint.of(signals.tokensExpiring),
+                        action: { open(.access) }
+                    )
+                    LinkedCountTile(
+                        value: signals.withoutMFA,
+                        label: "Without MFA",
+                        tint: SignalTint.of(signals.withoutMFA),
+                        action: { open(.access) }
+                    )
+                }
+                .listRowInsets(.init(top: 8, leading: 12, bottom: 8, trailing: 12))
+
+                // The windows are the server's, so they are quoted rather than
+                // assumed — a "24 hours" baked into the app would be wrong the
+                // day the platform changes it.
+                Text(
+                    "Failed logins over the last ^[\(signals.failedLoginWindowHours) hour](inflect: true); MFA counts local users only. ^[\(signals.permissionChanges) permission change](inflect: true) in the last ^[\(signals.permissionChangeWindowDays) day](inflect: true)."
+                )
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
 // MARK: - Shared
+
+/// The screens an overview tile can open.
+enum OverviewDestination: Hashable {
+    case newDevices
+    case asns
+    case circuits
+    case access
+    case audit
+}
+
+/// How loud a count of things-that-need-looking-at should be.
+///
+/// Green at zero rather than grey: "none" is the answer an operator opened
+/// the screen hoping for, and it should read as an answer — the tile's dash
+/// is what says a number could not be established.
+nonisolated enum SignalTint {
+    static func of(_ count: Int, raised: Color = .orange) -> Color {
+        count > 0 ? raised : .green
+    }
+}
+
+/// A count tile that opens the screen behind the number.
+///
+/// A plain-style button, so a row of three is three targets: a List otherwise
+/// hands every tap in a row to the row's first link.
+private struct LinkedCountTile: View {
+    let value: Int?
+    let label: LocalizedStringResource
+    let tint: Color
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            CountTile(value: value, label: label, tint: tint)
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint(Text("Opens the list behind this count."))
+    }
+}

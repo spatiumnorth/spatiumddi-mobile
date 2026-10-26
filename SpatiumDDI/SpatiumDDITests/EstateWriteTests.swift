@@ -4,6 +4,8 @@
 //
 
 import Foundation
+import HTTPTypes
+import OpenAPIRuntime
 import SpatiumAPI
 import Testing
 
@@ -306,5 +308,53 @@ struct MaintenanceStateTests {
         )
         #expect(!state.isOn)
         #expect(state.message == "Back at 14:00")
+    }
+    /// Read from the health rollup, which keeps the message after a window is
+    /// lifted exactly as `/settings` does, and carries the start time.
+    @Test("The health rollup maps onto the same state")
+    func fromHealth() throws {
+        let container = try JSONDecoder().decode(
+            OpenAPIValueContainer.self,
+            from: Data(
+                #"""
+                {"status":"ok","maintenance_mode":true,"maintenance_message":"Back at 14:00",
+                 "maintenance_started_at":"2026-10-25T23:32:43.254147+00:00","components":[]}
+                """#.utf8
+            )
+        )
+        let state = MaintenanceState(try #require(PlatformHealth(container: container)))
+        #expect(state.isOn)
+        #expect(state.message == "Back at 14:00")
+        let startedAt = try #require(state.startedAt)
+        #expect(abs(startedAt.timeIntervalSince1970 - 1_792_971_163.254) < 0.001)
+    }
+
+    private func clientError(status: HTTPResponse.Status?) -> ClientError {
+        ClientError(
+            operationID: "updateSettingsApiV1SettingsPut",
+            operationInput: (),
+            request: nil,
+            requestBody: nil,
+            baseURL: nil,
+            response: status.map { HTTPResponse(status: $0) },
+            responseBody: nil,
+            causeDescription: "Unknown",
+            underlyingError: DecodingError.dataCorrupted(.init(codingPath: [], debugDescription: "x"))
+        )
+    }
+
+    /// A 200 whose body this pin can't decode — the 1.0.0 betas dropped two
+    /// settings fields it lists as required — means the window changed.
+    /// Reporting that as a failure invites a retry into the state just set.
+    @Test("An undecodable 2xx counts as a write that landed")
+    func undecodableSuccessLanded() {
+        #expect(MaintenanceSection.landed(clientError(status: .ok)))
+    }
+
+    @Test("A failed status, or no response at all, did not land")
+    func failuresDidNotLand() {
+        #expect(!MaintenanceSection.landed(clientError(status: .forbidden)))
+        #expect(!MaintenanceSection.landed(clientError(status: nil)))
+        #expect(!MaintenanceSection.landed(URLError(.timedOut)))
     }
 }

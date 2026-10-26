@@ -15,10 +15,12 @@ import SpatiumAPI
 /// and every write path still handles a 403 honestly rather than assuming this
 /// check already ruled it out.
 ///
-/// The grammar is `docs/PERMISSIONS.md` in the platform repo: an entry is
+/// The grammar is `docs/PERMISSIONS.md` in the platform repo, and the matching
+/// below is a port of `backend/app/core/permissions.py`: an entry is
 /// `{action, resource_type, resource_id?}`, `admin` implies read + write +
-/// delete for its type, `*` matches any action, and an entry with no
-/// `resource_id` covers every instance of the type.
+/// delete (and nothing else — not `approve`), `*` matches any action or any
+/// type, and an entry whose `resource_id` is missing, empty or `*` covers every
+/// instance of the type.
 @MainActor
 @Observable
 final class Permissions {
@@ -92,14 +94,26 @@ final class Permissions {
 
     private func allows(action: String, type: String, id: String?) -> Bool {
         grants.contains { grant in
-            guard grant.resourceType == type else { return false }
-            // A grant scoped to one UUID says nothing about any other row.
-            if let scoped = grant.resourceId, !scoped.isEmpty, scoped != id { return false }
-            switch grant.action {
-            case action, "*", "admin": return true
-            default: return false
-            }
+            Self.actionMatches(granted: grant.action, requested: action)
+                && (grant.resourceType == "*" || grant.resourceType == type)
+                && Self.resourceIDMatches(granted: grant.resourceId, requested: id)
         }
+    }
+
+    /// What `admin` implies. Deliberately not `approve`: a two-person rule
+    /// whose approval rides along with generic admin isn't a two-person rule,
+    /// so the platform makes `{approve, change_request}` an explicit grant.
+    private static let adminImplies: Set<String> = ["read", "write", "delete", "admin"]
+
+    private static func actionMatches(granted: String, requested: String) -> Bool {
+        granted == "*" || granted == requested || (granted == "admin" && adminImplies.contains(requested))
+    }
+
+    private static func resourceIDMatches(granted: String?, requested: String?) -> Bool {
+        guard let granted, !granted.isEmpty, granted != "*" else { return true }
+        // A grant scoped to one UUID says nothing about any other row — nor
+        // about the type as a whole, when the question isn't about one row.
+        return granted == requested
     }
 
     func load(from session: ControlPlaneSession) async {

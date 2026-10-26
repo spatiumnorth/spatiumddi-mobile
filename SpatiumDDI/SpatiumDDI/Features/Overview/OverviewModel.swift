@@ -25,6 +25,8 @@ nonisolated struct PlatformHealth: Sendable, Equatable {
     var demoMode: Bool
     var maintenanceMode: Bool
     var maintenanceMessage: String?
+    /// When the change window opened, or `nil` with none running.
+    var maintenanceStartedAt: Date?
     var components: [Component]
 
     init?(container: OpenAPIValueContainer) {
@@ -34,6 +36,10 @@ nonisolated struct PlatformHealth: Sendable, Equatable {
         maintenanceMode = root["maintenance_mode"] as? Bool ?? false
         let message = root["maintenance_message"] as? String
         maintenanceMessage = (message?.isEmpty ?? true) ? nil : message
+        // Python's `isoformat()`, microseconds and all — the same parse the
+        // generated client uses for every typed timestamp.
+        maintenanceStartedAt = (root["maintenance_started_at"] as? String)
+            .flatMap { try? LenientDateTranscoder().decode($0) }
         components = (root["components"] as? [any Sendable] ?? []).compactMap { entry in
             guard let entry = entry as? [String: any Sendable],
                 let name = entry["name"] as? String
@@ -71,6 +77,18 @@ final class OverviewModel {
     var ipam: LoadState<IPAMTotals> = .idle
     var dns: LoadState<DNSTotals> = .idle
     var dhcp: LoadState<DHCPTotals> = .idle
+
+    /// The three server-side rollups, each loaded only once its section asks.
+    ///
+    /// Not part of `refresh()`'s first pass, because whether a section is on
+    /// screen at all turns on the feature-module list — which the view holds,
+    /// and which may still be arriving. A section that renders starts its own
+    /// load from `.idle`; one gated off never fetches, so a module switched off
+    /// costs no 404. Each is its own state, so one failing leaves the rest of
+    /// the overview — and the other two — standing.
+    var newDevices: LoadState<Components.Schemas.SummaryOut> = .idle
+    var network: LoadState<NetworkSignals> = .idle
+    var security: LoadState<SecuritySignals> = .idle
 
     init(session: ControlPlaneSession) {
         self.session = session
@@ -148,6 +166,81 @@ final class OverviewModel {
         var unhealthy: Int { servers.count - healthy }
     }
 
+    /// The headline counts from the network rollup — ASN holder drift, RPKI
+    /// ROA expiry and circuit trouble. The detail lists are not kept.
+    nonisolated struct NetworkSignals: Sendable, Equatable {
+        var asnDrift: Int
+        var roasExpiring: Int
+        var roasExpired: Int
+        var circuitTermsEnding: Int
+        var circuitStatusChanged: Int
+
+        /// One figure for "a circuit needs looking at", as the web console
+        /// counts it; the footer says which kind.
+        var circuitAlerts: Int { circuitTermsEnding + circuitStatusChanged }
+
+        init(
+            asnDrift: Int, roasExpiring: Int, roasExpired: Int, circuitTermsEnding: Int,
+            circuitStatusChanged: Int
+        ) {
+            self.asnDrift = asnDrift
+            self.roasExpiring = roasExpiring
+            self.roasExpired = roasExpired
+            self.circuitTermsEnding = circuitTermsEnding
+            self.circuitStatusChanged = circuitStatusChanged
+        }
+
+        init(_ summary: Components.Schemas.NetworkDashboardSummary) {
+            self.init(
+                asnDrift: summary.asnDriftCount,
+                roasExpiring: summary.rpkiExpiringCount,
+                roasExpired: summary.rpkiExpiredCount,
+                circuitTermsEnding: summary.circuitTermExpiringCount,
+                circuitStatusChanged: summary.circuitStatusChangedCount
+            )
+        }
+    }
+
+    /// The headline counts from the security rollup.
+    ///
+    /// Counts only, deliberately. A privileged caller's response also carries
+    /// per-user detail — who has not enrolled MFA, which address failed to log
+    /// in — and none of it is needed for a tile, so none of it is held.
+    nonisolated struct SecuritySignals: Sendable, Equatable {
+        var failedLogins: Int
+        var failedLoginWindowHours: Int
+        var tokensExpiring: Int
+        /// Local users without MFA. Never negative, whatever the two server
+        /// counts say about each other.
+        var withoutMFA: Int
+        var permissionChanges: Int
+        var permissionChangeWindowDays: Int
+
+        init(
+            failedLogins: Int, failedLoginWindowHours: Int, tokensExpiring: Int, mfaEnrolled: Int,
+            mfaLocalUsers: Int, permissionChanges: Int, permissionChangeWindowDays: Int
+        ) {
+            self.failedLogins = failedLogins
+            self.failedLoginWindowHours = failedLoginWindowHours
+            self.tokensExpiring = tokensExpiring
+            self.withoutMFA = max(mfaLocalUsers - mfaEnrolled, 0)
+            self.permissionChanges = permissionChanges
+            self.permissionChangeWindowDays = permissionChangeWindowDays
+        }
+
+        init(_ summary: Components.Schemas.SecurityDashboardSummary) {
+            self.init(
+                failedLogins: summary.failedLoginTotal,
+                failedLoginWindowHours: summary.failedLoginWindowHours,
+                tokensExpiring: summary.apiTokensExpiringCount,
+                mfaEnrolled: summary.mfaEnrolledCount,
+                mfaLocalUsers: summary.mfaTotalLocalUsers,
+                permissionChanges: summary.permissionChangeCount,
+                permissionChangeWindowDays: summary.permissionChangeWindowDays
+            )
+        }
+    }
+
     var openAlertCounts: [Severity: Int] {
         guard case .loaded(let events) = alerts else { return [:] }
         return events.reduce(into: [:]) { counts, event in
@@ -182,7 +275,50 @@ final class OverviewModel {
         async let ipam: Void = loadIPAM()
         async let dns: Void = loadDNS()
         async let dhcp: Void = loadDHCP()
-        _ = await (health, version, alerts, ipam, dns, dhcp)
+        async let rollups: Void = refreshRollups()
+        _ = await (health, version, alerts, ipam, dns, dhcp, rollups)
+    }
+
+    /// Reloads the rollups a section has already asked for, and only those.
+    /// One still `.idle` is either gated off or about to start itself.
+    private func refreshRollups() async {
+        async let newDevices: Void = newDevices.isIdle ? () : loadNewDevices()
+        async let network: Void = network.isIdle ? () : loadNetwork()
+        async let security: Void = security.isIdle ? () : loadSecurity()
+        _ = await (newDevices, network, security)
+    }
+
+    func loadNewDevices() async {
+        newDevices = .loading
+        newDevices = await LoadState.fetching {
+            switch try await session.client.getSummaryApiV1NewDevicesSummaryGet() {
+            case .ok(let ok): return try ok.body.json
+            case .undocumented(let statusCode, let payload):
+                throw await APIStatusError(status: statusCode, payload: payload)
+            }
+        }
+    }
+
+    func loadNetwork() async {
+        network = .loading
+        network = await LoadState.fetching {
+            switch try await session.client.networkSummaryApiV1DashboardsNetworkSummaryGet() {
+            case .ok(let ok): return NetworkSignals(try ok.body.json)
+            case .undocumented(let statusCode, let payload):
+                throw await APIStatusError(status: statusCode, payload: payload)
+            }
+        }
+    }
+
+    func loadSecurity() async {
+        security = .loading
+        security = await LoadState.fetching {
+            switch try await session.client.securitySummaryApiV1DashboardsSecuritySummaryGet() {
+            case .ok(let ok): return SecuritySignals(try ok.body.json)
+            case .undocumented(let statusCode, let payload):
+                throw await APIStatusError(status: statusCode, payload: payload)
+            }
+        }
     }
 
     private func loadHealth() async {

@@ -40,9 +40,9 @@ That document is **the release asset from a pinned platform release**, committed
 byte-for-byte so anyone can verify it against what upstream published:
 
 ```bash
-gh release download 2026.09.04-1 --repo spatiumnorth/spatiumddi --pattern openapi.json
+gh release download 2026.10.02-1 --repo spatiumnorth/spatiumddi --pattern openapi.json
 shasum -a 256 openapi.json
-# dc07aca3b4bb765297993a73b0b141d2ef7727d074724e789d4528ce3f0ae4d8
+# ff5e8d74e9200d922b1001727bcf72a0ccb773bb4555880a5d8f5380ef7f9351
 ```
 
 A live control plane serves the same document at `/api/openapi.json`, which is
@@ -278,9 +278,13 @@ reading 404 as "not supported."** Gate on `GET /api/v1/version` instead.
 
 ## Version gating
 
-`ServerVersion` parses the platform's CalVer (`2026.08.22-1`) into comparable
-parts, and treats anything else — `dev`, `latest`, a branch name — as a
-`.development` case rather than as a parse failure sorted to the bottom.
+`ServerVersion` parses the platform's releases — CalVer (`2026.08.22-1`) before
+1.0.0, SemVer (`1.0.0-beta.1`, `1.0.0`) from then on — into one order in which
+every SemVer release follows every CalVer one, and pre-releases follow SemVer
+precedence. The ordering is a port of the platform's own
+(`backend/app/core/versions.py`); the two have to agree. Anything else — `dev`,
+`latest`, a nightly (`0.0.0-nightly-…`), a `0.x` placeholder, a branch name — is
+a development build rather than a parse failure sorted to the bottom.
 
 A development build **passes** the minimum check, because a build from `main` is
 by definition newer than any release and refusing it would lock the app out of

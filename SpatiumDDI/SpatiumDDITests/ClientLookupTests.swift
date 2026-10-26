@@ -79,6 +79,69 @@ struct ClientLookupTests {
         #expect(!ClientIdentifier.isIPv4Like("aa:bb:cc:dd:ee:ff"))
     }
 
+    // Both lease filters take an IPv6 address as an exact `ip`; sent as a
+    // hostname it would match nothing.
+    @Test("An IPv6 address is recognised, but a DUID written in octets is not one")
+    func recognisesIPv6() {
+        #expect(ClientIdentifier.isIPv6Like("2001:db8::1"))
+        #expect(ClientIdentifier.isIPv6Like("fe80::1ff:fe23:4567:890a"))
+        #expect(ClientIdentifier.isIPv6Like("2001:0db8:0000:0000:0000:0000:0000:0001"))
+        #expect(!ClientIdentifier.isIPv6Like("10.40.12.68"))
+        #expect(!ClientIdentifier.isIPv6Like("laptop-1234"))
+        #expect(!ClientIdentifier.isIPv6Like("00:01:00:01:2c:5e:aa:bb"))
+    }
+
+    /// The platform stores DUIDs colon-separated and lowercase, and `search`
+    /// matches them as a substring, so every way of writing one has to arrive
+    /// in that form.
+    @Test(
+        "A DUID canonicalises from any separator convention",
+        arguments: [
+            "00:01:00:01:2C:5E:AA:BB:AA:BB:CC:DD:EE:FF",
+            "00-01-00-01-2c-5e-aa-bb-aa-bb-cc-dd-ee-ff",
+            "000100012C5EAABBAABBCCDDEEFF",
+        ]
+    )
+    func canonicalisesDUID(_ text: String) {
+        #expect(ClientIdentifier.canonicalDUID(text) == "00:01:00:01:2c:5e:aa:bb:aa:bb:cc:dd:ee:ff")
+    }
+
+    /// Short bare hex is a hostname as often as not, and `2001:db8::1` and an
+    /// IPv4 address have their own filters.
+    @Test(
+        "Hostnames, addresses and odd digit counts are not DUIDs",
+        arguments: ["cafe", "deadbeef", "laptop-1234", "10.40.12.68", "2001:db8::1", "00:01:00:01:2c:5", ""]
+    )
+    func refusesNonDUID(_ text: String) {
+        #expect(ClientIdentifier.canonicalDUID(text) == nil)
+    }
+
+    // A DHCPv6 lease has no MAC (optional since 2026.10.02-1) and is keyed by
+    // DUID. Showing a blank, or a DUID unlabelled where a MAC is expected,
+    // would misreport who holds the address.
+    @Test("A lease is named by its MAC, else its DUID, labelled as one")
+    func leaseClientFallsBackToDUID() {
+        let duid = "00:01:00:01:2c:5e:aa:bb:aa:bb:cc:dd:ee:ff"
+        #expect(LeaseClient(mac: "aa:bb:cc:dd:ee:ff", duid: duid) == .mac("aa:bb:cc:dd:ee:ff"))
+        #expect(LeaseClient(mac: nil, duid: duid) == .duid(duid))
+        #expect(LeaseClient(mac: "", duid: duid) == .duid(duid))
+        #expect(LeaseClient(mac: nil, duid: nil) == .unknown)
+        #expect(LeaseClient(mac: "", duid: "") == .unknown)
+
+        #expect(LeaseClient(mac: nil, duid: duid).plainText == "DUID \(duid)")
+        #expect(LeaseClient(mac: nil, duid: nil).plainText == nil)
+    }
+
+    @Test("Filtering a lease list matches a DUID as well as a MAC")
+    func leaseClientFilterMatchesDUID() {
+        #expect(LeaseClient(mac: nil, duid: "00:01:00:01:2C:5E").matches("2c:5e"))
+        #expect(LeaseClient(mac: "aa:bb:cc:dd:ee:ff", duid: nil).matches("DD:EE"))
+        #expect(!LeaseClient(mac: nil, duid: "00:01:00:01").matches("ff"))
+        // The label is the app's, not the server's: typing "DUID" is not a match.
+        #expect(!LeaseClient(mac: nil, duid: "00:01:00:01").matches("duid"))
+        #expect(!LeaseClient(mac: nil, duid: nil).matches("aa"))
+    }
+
     @Test("A NAK is coloured as the thing worth finding")
     func naksStandOut() {
         #expect(DHCPMessage.tint(for: "DHCP4_NAK") == .red)

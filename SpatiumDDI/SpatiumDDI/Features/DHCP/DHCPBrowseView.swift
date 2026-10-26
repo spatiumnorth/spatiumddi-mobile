@@ -129,19 +129,24 @@ private struct DHCPServerRow: View {
     }
 }
 
-/// One DHCP server: health, the last hour of traffic, and its leases.
+/// One DHCP server: health, the last hour of traffic, what was done to it, and
+/// its leases.
 struct DHCPServerDetailView: View {
     let session: ControlPlaneSession
     let server: Components.Schemas.AppApiV1DhcpServersServerResponse
 
     @State private var stats: LoadState<Components.Schemas.DHCPServerStatsResponse> = .idle
+    @State private var events: LoadState<[Components.Schemas.DHCPServerEventEntry]> = .idle
     @State private var leases: LoadState<[Components.Schemas.LeaseResponse]> = .idle
     @State private var leaseTotal = 0
     @State private var pendingLeaseDelete: DeleteLeaseModel?
     @Environment(Permissions.self) private var permissions
 
+    /// Superadmin only, in every platform release: `delete_lease` depends on
+    /// `SuperAdmin`, and no `dhcp_server` or `dhcp_scope` grant reaches it.
+    /// Offering it on write access only led to a 403.
     private var mayDeleteLeases: Bool {
-        permissions.canWrite("dhcp_server", "dhcp_scope", id: server.id)
+        permissions.canDoSuperadminOnly
     }
     @State private var query = ""
 
@@ -150,7 +155,7 @@ struct DHCPServerDetailView: View {
         guard !query.isEmpty else { return leases }
         return leases.filter {
             $0.ipAddress.localizedCaseInsensitiveContains(query)
-                || $0.macAddress.localizedCaseInsensitiveContains(query)
+                || LeaseClient(mac: $0.macAddress, duid: $0.duid).matches(query)
                 || ($0.hostname ?? "").localizedCaseInsensitiveContains(query)
         }
     }
@@ -159,6 +164,10 @@ struct DHCPServerDetailView: View {
         List {
             Section("Server") {
                 LabeledContent("Status") { StatusLabel(status: server.status) }
+                // See the DNS server detail: up and heartbeating is not serving.
+                if server.daemonNotServing == true {
+                    DaemonNotServingLabel(reason: server.daemonReason, since: server.daemonStatusSince)
+                }
                 LabeledContent("Endpoint", value: "\(server.host):\(server.port)")
                 LabeledContent("Driver", value: server.driver)
                 if !server.roles.isEmpty {
@@ -208,6 +217,33 @@ struct DHCPServerDetailView: View {
                 }
             }
 
+            // Audit rows about the server — who restarted it, who changed its
+            // config — not the daemon's own log, which is DHCP Log. Above the
+            // leases so it isn't buried under three hundred of them.
+            Section("Recent events") {
+                LoadStateView(
+                    state: events,
+                    emptyMessage: "Nothing has been recorded for this server.",
+                    retry: { Task { await fetchEvents() } }
+                ) { rows in
+                    ForEach(rows.prefix(20), id: \.id) { event in
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack {
+                                Text(verbatim: event.action).font(.subheadline)
+                                Spacer()
+                                Badge(
+                                    text: event.result,
+                                    tint: event.result.lowercased() == "success" ? .green : .red
+                                )
+                            }
+                            Text(event.timestamp.formatted(.relative(presentation: .named)))
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                }
+            }
+
             Section {
                 LoadStateView(
                     state: leases,
@@ -217,7 +253,7 @@ struct DHCPServerDetailView: View {
                     if visibleLeases.isEmpty {
                         NoMatchesView(
                             query: query,
-                            filterDescription: "No lease matches that address, MAC or hostname."
+                            filterDescription: "No lease matches that address, MAC, DUID or hostname."
                         )
                     } else {
                         ForEach(visibleLeases, id: \.id) { lease in
@@ -246,7 +282,7 @@ struct DHCPServerDetailView: View {
         }
         .navigationTitle(server.name)
         .navigationBarTitleDisplayMode(.inline)
-        .searchable(text: $query, prompt: "Filter by IP, hostname or MAC")
+        .searchable(text: $query, prompt: "Filter by IP, hostname, MAC or DUID")
         .dismissableKeyboard()
         .refreshable { await refresh() }
         .task { if case .idle = stats { await refresh() } }
@@ -274,7 +310,24 @@ struct DHCPServerDetailView: View {
     private func refresh() async {
         async let a: Void = fetchStats()
         async let b: Void = fetchLeases()
-        _ = await (a, b)
+        async let c: Void = fetchEvents()
+        _ = await (a, b, c)
+    }
+
+    private func fetchEvents() async {
+        events = .loading
+        events = await LoadState.fetching {
+            let response = try await session.client
+                .getServerRecentEventsApiV1DhcpServersServerIdRecentEventsGet(
+                    path: .init(serverId: server.id)
+                )
+            switch response {
+            case .ok(let ok): return try ok.body.json.items
+            case .unprocessableContent: throw APIStatusError(status: 422)
+            case .undocumented(let statusCode, let payload):
+                throw await APIStatusError(status: statusCode, payload: payload)
+            }
+        }
     }
 
     private func fetchStats() async {
@@ -382,7 +435,8 @@ private struct LeaseRow: View {
                 Spacer()
                 Badge(text: lease.state, tint: lease.state.lowercased() == "active" ? .green : .secondary)
             }
-            Text(lease.macAddress).font(.caption.monospaced()).foregroundStyle(.secondary)
+            LeaseClientText(mac: lease.macAddress, duid: lease.duid)
+                .font(.caption.monospaced()).foregroundStyle(.secondary)
             if let hostname = lease.hostname, !hostname.isEmpty {
                 Text(hostname).font(.caption).foregroundStyle(.secondary)
             }
@@ -479,6 +533,9 @@ struct DHCPScopeDetailView: View {
 
     @State private var subnet: Components.Schemas.SubnetResponse?
     @State private var pools: LoadState<[Components.Schemas.AppApiV1DhcpPoolsPoolResponse]> = .idle
+    /// Live fill per pool id, for the dynamic pools the server measured.
+    @State private var occupancy: [String: Components.Schemas.PoolOccupancyResponse] = [:]
+    @State private var occupancyFailure: FailureMessage?
     @State private var statics: LoadState<[Components.Schemas.StaticResponse]> = .idle
     @State private var isAddingReservation = false
     @State private var pendingReservationDelete: DeleteReservationModel?
@@ -553,8 +610,35 @@ struct DHCPScopeDetailView: View {
                                     Badge(text: restriction, tint: .purple)
                                 }
                             }
+                            // Only where the server reported one: it omits
+                            // non-dynamic pools rather than give them a number
+                            // that is not a fact about them, and a bar at 0%
+                            // here would be exactly that.
+                            if let fill = occupancy[pool.id] {
+                                UtilisationBar(percent: fill.percent)
+                                Text(
+                                    "\(fill.assigned.formatted()) of \(fill.total.formatted()) assigned · \(fill.free.formatted()) free"
+                                )
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                            }
                         }
                     }
+                }
+                // Occupancy is a second call, and its failure must not take the
+                // pool list with it — the ranges are still worth showing. But a
+                // missing bar has to be explained, or it reads as an empty pool.
+                if let occupancyFailure, hasPool == true {
+                    Label {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Pool occupancy is unavailable.")
+                            Text(occupancyFailure).font(.caption2)
+                        }
+                    } icon: {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.orange)
                 }
             }
 
@@ -663,7 +747,36 @@ struct DHCPScopeDetailView: View {
         async let a: Void = fetchSubnet()
         async let b: Void = fetchPools()
         async let c: Void = fetchStatics()
-        _ = await (a, b, c)
+        async let d: Void = fetchOccupancy()
+        _ = await (a, b, c, d)
+    }
+
+    private func fetchOccupancy() async {
+        let result: LoadState<[String: Components.Schemas.PoolOccupancyResponse]> = await LoadState.fetching {
+            let response = try await session.client
+                .scopePoolOccupancyApiV1DhcpScopesScopeIdPoolsOccupancyGet(path: .init(scopeId: scope.id))
+            switch response {
+            case .ok(let ok):
+                return PoolOccupancy.byPool(try ok.body.json)
+            case .unprocessableContent:
+                throw APIStatusError(status: 422)
+            case .undocumented(let statusCode, let payload):
+                throw await APIStatusError(status: statusCode, payload: payload)
+            }
+        }
+        switch result {
+        case .loaded(let byPool):
+            occupancy = byPool
+            occupancyFailure = nil
+        case .failed(let message):
+            // Dropped rather than left showing the last answer: a stale fill
+            // bar beside a fresh pool list is the plausible-but-wrong figure
+            // this app refuses to show.
+            occupancy = [:]
+            occupancyFailure = message
+        case .idle, .loading:
+            break
+        }
     }
 
     private func fetchSubnet() async {
@@ -707,6 +820,18 @@ struct DHCPScopeDetailView: View {
                 throw await APIStatusError(status: statusCode, payload: payload)
             }
         }
+    }
+}
+
+/// Matching the scope's occupancy rows to the pools they measure.
+nonisolated enum PoolOccupancy {
+    /// Keyed by pool id. Should the server ever repeat a pool, the last row
+    /// wins rather than the dictionary initialiser trapping on a duplicate key
+    /// — a display figure must not be able to crash the app.
+    static func byPool(
+        _ rows: [Components.Schemas.PoolOccupancyResponse]
+    ) -> [String: Components.Schemas.PoolOccupancyResponse] {
+        Dictionary(rows.map { ($0.poolId, $0) }, uniquingKeysWith: { _, last in last })
     }
 }
 
