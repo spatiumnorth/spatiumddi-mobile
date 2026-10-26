@@ -109,7 +109,7 @@ filter:
     - /api/v1/dhcp/scopes/{scope_id}/statics
     # The rack-side write: this MAC gets this IP, with the MAC on a label in
     # front of you (spatiumddi-mobile#18). POST is on the collection above;
-    # the item path carries the delete.
+    # the item path carries the edit and the delete.
     - /api/v1/dhcp/statics/{static_id}
     # Fleet-wide, not per server (spatiumddi-mobile#20): "does this MAC hold a
     # lease anywhere right now, and has it ever" in one call each, instead of
@@ -136,7 +136,15 @@ filter:
     - /api/v1/change-requests/{cr_id}/approve
     - /api/v1/change-requests/{cr_id}/reject
     - /api/v1/change-requests/{cr_id}/cancel
+    # Self-service requests (#696) — the same approval spine pointed the other
+    # way: approving one *provisions* what a requester asked for. Deciding and
+    # withdrawing only; the catalog, resource picker and submit form stay
+    # desktop work — nobody needs to ask for a subnet from a train.
     - /api/v1/requests
+    - /api/v1/requests/{req_id}
+    - /api/v1/requests/{req_id}/approve
+    - /api/v1/requests/{req_id}/reject
+    - /api/v1/requests/{req_id}/cancel
 
     # Expiry tracking: the two things that page someone at an awkward hour.
     - /api/v1/domains
@@ -214,6 +222,9 @@ filter:
     - /api/v1/api-tokens/{token_id}
     - /api/v1/audit
     - /api/v1/admin/trash
+    # Restore, beside the list it restores from. It brings back the whole
+    # deletion batch, not only the row that was tapped.
+    - /api/v1/admin/trash/{type}/{row_id}/restore
 
     # Which optional modules this control plane has switched on. The rule
     # against feature-probing needs somewhere to ask instead, and this is it.
