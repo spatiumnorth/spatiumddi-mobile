@@ -72,6 +72,7 @@ platform, the API and the roadmap all live in
 | **Overview** | Platform health per component, maintenance/demo banners, server version and update check, unresolved alerts by severity, estate counts, and a size-weighted utilisation figure with the busiest subnets. New-device, network (ASN drift, ROA expiry, circuits) and security (failed logins, expiring tokens, MFA gaps) tiles, each opening the screen behind it |
 | **Alerts** | Every alert event, most-severe first, filterable by severity and unresolved-only. **Resolve** one from the list — swipe, read what it says, confirm |
 | **Approvals** | Change requests with the change they'd make, who asked, and why the platform decided it needed approving. **Approve, reject or withdraw** — a decision you can make from a train, which is the point |
+| **Requests** | Self-service requests — an address, a subnet, a DNS record or a DHCP reservation someone asked for and can't create themselves — with what they asked for in operator terms (the record as a zone-file line, the address and its subnet), their reason, and the state, pending first. **Approve, reject or withdraw** — approving provisions it under your account, so it is offered only when you could have created it yourself |
 | **New devices** | First-seen MACs with vendor, subnet and randomisation, and **acknowledge** for the ones that turn out to be fine |
 | **IPAM** | The full tree — space → block → subnet → address — with utilisation at every level, and a per-address detail screen covering identity, fingerprinted device, last-seen signal and the DNS/DHCP objects linked to it. **Allocate** an address (next-available or specific, named and published to DNS in the same request), **edit** what it says about itself, **delete** it behind a typed confirmation |
 | **DNS** | Group → zone → record, with SOA facts, DNSSEC state and serial per zone, and record filtering by type or substring. **Add, edit and delete records** — A, AAAA, CNAME, TXT, MX, SRV, NS, PTR, CAA — each stated in zone-file form before it is sent. A **query log** per BIND9/PowerDNS resolver — what a client asked and what it was told, filterable by name, client, type and outcome |
@@ -135,9 +136,10 @@ deleting both ([#8](https://github.com/spatiumnorth/spatiumddi-mobile/issues/8))
 resolving an alert
 ([#9](https://github.com/spatiumnorth/spatiumddi-mobile/issues/9)), deciding a
 change request
-([#10](https://github.com/spatiumnorth/spatiumddi-mobile/issues/10)) and
+([#10](https://github.com/spatiumnorth/spatiumddi-mobile/issues/10)),
 acknowledging a new-device sighting
-([#12](https://github.com/spatiumnorth/spatiumddi-mobile/issues/12)).
+([#12](https://github.com/spatiumnorth/spatiumddi-mobile/issues/12)), and deciding a
+self-service request.
 
 **Next:** toggle maintenance mode
 ([#11](https://github.com/spatiumnorth/spatiumddi-mobile/issues/11)) and revoke a

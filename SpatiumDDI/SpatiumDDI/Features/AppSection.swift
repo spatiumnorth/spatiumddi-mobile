@@ -17,6 +17,7 @@ nonisolated enum AppSection: String, CaseIterable, Identifiable, Hashable, Senda
     case overview
     case alerts
     case changeRequests
+    case requests
     case clientLookup
     case dhcpLog
     case dnsLog
@@ -49,6 +50,7 @@ nonisolated enum AppSection: String, CaseIterable, Identifiable, Hashable, Senda
         case .overview: "Overview"
         case .alerts: "Alerts"
         case .changeRequests: "Change Requests"
+        case .requests: "Requests"
         case .clientLookup: "Client Lookup"
         case .dhcpLog: "DHCP Log"
         case .dnsLog: "DNS Log"
@@ -81,6 +83,7 @@ nonisolated enum AppSection: String, CaseIterable, Identifiable, Hashable, Senda
         case .overview: "gauge.with.dots.needle.33percent"
         case .alerts: "bell"
         case .changeRequests: "checkmark.seal"
+        case .requests: "tray"
         case .clientLookup: "person.crop.circle.badge.questionmark"
         case .dhcpLog: "doc.text.magnifyingglass"
         case .dnsLog: "text.magnifyingglass"
@@ -128,6 +131,9 @@ nonisolated enum AppSection: String, CaseIterable, Identifiable, Hashable, Senda
         // ungated and reports each panel's own `enabled`, which the screen
         // filters on. The gate is one layer down, not missing.
         case .changeRequests: "governance.approvals"
+        // A separate, default-off module: an install can run the approval
+        // gate without the self-service portal, and the reverse.
+        case .requests: "governance.requests"
         case .newDevices: "security.new_device_watch"
         case .certificates: "security.tls_certs"
         case .devices: "network.device"
@@ -155,7 +161,7 @@ nonisolated enum AppSection: String, CaseIterable, Identifiable, Hashable, Senda
 
         var sections: [AppSection] {
             switch self {
-            case .monitor: [.overview, .alerts, .clientLookup, .changeRequests, .newDevices]
+            case .monitor: [.overview, .alerts, .clientLookup, .changeRequests, .requests, .newDevices]
             case .estate: [.ipam, .dns, .dhcp, .dhcpLog, .dnsLog, .domains, .certificates]
             case .network: [.devices, .vlans, .vrfs, .circuits, .asns, .lookingGlass]
             case .administration: [.ownership, .access, .integrations, .audit, .trash]

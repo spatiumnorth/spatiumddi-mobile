@@ -136,7 +136,15 @@ filter:
     - /api/v1/change-requests/{cr_id}/approve
     - /api/v1/change-requests/{cr_id}/reject
     - /api/v1/change-requests/{cr_id}/cancel
+    # Self-service requests (#696) — the same approval spine pointed the other
+    # way: approving one *provisions* what a requester asked for. Deciding and
+    # withdrawing only; the catalog, resource picker and submit form stay
+    # desktop work — nobody needs to ask for a subnet from a train.
     - /api/v1/requests
+    - /api/v1/requests/{req_id}
+    - /api/v1/requests/{req_id}/approve
+    - /api/v1/requests/{req_id}/reject
+    - /api/v1/requests/{req_id}/cancel
 
     # Expiry tracking: the two things that page someone at an awkward hour.
     - /api/v1/domains
