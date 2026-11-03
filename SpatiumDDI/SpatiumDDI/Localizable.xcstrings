@@ -4,6 +4,9 @@
     "\"%@\" isn't a MAC address. Enter all twelve hex digits — separators are optional." : {
       "extractionState" : "extracted_with_value"
     },
+    "\"%@\" isn't an IP address. The client filter matches one address exactly." : {
+      "extractionState" : "extracted_with_value"
+    },
     "%@" : {
       "extractionState" : "extracted_with_value"
     },
@@ -37,10 +40,16 @@
     "%@ isn't set up on this device. Setting it up is strongly recommended — it's harder to observe than a typed passcode, and it drops the stored token automatically if the enrolment ever changes." : {
       "extractionState" : "extracted_with_value"
     },
+    "%@ not restored" : {
+      "extractionState" : "extracted_with_value"
+    },
     "%@ of %@" : {
       "extractionState" : "extracted_with_value"
     },
     "%@ of %@ addresses" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "%@ of %@ assigned · %@ free" : {
       "extractionState" : "extracted_with_value"
     },
     "%@ stops resolving as soon as this is sent — the retraction is pushed to every server in the group, not left for a later sync. The record can be restored from Trash." : {
@@ -202,6 +211,15 @@
     "A record's type can't be changed — an A that becomes a CNAME is a different record." : {
       "extractionState" : "extracted_with_value"
     },
+    "A reservation can't move to another scope. To move it, delete it here and create it in the other scope." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "A reservation needs a MAC address — it's what the reservation matches on." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "A reservation needs an address — it's what the reservation hands out." : {
+      "extractionState" : "extracted_with_value"
+    },
     "A token is never stored unprotected. Set a device passcode — and biometrics if this device has them — then come back." : {
       "extractionState" : "extracted_with_value"
     },
@@ -226,6 +244,9 @@
     "AS%lld" : {
       "extractionState" : "extracted_with_value"
     },
+    "ASN drift" : {
+      "extractionState" : "extracted_with_value"
+    },
     "ASNs" : {
       "extractionState" : "extracted_with_value"
     },
@@ -242,6 +263,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Acknowledge this device?" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Acknowledged" : {
       "extractionState" : "extracted_with_value"
     },
     "Actions" : {
@@ -304,6 +328,9 @@
     "Alerts" : {
       "extractionState" : "extracted_with_value"
     },
+    "All" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Allocate" : {
       "extractionState" : "extracted_with_value"
     },
@@ -340,6 +367,12 @@
     "An address nothing has answered for in that long. \"Never seen\" means discovery has no record of it at all, which is not the same as it having gone quiet." : {
       "extractionState" : "extracted_with_value"
     },
+    "Any" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Anyone who picks it up can open this app and use the token against your control plane. Set a passcode to stop that — and to be able to require it here." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Apache License 2.0" : {
       "extractionState" : "extracted_with_value"
     },
@@ -355,7 +388,22 @@
     "Approve" : {
       "extractionState" : "extracted_with_value"
     },
+    "Approve and Provision" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Approve and create this?" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Approve and run this change?" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Approved" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Approving creates this now, under your account. Rejecting declines it and creates nothing. The requester sees your note." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Approving creates this under your account, so it also needs %@ on %@ — the same permission as creating it yourself." : {
       "extractionState" : "extracted_with_value"
     },
     "Approving pins this exact certificate for %@. If the server later presents a different one, you'll be asked again." : {
@@ -442,6 +490,9 @@
     "Cancel Scan" : {
       "extractionState" : "extracted_with_value"
     },
+    "Cancelled" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Candidate" : {
       "extractionState" : "extracted_with_value"
     },
@@ -481,6 +532,9 @@
     "Choose a section to begin." : {
       "extractionState" : "extracted_with_value"
     },
+    "Circuit alerts" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Circuits" : {
       "extractionState" : "extracted_with_value"
     },
@@ -491,6 +545,12 @@
       "extractionState" : "extracted_with_value"
     },
     "Client" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Client ID, DUID, option overrides and tags aren't shown here, and saving leaves them as they are." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Client IP (optional)" : {
       "extractionState" : "extracted_with_value"
     },
     "Client Lookup" : {
@@ -509,6 +569,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Confirm" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Confirm it's you to stop requiring %@ for %@" : {
       "extractionState" : "extracted_with_value"
     },
     "Connect" : {
@@ -583,13 +646,28 @@
     "DHCP acknowledgements and refusals" : {
       "extractionState" : "extracted_with_value"
     },
+    "DHCP reservation" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "DHCP scope" : {
+      "extractionState" : "extracted_with_value"
+    },
     "DNS" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "DNS Log" : {
       "extractionState" : "extracted_with_value"
     },
     "DNS Servers" : {
       "extractionState" : "extracted_with_value"
     },
     "DNS queries" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "DNS record" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "DNS zone" : {
       "extractionState" : "extracted_with_value"
     },
     "DNS zones" : {
@@ -601,13 +679,22 @@
     "DNSSEC" : {
       "extractionState" : "extracted_with_value"
     },
+    "DUID %@" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Decide" : {
       "extractionState" : "extracted_with_value"
     },
     "Deciding change requests needs the approve permission on this control plane." : {
       "extractionState" : "extracted_with_value"
     },
+    "Deciding requests needs the approve permission on change requests on this control plane." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Decision" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Declined for %@. Nothing is created." : {
       "extractionState" : "extracted_with_value"
     },
     "Default TTL" : {
@@ -658,6 +745,9 @@
     "Device passcode" : {
       "extractionState" : "extracted_with_value"
     },
+    "Device unlock only" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Devices" : {
       "extractionState" : "extracted_with_value"
     },
@@ -704,6 +794,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Edit Record" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Edit Reservation" : {
       "extractionState" : "extracted_with_value"
     },
     "Edit Subnet" : {
@@ -808,6 +901,9 @@
     "Everything at once. Slowest, and the most obvious in a log." : {
       "extractionState" : "extracted_with_value"
     },
+    "Everything deleted in the same action comes back with it — %@ in all." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Execution error" : {
       "extractionState" : "extracted_with_value"
     },
@@ -832,6 +928,15 @@
     "FQDN" : {
       "extractionState" : "extracted_with_value"
     },
+    "Failed" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Failed logins" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Failed logins over the last ^[%lld hour](inflect: true); MFA counts local users only. ^[%lld permission change](inflect: true) in the last ^[%lld day](inflect: true)." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Fetch Certificate" : {
       "extractionState" : "extracted_with_value"
     },
@@ -839,6 +944,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Filter by IP, hostname or MAC" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Filter by IP, hostname, MAC or DUID" : {
       "extractionState" : "extracted_with_value"
     },
     "Filter by MAC (optional)" : {
@@ -961,10 +1069,22 @@
     "IP Spaces" : {
       "extractionState" : "extracted_with_value"
     },
+    "IP address" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "IP block" : {
+      "extractionState" : "extracted_with_value"
+    },
     "IP blocks" : {
       "extractionState" : "extracted_with_value"
     },
+    "IP space" : {
+      "extractionState" : "extracted_with_value"
+    },
     "IP spaces" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "IP, hostname, MAC or DUID" : {
       "extractionState" : "extracted_with_value"
     },
     "IP, name, MAC, zone" : {
@@ -980,6 +1100,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Identity" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "If any of it clashes with something live now, such as a name or CIDR taken since, nothing is restored." : {
       "extractionState" : "extracted_with_value"
     },
     "In %@" : {
@@ -1006,6 +1129,9 @@
     "It can take an address from this group again, at its next request." : {
       "extractionState" : "extracted_with_value"
     },
+    "It comes off the approvers' queue. Nothing is created." : {
+      "extractionState" : "extracted_with_value"
+    },
     "It gets no address from %@ from now on. A device already holding a lease keeps it until that lease expires." : {
       "extractionState" : "extracted_with_value"
     },
@@ -1015,6 +1141,9 @@
     "It stops counting as unresolved. It fires again if the condition comes back." : {
       "extractionState" : "extracted_with_value"
     },
+    "It would clash with something live." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Key" : {
       "extractionState" : "extracted_with_value"
     },
@@ -1022,6 +1151,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Label" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Last 24h" : {
       "extractionState" : "extracted_with_value"
     },
     "Last checked" : {
@@ -1043,6 +1175,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Lease history" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Lease history can't be searched by DUID. Search the address above to see who else has held it." : {
       "extractionState" : "extracted_with_value"
     },
     "Lease time" : {
@@ -1171,6 +1306,9 @@
     "NAK" : {
       "extractionState" : "extracted_with_value"
     },
+    "NODATA" : {
+      "extractionState" : "extracted_with_value"
+    },
     "NS drift" : {
       "extractionState" : "extracted_with_value"
     },
@@ -1178,6 +1316,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Name (optional)" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Name contains (optional)" : {
       "extractionState" : "extracted_with_value"
     },
     "Name resolution" : {
@@ -1216,6 +1357,9 @@
     "New Reservation" : {
       "extractionState" : "extracted_with_value"
     },
+    "New devices" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Next available" : {
       "extractionState" : "extracted_with_value"
     },
@@ -1237,7 +1381,13 @@
     "No BGP peers are configured." : {
       "extractionState" : "extracted_with_value"
     },
+    "No BIND9 or PowerDNS servers are registered. This log is agent-shipped; Windows DNS records its queries elsewhere." : {
+      "extractionState" : "extracted_with_value"
+    },
     "No DHCP server groups are defined." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "No DHCP server holds a lease for this DUID right now. Lease history can't be searched by DUID, so a client that has since left won't show here — search its IPv6 address or hostname instead." : {
       "extractionState" : "extracted_with_value"
     },
     "No DHCP servers are registered." : {
@@ -1262,6 +1412,9 @@
       "extractionState" : "extracted_with_value"
     },
     "No MAC is blocked in this group." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "No MAC or DUID reported" : {
       "extractionState" : "extracted_with_value"
     },
     "No VRFs are defined." : {
@@ -1348,6 +1501,9 @@
     "No lease matches that address, MAC or hostname." : {
       "extractionState" : "extracted_with_value"
     },
+    "No lease matches that address, MAC, DUID or hostname." : {
+      "extractionState" : "extracted_with_value"
+    },
     "No matches" : {
       "extractionState" : "extracted_with_value"
     },
@@ -1357,7 +1513,13 @@
     "No network devices are registered for polling." : {
       "extractionState" : "extracted_with_value"
     },
+    "No network figures." : {
+      "extractionState" : "extracted_with_value"
+    },
     "No new devices have been seen." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "No new-device figures." : {
       "extractionState" : "extracted_with_value"
     },
     "No open ports found." : {
@@ -1372,6 +1534,9 @@
     "No record matches this filter." : {
       "extractionState" : "extracted_with_value"
     },
+    "No requests recorded." : {
+      "extractionState" : "extracted_with_value"
+    },
     "No resolver answered." : {
       "extractionState" : "extracted_with_value"
     },
@@ -1381,10 +1546,16 @@
     "No scans have been run on this control plane." : {
       "extractionState" : "extracted_with_value"
     },
+    "No security figures." : {
+      "extractionState" : "extracted_with_value"
+    },
     "No sites are defined." : {
       "extractionState" : "extracted_with_value"
     },
     "No telemetry, analytics or crash reporting leaves this device." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "No token is stored on this device for this server." : {
       "extractionState" : "extracted_with_value"
     },
     "No token is stored on this device." : {
@@ -1444,6 +1615,9 @@
     "Not enough history yet to draw a trend." : {
       "extractionState" : "extracted_with_value"
     },
+    "Not recorded" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Not resolved" : {
       "extractionState" : "extracted_with_value"
     },
@@ -1498,6 +1672,9 @@
     "Nothing here." : {
       "extractionState" : "extracted_with_value"
     },
+    "Nothing in this deletion was restored. Rename or remove what it clashes with, then try again." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Nothing in this table matches." : {
       "extractionState" : "extracted_with_value"
     },
@@ -1505,6 +1682,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Nothing logged for that MAC. It may not be reaching this server at all." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Nothing logged matches those filters." : {
       "extractionState" : "extracted_with_value"
     },
     "Nothing was changed — the server is in a change window: %@" : {
@@ -1522,6 +1702,9 @@
     "Only the first %lld of %lld polled devices were asked." : {
       "extractionState" : "extracted_with_value"
     },
+    "Only the person who asked for this can withdraw it." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Only the person who raised this request can withdraw it." : {
       "extractionState" : "extracted_with_value"
     },
@@ -1529,6 +1712,21 @@
       "extractionState" : "extracted_with_value"
     },
     "Open source" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Opening the app won't ask for %@. The token stays in this device's Keychain and can be read whenever the device is unlocked." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Opening this server asks for nothing beyond unlocking the device, so anyone holding it unlocked can use the token. The token itself never leaves this device's Keychain." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Opening this server will ask for %@ every time the app comes back to the foreground. The token is saved again behind it; nothing on the server changes." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Opening…" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Opens the list behind this count." : {
       "extractionState" : "extracted_with_value"
     },
     "Operation" : {
@@ -1547,6 +1745,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Other" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Outcome" : {
       "extractionState" : "extracted_with_value"
     },
     "Overlays" : {
@@ -1574,6 +1775,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Peers" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Pending" : {
       "extractionState" : "extracted_with_value"
     },
     "Percent used" : {
@@ -1604,6 +1808,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Poll queued %@. Pull to refresh once it has run." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Pool occupancy is unavailable." : {
       "extractionState" : "extracted_with_value"
     },
     "Pools" : {
@@ -1657,6 +1864,12 @@
     "Protocol" : {
       "extractionState" : "extracted_with_value"
     },
+    "Provisioned" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Provisioning failed" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Pushed to the DHCP servers in this group. The device picks it up at its next renewal, not immediately." : {
       "extractionState" : "extracted_with_value"
     },
@@ -1666,6 +1879,9 @@
     "Queries" : {
       "extractionState" : "extracted_with_value"
     },
+    "Query Log" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Query rate" : {
       "extractionState" : "extracted_with_value"
     },
@@ -1673,6 +1889,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Quick" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "ROAs expiring" : {
       "extractionState" : "extracted_with_value"
     },
     "Reachability" : {
@@ -1720,6 +1939,12 @@
     "Reject this request?" : {
       "extractionState" : "extracted_with_value"
     },
+    "Rejected" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Rejecting declines it and creates nothing. The requester sees your note." : {
+      "extractionState" : "extracted_with_value"
+    },
     "Relays" : {
       "extractionState" : "extracted_with_value"
     },
@@ -1759,7 +1984,22 @@
     "Reports" : {
       "extractionState" : "extracted_with_value"
     },
+    "Request" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Requested" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Requests" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Require %@" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Require %@ to open" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Require %@ to open %@?" : {
       "extractionState" : "extracted_with_value"
     },
     "Reservation" : {
@@ -1787,6 +2027,21 @@
       "extractionState" : "extracted_with_value"
     },
     "Resource" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Restore" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Restore %@?" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Restored %@, with ^[%lld other row](inflect: true)." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Restored %@." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Restoring %@…" : {
       "extractionState" : "extracted_with_value"
     },
     "Result" : {
@@ -1861,6 +2116,9 @@
     "Save Anyway" : {
       "extractionState" : "extracted_with_value"
     },
+    "Save Token Again" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Save changes to %@?" : {
       "extractionState" : "extracted_with_value"
     },
@@ -1889,6 +2147,12 @@
       "extractionState" : "extracted_with_value"
     },
     "Searches lease history across every DHCP server you can read. A MAC can be entered with or without colons." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Searches lease history across every DHCP server you can read. A MAC or DUID can be entered with or without colons." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Security" : {
       "extractionState" : "extracted_with_value"
     },
     "See all alerts" : {
@@ -1987,6 +2251,9 @@
     "Signing out deletes this device's stored token for %@. The server stays in your list, with its name and its approved certificate." : {
       "extractionState" : "extracted_with_value"
     },
+    "Size" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Source" : {
       "extractionState" : "extracted_with_value"
     },
@@ -2036,6 +2303,12 @@
       "extractionState" : "extracted_with_value"
     },
     "Status: %@" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Stop Requiring %@" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Stop requiring %@ for %@?" : {
       "extractionState" : "extracted_with_value"
     },
     "Subject" : {
@@ -2131,7 +2404,13 @@
     "The DHCP reservation on this address is removed with it, and pushed to the DHCP server." : {
       "extractionState" : "extracted_with_value"
     },
+    "The IPAM entry moves to the new address and the old one is freed." : {
+      "extractionState" : "extracted_with_value"
+    },
     "The SOA serial increments and the zone is pushed to its servers." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "The account that asked for this no longer exists, so the platform won't provision it." : {
       "extractionState" : "extracted_with_value"
     },
     "The address becomes an orphan row in this subnet and can be allocated again. Its DNS record is deleted either way — the name is released." : {
@@ -2164,6 +2443,9 @@
     "The common ports on one host. Fast." : {
       "extractionState" : "extracted_with_value"
     },
+    "The daemon on this server is not serving." : {
+      "extractionState" : "extracted_with_value"
+    },
     "The device's ports, as SNMP reports them." : {
       "extractionState" : "extracted_with_value"
     },
@@ -2179,6 +2461,9 @@
     "The most specific route that would carry this address." : {
       "extractionState" : "extracted_with_value"
     },
+    "The name matches anywhere in the query or the raw line. The client IP must be exact. Newest first." : {
+      "extractionState" : "extracted_with_value"
+    },
     "The only tool here that changes anything, and what it changes is whether a machine is switched on." : {
       "extractionState" : "extracted_with_value"
     },
@@ -2186,6 +2471,9 @@
       "extractionState" : "extracted_with_value"
     },
     "The reason is recorded against the block, and read by whoever finds it later." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "The record is published to the zone's servers again." : {
       "extractionState" : "extracted_with_value"
     },
     "The registrar's nameservers don't match what's expected here." : {
@@ -2201,6 +2489,12 @@
       "extractionState" : "extracted_with_value"
     },
     "The reverse record %@ already points at %@." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "The scope is pushed back to its DHCP servers, with its pools and reservations." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "The server accepted the change but still reports writes open." : {
       "extractionState" : "extracted_with_value"
     },
     "The server capped this batch, so some selected addresses were not deprecated." : {
@@ -2275,13 +2569,28 @@
     "The stored token could not be unsealed. It is still on this device — try again, or sign out to replace it." : {
       "extractionState" : "extracted_with_value"
     },
+    "The token is no longer saved on this device." : {
+      "extractionState" : "extracted_with_value"
+    },
     "The token is stored in the Keychain and unlocked with %@. It never leaves this device except as an Authorization header to %@." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "The token is stored in this device's Keychain and opens without a prompt while the device is unlocked. It never leaves this device except as an Authorization header to %@." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "The token is stored in this device's Keychain and unlocked with %@. It never leaves this device except as an Authorization header to %@." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "The zone and the records deleted with it are served again." : {
       "extractionState" : "extracted_with_value"
     },
     "The zone's name, type and DNSSEC policy aren't editable here — those are creation-time and desk decisions." : {
       "extractionState" : "extracted_with_value"
     },
     "The zone's serial is bumped and the change is pushed to every server in the group." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "There is no signed-in session to save a token from." : {
       "extractionState" : "extracted_with_value"
     },
     "This Device" : {
@@ -2347,6 +2656,15 @@
     "This device has no network connection." : {
       "extractionState" : "extracted_with_value"
     },
+    "This device has no passcode, so anyone who picks it up can open this server. Set a passcode to be able to require one." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "This device has no passcode, so nothing can be required to open the app. Set a device passcode — and biometrics if this device has them — or turn the requirement off." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "This device has no passcode." : {
+      "extractionState" : "extracted_with_value"
+    },
     "This group has no scopes." : {
       "extractionState" : "extracted_with_value"
     },
@@ -2362,7 +2680,16 @@
     "This is a development build, so it can't be checked against the minimum supported release (%@)." : {
       "extractionState" : "extracted_with_value"
     },
+    "This is a development or nightly build, so it can't be checked against the minimum supported release (%@)." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "This is created now, under your account, for %@:" : {
+      "extractionState" : "extracted_with_value"
+    },
     "This is the token this app is signed in with. Revoking it signs you out on this device immediately — sign in again to mint a replacement." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "This is your own request. Someone else has to decide it — you can withdraw it instead." : {
       "extractionState" : "extracted_with_value"
     },
     "This is your own request. The platform needs a second person to approve it — you can withdraw it instead." : {
@@ -2380,6 +2707,9 @@
     "This request is %@. There is nothing left to decide." : {
       "extractionState" : "extracted_with_value"
     },
+    "This request's deadline has passed, so it can no longer be approved." : {
+      "extractionState" : "extracted_with_value"
+    },
     "This router has no VLANs." : {
       "extractionState" : "extracted_with_value"
     },
@@ -2393,6 +2723,9 @@
       "extractionState" : "extracted_with_value"
     },
     "This scope has no static reservations." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "This server has logged no queries. Query logging may be off for its group." : {
       "extractionState" : "extracted_with_value"
     },
     "This server has logged nothing in the window." : {
@@ -2423,6 +2756,12 @@
       "extractionState" : "extracted_with_value"
     },
     "To" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "To review" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Tokens expiring" : {
       "extractionState" : "extracted_with_value"
     },
     "Took" : {
@@ -2602,10 +2941,16 @@
     "What LLDP says is on the other end of each port." : {
       "extractionState" : "extracted_with_value"
     },
+    "What approving would do" : {
+      "extractionState" : "extracted_with_value"
+    },
     "What counts as stale" : {
       "extractionState" : "extracted_with_value"
     },
     "What is listening, and which version of it." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "What it asks for" : {
       "extractionState" : "extracted_with_value"
     },
     "What it would do" : {
@@ -2641,6 +2986,9 @@
     "Which port learned which MAC — the answer to \"where is this device plugged in\"." : {
       "extractionState" : "extracted_with_value"
     },
+    "Why they need it" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Why this needs approval" : {
       "extractionState" : "extracted_with_value"
     },
@@ -2668,6 +3016,12 @@
     "Withdrawing takes it off the approvers' queue. Nothing is changed." : {
       "extractionState" : "extracted_with_value"
     },
+    "Withdrawing takes it off the approvers' queue. Nothing is created." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Without MFA" : {
+      "extractionState" : "extracted_with_value"
+    },
     "Without a message the banner just says the server is in a change window. Anyone who wanted to know why will ask you instead." : {
       "extractionState" : "extracted_with_value"
     },
@@ -2677,10 +3031,22 @@
     "Writes reopen on %@ immediately and the banner disappears for everyone using it." : {
       "extractionState" : "extracted_with_value"
     },
+    "You can change this later from the Server screen." : {
+      "extractionState" : "extracted_with_value"
+    },
     "You don't have permission to make this change. Ask an administrator to review your role." : {
       "extractionState" : "extracted_with_value"
     },
     "You don't have permission to read this. Ask an administrator to review your role." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "You see your own requests. Approvers see everyone's." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "You'll confirm with %@ once now. After that, anyone who has this device unlocked can open this server without being asked. The token stays in this device's Keychain; nothing on the server changes." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "You're still signed in for now. Save it again, or you'll need to sign in next time." : {
       "extractionState" : "extracted_with_value"
     },
     "Your session is no longer valid. Sign in again." : {
@@ -2690,6 +3056,9 @@
       "extractionState" : "extracted_with_value"
     },
     "Your token is held in the Keychain behind biometrics." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "Your token is held in this device's Keychain and never leaves it. Requiring Face ID or your passcode to open is your choice, per server." : {
       "extractionState" : "extracted_with_value"
     },
     "Your token will be protected by %@." : {
@@ -2713,6 +3082,9 @@
     "^[%lld DNS alias](inflect: true)" : {
       "extractionState" : "extracted_with_value"
     },
+    "^[%lld DNS group](inflect: true) couldn't be listed, so its servers aren't offered here. This account may not have access to it." : {
+      "extractionState" : "extracted_with_value"
+    },
     "^[%lld IPv6 subnet](inflect: true) excluded — utilisation isn't a useful measure of a /64." : {
       "extractionState" : "extracted_with_value"
     },
@@ -2723,6 +3095,9 @@
       "extractionState" : "extracted_with_value"
     },
     "^[%lld NXDOMAIN](inflect: true) · ^[%lld SERVFAIL](inflect: true)" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "^[%lld ROA](inflect: true) already expired." : {
       "extractionState" : "extracted_with_value"
     },
     "^[%lld RPKI-invalid route](inflect: true)" : {
@@ -2758,6 +3133,9 @@
     "^[%lld route](inflect: true) flapping." : {
       "extractionState" : "extracted_with_value"
     },
+    "^[%lld row](inflect: true)" : {
+      "extractionState" : "extracted_with_value"
+    },
     "^[%lld row](inflect: true) in this deletion" : {
       "extractionState" : "extracted_with_value"
     },
@@ -2765,6 +3143,9 @@
       "extractionState" : "extracted_with_value"
     },
     "^[%lld target](inflect: true) missed the sync interval." : {
+      "extractionState" : "extracted_with_value"
+    },
+    "^[%lld term](inflect: true) ending · ^[%lld status change](inflect: true)" : {
       "extractionState" : "extracted_with_value"
     },
     "a while" : {
@@ -2860,10 +3241,16 @@
     "never seen" : {
       "extractionState" : "extracted_with_value"
     },
+    "no prompt" : {
+      "extractionState" : "extracted_with_value"
+    },
     "not enforced" : {
       "extractionState" : "extracted_with_value"
     },
     "not polled" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "not recorded" : {
       "extractionState" : "extracted_with_value"
     },
     "ns1.example.com." : {
@@ -2948,6 +3335,9 @@
       "extractionState" : "extracted_with_value"
     },
     "view" : {
+      "extractionState" : "extracted_with_value"
+    },
+    "view %@" : {
       "extractionState" : "extracted_with_value"
     },
     "withdrawn %@" : {

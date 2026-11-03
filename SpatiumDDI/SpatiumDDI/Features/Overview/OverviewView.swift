@@ -275,8 +275,17 @@ private struct IPAMSummarySection: View {
 
 private struct DNSSummarySection: View {
     let model: OverviewModel
+    @Environment(FeatureModules.self) private var features
 
     var body: some View {
+        // Hidden, like its sidebar section, when the module is off: the counts
+        // would only ever be a 404 dressed as an error.
+        if features.isAvailable(AppSection.dns.featureModule) {
+            counts
+        }
+    }
+
+    private var counts: some View {
         Section("DNS") {
             switch model.dns {
             case .idle, .loading:
@@ -309,8 +318,17 @@ private struct DNSSummarySection: View {
 
 private struct DHCPSummarySection: View {
     let model: OverviewModel
+    @Environment(FeatureModules.self) private var features
 
     var body: some View {
+        // Hidden, like its sidebar section, when the module is off: the counts
+        // would only ever be a 404 dressed as an error.
+        if features.isAvailable(AppSection.dhcp.featureModule) {
+            counts
+        }
+    }
+
+    private var counts: some View {
         Section("DHCP") {
             switch model.dhcp {
             case .idle, .loading:
